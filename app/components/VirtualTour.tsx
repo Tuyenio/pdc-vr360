@@ -1,13 +1,15 @@
 "use client";
 
 import {
-  Compass,
   Info,
   Layers3,
   LucideIcon,
   MapPin,
+  Maximize2,
+  Minimize2,
   Pause,
   Play,
+  Scan,
   Settings,
   Volume2,
   VolumeX,
@@ -239,9 +241,34 @@ function directionFromYawPitch(yaw: number, pitch: number) {
 
 export default function VirtualTour() {
   const [hasEntered, setHasEntered] = useState(false);
+  const [isEntering, setIsEntering] = useState(false);
+  const enterTimerRef = useRef<number | null>(null);
+
+  const handleEnter = useCallback(() => {
+    if (isEntering) {
+      return;
+    }
+
+    setIsEntering(true);
+    if (enterTimerRef.current) {
+      window.clearTimeout(enterTimerRef.current);
+    }
+
+    enterTimerRef.current = window.setTimeout(() => {
+      setHasEntered(true);
+    }, 720);
+  }, [isEntering]);
+
+  useEffect(() => {
+    return () => {
+      if (enterTimerRef.current) {
+        window.clearTimeout(enterTimerRef.current);
+      }
+    };
+  }, []);
 
   if (!hasEntered) {
-    return <WelcomeScreen onEnter={() => setHasEntered(true)} />;
+    return <WelcomeScreen isEntering={isEntering} onEnter={handleEnter} />;
   }
 
   return <TourExperience />;
@@ -290,7 +317,7 @@ function useDeviceOrientation() {
   return { orientation, isSupported, requestPermission, startListening };
 }
 
-function WelcomeScreen({ onEnter }: { onEnter: () => void }) {
+function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
 
@@ -360,7 +387,11 @@ function WelcomeScreen({ onEnter }: { onEnter: () => void }) {
   }, []);
 
   return (
-    <main className="fixed inset-0 min-h-[100dvh] overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
+    <main
+      className={`fixed inset-0 min-h-[100dvh] overflow-hidden bg-[var(--background)] text-[var(--foreground)] transition-[opacity,transform,filter] duration-[720ms] ease-[cubic-bezier(.2,.8,.2,1)] ${
+        isEntering ? "pointer-events-none scale-[1.02] opacity-0 blur-[2px]" : "opacity-100"
+      }`}
+    >
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,252,245,0.9)_0%,rgba(245,241,230,0.64)_36%,rgba(45,38,33,0.34)_100%)]" />
       <div className="absolute inset-x-0 top-0 h-[46dvh] bg-[radial-gradient(ellipse_at_center,rgba(255,252,245,0.96)_0%,rgba(255,252,245,0.78)_45%,rgba(255,252,245,0)_76%)]" />
@@ -368,14 +399,14 @@ function WelcomeScreen({ onEnter }: { onEnter: () => void }) {
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(74,63,53,0.08)_0_1px,transparent_1px)] bg-[length:92px_100%] opacity-60" />
 
       <section className="relative z-10 grid min-h-[100dvh] place-items-center px-4 py-8">
-        <div className="flex w-full max-w-6xl flex-col items-center text-center">
-          <div className="max-w-5xl">
-            
-            <h1 className="font-display-vn mt-5 text-balance text-5xl font-bold uppercase leading-[0.98] text-[var(--tour-ink)] drop-shadow-[0_2px_0_rgba(255,252,245,0.86)] sm:text-7xl lg:text-8xl">
+        <div className="flex w-full max-w-5xl flex-col items-center text-center">
+          <div className="max-w-4xl">
+
+            <h1 className="font-display-vn mt-4 text-balance text-[2.4rem] font-bold uppercase leading-[0.98] text-[var(--tour-ink)] drop-shadow-[0_2px_0_rgba(255,252,245,0.86)] sm:text-[3.6rem] lg:text-[4.8rem]">
               Số hóa di tích
               <span className="block text-[var(--primary)]">lịch sử văn hóa</span>
             </h1>
-            <p className="mt-5 text-base font-extrabold text-[rgb(74_63_53_/_0.9)] sm:text-2xl">
+            <p className="mt-4 text-[0.85rem] font-extrabold text-[rgb(74_63_53_/_0.9)] sm:text-[1.2rem]">
               Đình Làng Định Công Thượng · Nhà thờ Tổ nghề Kim hoàn
             </p>
           </div>
@@ -383,12 +414,14 @@ function WelcomeScreen({ onEnter }: { onEnter: () => void }) {
           <button
             type="button"
             onClick={onEnter}
-            className="mt-[10dvh] rounded-full border border-[rgb(255_252_245_/_0.48)] bg-[linear-gradient(135deg,#315f50,#a67c52_58%,#735a3a)] px-9 py-4 text-lg font-extrabold text-white shadow-[0_22px_58px_rgb(74_63_53_/_0.34),inset_0_1px_0_rgb(255_255_255_/_0.28)] transition hover:scale-[1.03] hover:shadow-[0_28px_70px_rgb(74_63_53_/_0.42)] active:scale-[0.98] sm:px-12 sm:text-2xl"
+            disabled={isEntering}
+            className="mt-[8dvh] rounded-full border border-[rgb(255_252_245_/_0.48)] bg-[linear-gradient(135deg,#315f50,#a67c52_58%,#735a3a)] px-7 py-3 text-[0.95rem] font-extrabold text-white shadow-[0_22px_58px_rgb(74_63_53_/_0.34),inset_0_1px_0_rgb(255_255_255_/_0.28)] transition hover:scale-[1.03] hover:shadow-[0_28px_70px_rgb(74_63_53_/_0.42)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70 sm:px-9 sm:text-[1.25rem]"
           >
             Khám phá ngay
           </button>
 
-          <div className="mt-[8dvh] grid w-full max-w-2xl grid-cols-2 gap-4 px-4 sm:gap-8">
+          <div className="relative mt-[6dvh] grid w-full max-w-[520px] grid-cols-2 gap-4 px-4 sm:gap-7">
+            <span className="pointer-events-none absolute -left-8 -right-8 top-1/2 h-px bg-[linear-gradient(90deg,transparent,rgba(185,139,86,0.55),transparent)]" />
             <WelcomeCard image={dinhCardImage} label="Đình Làng" rotate="-rotate-6" />
             <WelcomeCard image={shrineCardImage} label="Nhà thờ tổ nghề" rotate="rotate-5" />
           </div>
@@ -408,19 +441,38 @@ function WelcomeCard({
   rotate: string;
 }) {
   return (
-    <div
-      className={`rounded-[8px] border border-[rgb(166_124_82_/_0.18)] bg-[var(--card)] p-2 shadow-[0_22px_58px_rgb(74_63_53_/_0.24)] ${rotate}`}
-    >
-      <div className="relative aspect-[4/3] overflow-hidden rounded-[6px]">
-        <Image src={image} alt={label} fill sizes="240px" className="object-cover" priority />
+    <div className={`group relative ${rotate}`}>
+      <div className="absolute inset-0 rounded-[18px] bg-[conic-gradient(from_140deg,#f6ead4,#c8a27a,#315f50,#c8a27a,#f6ead4)] opacity-55 blur-[14px]" />
+      <div className="relative rounded-[18px] bg-[linear-gradient(150deg,rgba(255,252,245,0.9),rgba(255,252,245,0.55)_46%,rgba(255,252,245,0.2))] p-[2px] shadow-[0_26px_70px_rgb(74_63_53_/_0.26)]">
+        <div className="rounded-[16px] border border-[rgb(166_124_82_/_0.18)] bg-[linear-gradient(160deg,rgba(255,252,245,0.85),rgba(236,229,216,0.6))] p-2">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[14px]">
+            <Image
+              src={image}
+              alt={label}
+              fill
+              sizes="260px"
+              className="object-cover transition duration-500 group-hover:scale-[1.05]"
+              priority
+            />
+            <span className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.3),transparent_40%,rgba(0,0,0,0.2))]" />
+            <span className="absolute inset-0 ring-1 ring-white/40" />
+          </div>
+          <div className="mt-2 flex items-center justify-between px-1">
+            <p className="font-display-vn text-[0.8rem] font-bold text-[var(--foreground)] sm:text-[0.9rem]">
+              {label}
+            </p>
+            <span className="text-[0.58rem] font-black uppercase tracking-[0.22em] text-[var(--tour-gold)]">
+              Di sản
+            </span>
+          </div>
+        </div>
       </div>
-      <p className="font-display-vn py-2 text-sm font-bold text-[var(--foreground)] sm:text-base">{label}</p>
     </div>
   );
 }
 
 function TourExperience() {
-  const [currentSceneId, setCurrentSceneId] = useState<SceneId>("scene-5");
+  const [currentSceneId, setCurrentSceneId] = useState<SceneId>("scene-1");
   const [activePanel, setActivePanel] = useState<Panel>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -429,24 +481,32 @@ function TourExperience() {
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [vrMode, setVrMode] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
+  const rootRef = useRef<HTMLElement | null>(null);
+  const canvasWrapRef = useRef<HTMLDivElement | null>(null);
   const mountRef = useRef<HTMLDivElement | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
   const materialRef = useRef<THREE.MeshBasicMaterial | null>(null);
+  const transitionMaterialRef = useRef<THREE.MeshBasicMaterial | null>(null);
   const textureCacheRef = useRef<Map<string, THREE.Texture>>(new Map());
   const hotspotRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
-  const currentSceneRef = useRef<TourScene>(sceneById.get("scene-5")!);
+  const currentSceneRef = useRef<TourScene>(sceneById.get("scene-1")!);
   const lastOrientationRef = useRef<{ alpha: number; beta: number; gamma: number } | null>(null);
+  const transitionFrameRef = useRef<number | null>(null);
+  const transitionTokenRef = useRef(0);
+  const initialSceneRef = useRef(true);
+  const transitionLockRef = useRef(false);
 
-  const { orientation, isSupported: isVrSupported, requestPermission, startListening } = useDeviceOrientation();
+  const { orientation, requestPermission, startListening } = useDeviceOrientation();
 
   const activeScene = useMemo(
-    () => sceneById.get(currentSceneId) ?? sceneById.get("scene-5")!,
+    () => sceneById.get(currentSceneId) ?? sceneById.get("scene-1")!,
     [currentSceneId],
   );
 
-  const positionCamera = useCallback((scene: TourScene) => {
+  const positionCamera = useCallback((scene: TourScene, distance?: number) => {
     const camera = cameraRef.current;
     const controls = controlsRef.current;
 
@@ -455,7 +515,8 @@ function TourExperience() {
     }
 
     const direction = directionFromYawPitch(scene.initialYaw, 0).normalize();
-    camera.position.copy(direction.multiplyScalar(-0.12));
+    const targetDistance = distance ?? 0.12;
+    camera.position.copy(direction.multiplyScalar(-targetDistance));
     controls.target.set(0, 0, 0);
     controls.update();
   }, []);
@@ -533,9 +594,16 @@ function TourExperience() {
     const threeScene = new THREE.Scene();
     const geometry = new THREE.SphereGeometry(500, 128, 72);
     geometry.scale(-1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1 });
+    const transitionMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0,
+    });
     const sphere = new THREE.Mesh(geometry, material);
+    const transitionSphere = new THREE.Mesh(geometry, transitionMaterial);
     threeScene.add(sphere);
+    threeScene.add(transitionSphere);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -556,6 +624,7 @@ function TourExperience() {
     cameraRef.current = camera;
     controlsRef.current = controls;
     materialRef.current = material;
+    transitionMaterialRef.current = transitionMaterial;
     positionCamera(currentSceneRef.current);
 
     const resize = () => {
@@ -582,6 +651,7 @@ function TourExperience() {
       controls.dispose();
       geometry.dispose();
       material.dispose();
+      transitionMaterial.dispose();
       textureCache.forEach((texture) => texture.dispose());
       renderer.dispose();
       renderer.domElement.remove();
@@ -607,108 +677,168 @@ function TourExperience() {
     }
   }, [updateHotspots, wideAngle]);
 
-  useEffect(() => {
-    currentSceneRef.current = activeScene;
-    
-    // Google Street View style zoom transition
-    const camera = cameraRef.current;
-    const controls = controlsRef.current;
-    
-    if (camera && controls) {
-      setIsTransitioning(true);
-      
-      // Zoom in animation (0.12 -> 0.01)
-      const startDistance = camera.position.length();
-      const zoomInDuration = 300;
-      const zoomOutDuration = 300;
-      const startTime = Date.now();
-      
-      const animateZoomIn = () => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / zoomInDuration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-        
-        const newDistance = startDistance + (0.01 - startDistance) * eased;
-        const direction = camera.position.clone().normalize();
-        camera.position.copy(direction.multiplyScalar(newDistance));
-        controls.update();
-        
-        if (progress < 1) {
-          requestAnimationFrame(animateZoomIn);
-        } else {
-          // Switch scene at peak zoom
-          positionCamera(activeScene);
-          
-          // Zoom out animation
-          const zoomOutStart = Date.now();
-          const animateZoomOut = () => {
-            const elapsed = Date.now() - zoomOutStart;
-            const progress = Math.min(elapsed / zoomOutDuration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            
-            const newDistance = 0.01 + (0.12 - 0.01) * eased;
-            const direction = camera.position.clone().normalize();
-            camera.position.copy(direction.multiplyScalar(newDistance));
-            controls.update();
-            
-            if (progress < 1) {
-              requestAnimationFrame(animateZoomOut);
-            } else {
-              setIsTransitioning(false);
+  const setTransitionVisuals = useCallback((progress: number) => {
+    const wrap = canvasWrapRef.current;
+
+    if (!wrap) {
+      return;
+    }
+
+    const intensity = Math.sin(Math.PI * progress);
+    wrap.style.setProperty("--tour-blur", `${(8 * intensity).toFixed(2)}px`);
+    wrap.style.setProperty("--tour-scale", `${(1 + intensity * 0.02).toFixed(3)}`);
+    wrap.style.setProperty("--tour-vignette", `${(0.35 * intensity).toFixed(3)}`);
+  }, []);
+
+  const runSceneTransition = useCallback(
+    (scene: TourScene) => {
+      currentSceneRef.current = scene;
+      const camera = cameraRef.current;
+      const controls = controlsRef.current;
+      const material = materialRef.current;
+      const transitionMaterial = transitionMaterialRef.current;
+
+      if (!camera || !controls || !material || !transitionMaterial) {
+        positionCamera(scene);
+        return;
+      }
+
+      if (transitionFrameRef.current) {
+        cancelAnimationFrame(transitionFrameRef.current);
+        transitionFrameRef.current = null;
+      }
+
+      const token = ++transitionTokenRef.current;
+      setLoadError(null);
+      setIsLoading(true);
+      transitionLockRef.current = !initialSceneRef.current;
+
+      const cachedTexture = textureCacheRef.current.get(scene.image);
+      const loadTexture = cachedTexture
+        ? Promise.resolve(cachedTexture)
+        : new Promise<THREE.Texture>((resolve, reject) => {
+            const loader = new THREE.TextureLoader();
+            loader.load(
+              scene.image,
+              (texture) => {
+                texture.colorSpace = THREE.SRGBColorSpace;
+                texture.anisotropy = 8;
+                textureCacheRef.current.set(scene.image, texture);
+                resolve(texture);
+              },
+              undefined,
+              () => reject(new Error("load-failed")),
+            );
+          });
+
+      loadTexture
+        .then((texture) => {
+          if (transitionTokenRef.current !== token) {
+            return;
+          }
+
+          if (initialSceneRef.current) {
+            material.map = texture;
+            material.opacity = 1;
+            material.needsUpdate = true;
+            transitionMaterial.map = texture;
+            transitionMaterial.opacity = 0;
+            transitionMaterial.needsUpdate = true;
+            positionCamera(scene);
+            updateHotspots();
+            initialSceneRef.current = false;
+            setIsTransitioning(false);
+            setIsLoading(false);
+            setTransitionVisuals(0);
+            transitionLockRef.current = false;
+            return;
+          }
+
+          setIsTransitioning(true);
+          setTransitionVisuals(0);
+
+          const startDistance = camera.position.length() || 0.12;
+          const minDistance = Math.max(0.06, startDistance * 0.65);
+          const duration = 900;
+          const startTime = performance.now();
+
+          transitionMaterial.map = texture;
+          transitionMaterial.opacity = 0;
+          transitionMaterial.needsUpdate = true;
+          material.opacity = 1;
+          positionCamera(scene, startDistance);
+
+          const easeInOutCubic = (t: number) =>
+            t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+          const tick = (now: number) => {
+            if (transitionTokenRef.current !== token) {
+              return;
             }
+
+            const progress = Math.min((now - startTime) / duration, 1);
+            const zoomPhase = progress < 0.55 ? progress / 0.55 : (1 - progress) / 0.45;
+            const zoomEase = easeInOutCubic(Math.min(Math.max(zoomPhase, 0), 1));
+            const distance =
+              progress < 0.55
+                ? startDistance + (minDistance - startDistance) * zoomEase
+                : minDistance + (startDistance - minDistance) * zoomEase;
+
+            const direction = camera.position.clone().normalize();
+            camera.position.copy(direction.multiplyScalar(distance));
+            controls.update();
+
+            const fadeProgress = Math.min(Math.max((progress - 0.12) / 0.88, 0), 1);
+            const fadeEase = easeInOutCubic(fadeProgress);
+            transitionMaterial.opacity = fadeEase;
+            material.opacity = 1 - fadeEase;
+
+            setTransitionVisuals(progress);
+
+            if (progress < 1) {
+              transitionFrameRef.current = requestAnimationFrame(tick);
+              return;
+            }
+
+            material.map = texture;
+            material.opacity = 1;
+            material.needsUpdate = true;
+            transitionMaterial.opacity = 0;
+            transitionMaterial.needsUpdate = true;
+            setTransitionVisuals(0);
+            setIsTransitioning(false);
+            setIsLoading(false);
+            transitionLockRef.current = false;
+            updateHotspots();
           };
-          animateZoomOut();
-        }
-      };
-      animateZoomIn();
-    } else {
-      positionCamera(activeScene);
-    }
 
-    const material = materialRef.current;
-
-    if (!material) {
-      return;
-    }
-
-    const cachedTexture = textureCacheRef.current.get(activeScene.image);
-
-    if (cachedTexture) {
-      material.map = cachedTexture;
-      material.needsUpdate = true;
-      updateHotspots();
-      return;
-    }
-
-    let cancelled = false;
-    const loader = new THREE.TextureLoader();
-    loader.load(
-      activeScene.image,
-      (texture) => {
-        if (cancelled) {
-          texture.dispose();
-          return;
-        }
-
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.anisotropy = 8;
-        textureCacheRef.current.set(activeScene.image, texture);
-        material.map = texture;
-        material.needsUpdate = true;
-        updateHotspots();
-      },
-      undefined,
-      () => {
-        if (!cancelled) {
+          transitionFrameRef.current = requestAnimationFrame(tick);
+        })
+        .catch(() => {
+          if (transitionTokenRef.current !== token) {
+            return;
+          }
+          setIsTransitioning(false);
+          setIsLoading(false);
+          setTransitionVisuals(0);
           setLoadError("Không tải được ảnh panorama cho cảnh này.");
-        }
-      },
-    );
+          transitionLockRef.current = false;
+        });
+    },
+    [positionCamera, setTransitionVisuals, updateHotspots],
+  );
 
+  useEffect(() => {
+    runSceneTransition(activeScene);
+  }, [activeScene, runSceneTransition]);
+
+  useEffect(() => {
     return () => {
-      cancelled = true;
+      if (transitionFrameRef.current) {
+        cancelAnimationFrame(transitionFrameRef.current);
+      }
     };
-  }, [activeScene, positionCamera, updateHotspots]);
+  }, []);
 
   // VR Mode - Device Orientation
   useEffect(() => {
@@ -739,6 +869,20 @@ function TourExperience() {
     lastOrientationRef.current = orientation;
   }, [orientation, vrMode]);
 
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const handleFullscreen = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+
+    handleFullscreen();
+    document.addEventListener("fullscreenchange", handleFullscreen);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreen);
+  }, []);
+
   const toggleVrMode = useCallback(async () => {
     if (!vrMode) {
       const permitted = await requestPermission();
@@ -758,13 +902,29 @@ function TourExperience() {
     }
   }, [vrMode, requestPermission, startListening]);
 
-  const goToScene = (sceneId: SceneId, keepPanel = false) => {
-    if (sceneId !== currentSceneId) {
-      setLoadError(null);
-      setIsLoading(true);
-      setIsTransitioning(true);
+  const toggleFullscreen = useCallback(async () => {
+    if (typeof document === "undefined") {
+      return;
     }
 
+    try {
+      if (!document.fullscreenElement) {
+        await rootRef.current?.requestFullscreen?.();
+      } else {
+        await document.exitFullscreen?.();
+      }
+    } catch (error) {
+      console.error("Fullscreen error:", error);
+    }
+  }, []);
+
+  const goToScene = (sceneId: SceneId, keepPanel = false) => {
+    if (sceneId === currentSceneId || transitionLockRef.current) {
+      return;
+    }
+
+    setLoadError(null);
+    setIsLoading(true);
     setCurrentSceneId(sceneId);
     if (!keepPanel) {
       setActivePanel(null);
@@ -772,11 +932,20 @@ function TourExperience() {
   };
 
   return (
-    <main className="fixed inset-0 min-h-[100dvh] overflow-hidden bg-[var(--tour-wood)] text-white">
-      <div ref={mountRef} className="absolute inset-0 cursor-grab active:cursor-grabbing" />
+    <main
+      ref={rootRef}
+      className="fixed inset-0 min-h-[100dvh] overflow-hidden bg-[var(--tour-wood)] text-white"
+    >
+      <div ref={canvasWrapRef} className="tour-canvas absolute inset-0">
+        <div ref={mountRef} className="absolute inset-0 cursor-grab active:cursor-grabbing" />
+      </div>
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(45,38,33,0.1)_0%,rgba(45,38,33,0.02)_42%,rgba(45,38,33,0.68)_100%)]" />
 
-      <div className="pointer-events-none absolute inset-0 z-10">
+      <div
+        className={`pointer-events-none absolute inset-0 z-10 transition-opacity duration-200 ${
+          isTransitioning ? "opacity-0" : "opacity-100"
+        }`}
+      >
         {activeScene.hotspots.map((hotspot) => (
           <button
             key={`${activeScene.id}-${hotspot.targetId}`}
@@ -790,7 +959,7 @@ function TourExperience() {
               }
             }}
             type="button"
-            className="absolute left-1/2 top-1/2 grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_10px_18px_rgba(0,0,0,0.46)] transition-[opacity,transform,filter] duration-200 hover:scale-110 hover:drop-shadow-[0_14px_24px_rgba(0,0,0,0.58)] active:scale-95 sm:h-20 sm:w-20"
+            className="absolute left-1/2 top-1/2 grid h-[3.2rem] w-[3.2rem] -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_10px_18px_rgba(0,0,0,0.46)] transition-[opacity,transform,filter] duration-200 hover:scale-105 hover:drop-shadow-[0_14px_24px_rgba(0,0,0,0.58)] active:scale-96 sm:h-16 sm:w-16"
             style={
               {
                 "--hotspot-angle": `${hotspot.rotation ?? 0}deg`,
@@ -816,35 +985,34 @@ function TourExperience() {
 
       <div
         className={`absolute left-1/2 z-30 -translate-x-1/2 transition-[bottom,width,max-width,transform] duration-300 ease-out ${
-          activePanel === "scenes" ? "w-[calc(100vw-32px)] max-w-[1480px]" : "w-[min(94vw,560px)]"
-        } ${activePanel === "scenes" ? "bottom-1 sm:bottom-2" : "bottom-3 sm:bottom-6"}`}
+          activePanel === "scenes" ? "w-[calc(100vw-32px)] max-w-[1180px]" : "w-[min(92vw,448px)]"
+        } ${activePanel === "scenes" ? "bottom-1 sm:bottom-2" : "bottom-2 sm:bottom-5"}`}
       >
         {activePanel ? (
-          <section className="mb-2 max-h-[46dvh] animate-[tourPanelIn_260ms_cubic-bezier(.2,.9,.2,1)_both] overflow-hidden rounded-[8px] border border-[rgb(255_252_245_/_0.18)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.12),rgb(255_252_245_/_0.04)_38%,transparent_70%),rgb(45_38_33_/_0.48)] shadow-[0_24px_86px_rgb(0_0_0_/_0.28),inset_0_1px_0_rgb(255_255_255_/_0.18),inset_0_-1px_0_rgb(0_0_0_/_0.16)] backdrop-blur-xl backdrop-saturate-150 sm:mb-3">
-            <div className="flex items-center justify-between border-b border-[rgb(255_252_245_/_0.1)] bg-[rgb(255_252_245_/_0.035)] px-4 py-2.5">
-              <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                <Compass className="h-4 w-4 text-[var(--tour-gold-light)]" strokeWidth={1.9} />
+          <section className="mb-1.5 max-h-[46dvh] animate-[tourPanelIn_260ms_cubic-bezier(.2,.9,.2,1)_both] overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.18)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.12),rgb(255_252_245_/_0.04)_38%,transparent_70%),rgb(45_38_33_/_0.48)] shadow-[0_24px_86px_rgb(0_0_0_/_0.28),inset_0_1px_0_rgb(255_255_255_/_0.18),inset_0_-1px_0_rgb(0_0_0_/_0.16)] backdrop-blur-xl backdrop-saturate-150 sm:mb-2.5">
+            <div className="flex items-center justify-between border-b border-[rgb(255_252_245_/_0.1)] bg-[rgb(255_252_245_/_0.035)] px-3 py-2">
+              <div className="flex items-center gap-1.5 text-[0.8rem] font-semibold text-white">
                 {panelTitle(activePanel)}
               </div>
               <button
                 type="button"
                 onClick={() => setActivePanel(null)}
-                className="grid h-9 w-9 place-items-center rounded-[8px] text-white transition hover:bg-white/10 active:scale-95"
+                className="grid h-7 w-7 place-items-center rounded-[6px] text-white transition hover:bg-white/10 active:scale-95"
                 aria-label="Đóng bảng"
               >
-                <X className="h-5 w-5" strokeWidth={2.5} />
+                <X className="h-4 w-4" strokeWidth={2.4} />
               </button>
             </div>
 
             {activePanel === "scenes" ? (
-              <div className="flex w-full gap-3 overflow-x-auto overflow-y-hidden px-3 py-3 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin]">
+              <div className="flex w-full gap-2.5 overflow-x-auto overflow-y-hidden px-2.5 py-2.5 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin]">
                 {scenes.map((scene) => (
                   <button
                     key={scene.id}
                     type="button"
                     onClick={() => goToScene(scene.id, true)}
                     aria-current={scene.id === activeScene.id ? "true" : undefined}
-                    className={`group relative h-24 w-[68vw] shrink-0 overflow-hidden rounded-[8px] border text-left transition-[border-color,box-shadow,filter] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tour-gold-light)] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(45_38_33_/_0.62)] active:scale-[0.99] sm:h-28 sm:w-56 lg:w-64 ${
+                    className={`group relative h-20 w-[60vw] shrink-0 overflow-hidden rounded-[6px] border text-left transition-[border-color,box-shadow,filter] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tour-gold-light)] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(45_38_33_/_0.62)] active:scale-[0.99] sm:h-24 sm:w-48 lg:w-56 ${
                       scene.id === activeScene.id
                         ? "border-[var(--tour-gold-light)] bg-[rgb(192_160_128_/_0.16)] shadow-[0_0_0_2px_rgb(232_207_170_/_0.28),0_16px_40px_rgb(0_0_0_/_0.28)]"
                         : "border-white/14 bg-white/[0.04] shadow-[0_12px_30px_rgb(0_0_0_/_0.18)] hover:border-[rgb(232_207_170_/_0.46)] hover:shadow-[0_16px_38px_rgb(0_0_0_/_0.24)]"
@@ -854,19 +1022,19 @@ function TourExperience() {
                     <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.03)_22%,rgba(0,0,0,0.68)_100%)] opacity-90" />
                     <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-[linear-gradient(180deg,rgb(255_252_245_/_0.18),transparent)] opacity-55" />
                     <span className="absolute inset-x-3 top-2 h-px bg-[linear-gradient(90deg,transparent,rgb(255_252_245_/_0.52),transparent)]" />
-                    <span className="absolute left-3 top-3 grid h-7 min-w-9 place-items-center rounded-full bg-[rgb(255_252_245_/_0.84)] px-2 font-mono text-[11px] font-bold text-[var(--tour-wood)] shadow-[0_8px_22px_rgb(0_0_0_/_0.18)]">
+                    <span className="absolute left-2.5 top-2.5 grid h-6 min-w-8 place-items-center rounded-full bg-[rgb(255_252_245_/_0.84)] px-2 font-mono text-[10px] font-bold text-[var(--tour-wood)] shadow-[0_8px_22px_rgb(0_0_0_/_0.18)]">
                       {scene.order}
                     </span>
-                    <span className="absolute inset-x-3 bottom-2.5 min-w-0">
-                      <span className="block truncate text-sm font-semibold text-white">
+                    <span className="absolute inset-x-3 bottom-2 min-w-0">
+                      <span className="block truncate text-[0.82rem] font-semibold text-white">
                         {scene.title}
                       </span>
-                      <span className="mt-0.5 block truncate text-xs text-white/58">
+                      <span className="mt-0.5 block truncate text-[0.7rem] text-white/58">
                         {scene.location}
                       </span>
                     </span>
                     {scene.id === activeScene.id ? (
-                      <span className="absolute right-3 top-3 rounded-full border border-[rgb(255_252_245_/_0.42)] bg-[rgb(49_95_80_/_0.86)] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-white shadow-[0_8px_24px_rgb(0_0_0_/_0.24)]">
+                      <span className="absolute right-2.5 top-2.5 rounded-full border border-[rgb(255_252_245_/_0.42)] bg-[rgb(49_95_80_/_0.86)] px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-white shadow-[0_8px_24px_rgb(0_0_0_/_0.24)]">
                         Đang xem
                       </span>
                     ) : null}
@@ -876,7 +1044,7 @@ function TourExperience() {
             ) : null}
 
             {activePanel === "info" ? (
-              <div className="space-y-3 p-4 text-sm leading-6 text-white/76">
+              <div className="space-y-2.5 p-3 text-[0.82rem] leading-5 text-white/76">
                 <p>
                   Di chuyển bằng chuột hoặc vuốt trên màn hình để xoay 360 độ. Dùng con
                   lăn chuột hoặc chụm hai ngón để phóng to, thu nhỏ trong không gian.
@@ -889,14 +1057,14 @@ function TourExperience() {
             ) : null}
 
             {activePanel === "map" ? (
-              <div className="grid gap-3 p-4 text-sm text-white/76 sm:grid-cols-2">
+              <div className="grid gap-2.5 p-3 text-[0.82rem] text-white/76 sm:grid-cols-2">
                 <LocationCard title="Nhà thờ Tổ nghề Kim hoàn" detail="Không gian thờ tổ nghề, tuyến nối từ sân Đình sang khu tổ nghề." />
                 <LocationCard title="Đình Làng Định Công Thượng" detail="Cổng, sân trước, hồ sâu, sân Đình, Công Đồng và các không gian thờ tự." />
               </div>
             ) : null}
 
             {activePanel === "settings" ? (
-              <div className="grid gap-2 p-3 sm:grid-cols-2">
+              <div className="grid gap-2 p-2.5 sm:grid-cols-2">
                 <ToggleButton
                   active={autoRotate}
                   icon={autoRotate ? Pause : Play}
@@ -905,7 +1073,7 @@ function TourExperience() {
                 />
                 <ToggleButton
                   active={wideAngle}
-                  icon={Compass}
+                  icon={Scan}
                   label="Góc rộng"
                   onClick={() => setWideAngle((value) => !value)}
                 />
@@ -915,7 +1083,7 @@ function TourExperience() {
         ) : null}
 
         {activePanel !== "scenes" ? (
-          <nav className="grid grid-cols-5 overflow-hidden rounded-[8px] border border-[rgb(255_252_245_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.14),transparent_36%),rgb(115_90_58_/_0.62)] p-2 text-white shadow-[0_24px_80px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.18)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-out">
+          <nav className="grid grid-cols-5 overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.14),transparent_36%),rgb(115_90_58_/_0.62)] p-1.5 text-white shadow-[0_24px_80px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.18)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-out">
             <BottomButton
               icon={Layers3}
               label="Cảnh"
@@ -950,27 +1118,28 @@ function TourExperience() {
         ) : null}
       </div>
 
-      {/* VR Mode Button */}
-      {isVrSupported && (
-        <button
-          type="button"
-          onClick={toggleVrMode}
-          className={`fixed right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border p-3 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-all active:scale-95 sm:p-4 ${
-            vrMode
-              ? "border-[var(--tour-gold-light)] bg-[rgb(192_160_128_/_0.24)] text-white"
-              : "border-white/20 bg-[rgb(45_38_33_/_0.48)] text-white/80 hover:bg-[rgb(45_38_33_/_0.62)]"
-          }`}
-          aria-label={vrMode ? "Tắt chế độ VR" : "Bật chế độ VR"}
-          title={vrMode ? "Tắt chế độ VR" : "Bật chế độ VR"}
-        >
-          <Compass className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={2} />
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={toggleFullscreen}
+        className={`fixed right-4 top-4 z-20 rounded-full border p-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-all active:scale-95 sm:p-3 ${
+          isFullscreen
+            ? "border-[var(--tour-gold-light)] bg-[rgb(192_160_128_/_0.24)] text-white"
+            : "border-white/20 bg-[rgb(45_38_33_/_0.48)] text-white/80 hover:bg-[rgb(45_38_33_/_0.62)]"
+        }`}
+        aria-label={isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
+        title={isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
+      >
+        {isFullscreen ? (
+          <Minimize2 className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={2} />
+        ) : (
+          <Maximize2 className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={2} />
+        )}
+      </button>
 
       {loadError ? (
         <div className="pointer-events-none absolute inset-0 z-40 grid place-items-center bg-[rgb(45_38_33_/_0.46)] backdrop-blur-sm">
-          <div className="w-[min(82vw,340px)] rounded-[8px] border border-[rgb(255_252_245_/_0.16)] bg-[rgb(45_38_33_/_0.62)] p-5 text-center shadow-[0_18px_70px_rgba(0,0,0,0.42)] backdrop-blur-2xl">
-            <p className="text-sm font-semibold text-white">{loadError}</p>
+          <div className="w-[min(82vw,280px)] rounded-[6px] border border-[rgb(255_252_245_/_0.16)] bg-[rgb(45_38_33_/_0.62)] p-4 text-center shadow-[0_18px_70px_rgba(0,0,0,0.42)] backdrop-blur-2xl">
+            <p className="text-[0.82rem] font-semibold text-white">{loadError}</p>
           </div>
         </div>
       ) : null}
@@ -987,9 +1156,33 @@ function TourExperience() {
           }
         }
 
+        .tour-canvas {
+          --tour-blur: 0px;
+          --tour-scale: 1;
+          --tour-vignette: 0;
+          overflow: hidden;
+        }
 
-        canvas {
+        .tour-canvas::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background: radial-gradient(
+            circle at 50% 50%,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0.18) 58%,
+            rgba(0, 0, 0, 0.32) 100%
+          );
+          opacity: var(--tour-vignette);
+          transition: opacity 120ms linear;
+        }
+
+        .tour-canvas canvas {
           display: block;
+          filter: blur(var(--tour-blur));
+          transform: scale(var(--tour-scale));
+          will-change: transform, filter;
         }
       `}</style>
     </main>
@@ -1014,9 +1207,9 @@ function panelTitle(panel: Exclude<Panel, null>) {
 
 function LocationCard({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-[8px] border border-[rgb(255_252_245_/_0.14)] bg-[rgb(255_252_245_/_0.06)] p-3">
+    <div className="rounded-[6px] border border-[rgb(255_252_245_/_0.14)] bg-[rgb(255_252_245_/_0.06)] p-2.5">
       <p className="font-semibold text-white">{title}</p>
-      <p className="mt-1 leading-6 text-white/68">{detail}</p>
+      <p className="mt-0.5 leading-5 text-white/68">{detail}</p>
     </div>
   );
 }
@@ -1038,15 +1231,15 @@ function BottomButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-[8px] px-1.5 py-2.5 text-center transition active:scale-95 ${
+      className={`flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-[6px] px-1 py-2 text-center transition active:scale-95 ${
         active ? "bg-[rgb(255_252_245_/_0.2)] text-white shadow-[inset_0_1px_0_rgb(255_255_255_/_0.18)]" : "text-white/92 hover:bg-white/12"
       }`}
       aria-label={label}
       title={label}
     >
-      <Icon className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={2.2} />
+      <Icon className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={2.1} />
       {hideLabel ? null : (
-        <span className="w-full truncate text-[11px] font-semibold leading-tight sm:text-sm">
+        <span className="w-full truncate text-[10px] font-semibold leading-tight sm:text-[0.82rem]">
           {label}
         </span>
       )}
@@ -1069,17 +1262,17 @@ function ToggleButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center justify-between rounded-[8px] border px-3 py-3 text-sm font-semibold transition active:scale-[0.99] ${
+      className={`flex items-center justify-between rounded-[6px] border px-2.5 py-2.5 text-[0.82rem] font-semibold transition active:scale-[0.99] ${
         active
           ? "border-[rgb(232_207_170_/_0.56)] bg-[rgb(192_160_128_/_0.16)] text-white"
           : "border-white/10 bg-white/[0.04] text-white/78 hover:border-white/24"
       }`}
     >
       <span className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-[var(--tour-gold-light)]" strokeWidth={1.9} />
+        <Icon className="h-3.5 w-3.5 text-[var(--tour-gold-light)]" strokeWidth={1.9} />
         {label}
       </span>
-      <span className="h-2.5 w-2.5 rounded-full bg-current opacity-80" />
+      <span className="h-2 w-2 rounded-full bg-current opacity-80" />
     </button>
   );
 }
