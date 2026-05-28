@@ -247,40 +247,148 @@ export default function VirtualTour() {
   return <TourExperience />;
 }
 
+function useDeviceOrientation() {
+  const [orientation, setOrientation] = useState<{ alpha: number; beta: number; gamma: number } | null>(null);
+  const [isSupported] = useState(
+    () => typeof window !== "undefined" && "DeviceOrientationEvent" in window,
+  );
+
+  const requestPermission = useCallback(async () => {
+    const orientationEvent = DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+      requestPermission?: () => Promise<PermissionState>;
+    };
+
+    if (typeof orientationEvent.requestPermission === "function") {
+      try {
+        const permission = await orientationEvent.requestPermission();
+        if (permission === 'granted') {
+          return true;
+        }
+      } catch (error) {
+        console.error('Permission denied:', error);
+        return false;
+      }
+    }
+    return true;
+  }, []);
+
+  const startListening = useCallback(() => {
+    const handleOrientation = (event: DeviceOrientationEvent) => {
+      if (event.alpha !== null && event.beta !== null && event.gamma !== null) {
+        setOrientation({
+          alpha: event.alpha,
+          beta: event.beta,
+          gamma: event.gamma,
+        });
+      }
+    };
+
+    window.addEventListener('deviceorientation', handleOrientation);
+    return () => window.removeEventListener('deviceorientation', handleOrientation);
+  }, []);
+
+  return { orientation, isSupported, requestPermission, startListening };
+}
+
 function WelcomeScreen({ onEnter }: { onEnter: () => void }) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const animationRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: false,
+      powerPreference: "high-performance",
+    });
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const camera = new THREE.PerspectiveCamera(
+      76,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000,
+    );
+    camera.position.set(0, 0, 0.1);
+
+    const scene = new THREE.Scene();
+    const geometry = new THREE.SphereGeometry(500, 128, 72);
+    geometry.scale(-1, 1, 1);
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const sphere = new THREE.Mesh(geometry, material);
+    scene.add(sphere);
+
+    const loader = new THREE.TextureLoader();
+    loader.load(heroImage, (texture) => {
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.anisotropy = 8;
+      material.map = texture;
+      material.needsUpdate = true;
+    });
+
+    let rotation = 0;
+    const animate = () => {
+      rotation += 0.0003;
+      camera.rotation.y = rotation;
+      renderer.render(scene, camera);
+      animationRef.current = requestAnimationFrame(animate);
+    };
+    animate();
+
+    const handleResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      geometry.dispose();
+      material.dispose();
+      if (material.map) material.map.dispose();
+      renderer.dispose();
+    };
+  }, []);
+
   return (
-    <main className="fixed inset-0 min-h-[100dvh] overflow-hidden bg-[#edf7fb] text-[#20252a]">
-      <div
-        className="absolute inset-0 scale-[1.04] bg-cover bg-center"
-        style={{ backgroundImage: `url("${heroImage}")` }}
-      />
-      <div className="absolute inset-0 bg-white/58" />
-      <div className="absolute inset-x-0 top-0 h-[42dvh] bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.96)_0%,rgba(255,255,255,0.82)_42%,rgba(255,255,255,0)_72%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_92%,rgba(32,118,148,0.18),transparent_38%)]" />
+    <main className="fixed inset-0 min-h-[100dvh] overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,252,245,0.9)_0%,rgba(245,241,230,0.64)_36%,rgba(45,38,33,0.34)_100%)]" />
+      <div className="absolute inset-x-0 top-0 h-[46dvh] bg-[radial-gradient(ellipse_at_center,rgba(255,252,245,0.96)_0%,rgba(255,252,245,0.78)_45%,rgba(255,252,245,0)_76%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_86%,rgba(166,124,82,0.26),transparent_36%),radial-gradient(circle_at_84%_12%,rgba(49,95,80,0.18),transparent_28%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(74,63,53,0.08)_0_1px,transparent_1px)] bg-[length:92px_100%] opacity-60" />
 
       <section className="relative z-10 grid min-h-[100dvh] place-items-center px-4 py-8">
-        <div className="flex w-full max-w-5xl flex-col items-center text-center">
-          <div className="max-w-4xl">
-            <p className="mx-auto text-balance text-3xl font-black uppercase leading-[1.08] text-[#1d2820] drop-shadow-[0_2px_0_rgba(255,255,255,0.9)] sm:text-5xl lg:text-6xl">
-              Số hóa di tích lịch sử văn hóa
-            </p>
-            <h1 className="mt-2 text-balance text-2xl font-black uppercase leading-[1.06] text-[#22302a] sm:text-4xl lg:text-5xl">
-              Đình và Chùa
+        <div className="flex w-full max-w-6xl flex-col items-center text-center">
+          <div className="max-w-5xl">
+            
+            <h1 className="font-display-vn mt-5 text-balance text-5xl font-bold uppercase leading-[0.98] text-[var(--tour-ink)] drop-shadow-[0_2px_0_rgba(255,252,245,0.86)] sm:text-7xl lg:text-8xl">
+              Số hóa di tích
+              <span className="block text-[var(--primary)]">lịch sử văn hóa</span>
             </h1>
-            <p className="mt-5 text-base font-bold text-[#3f4146] sm:text-2xl">
-              Phường Định Công, TP. Hà Nội
+            <p className="mt-5 text-base font-extrabold text-[rgb(74_63_53_/_0.9)] sm:text-2xl">
+              Đình Làng Định Công Thượng · Nhà thờ Tổ nghề Kim hoàn
             </p>
           </div>
 
           <button
             type="button"
             onClick={onEnter}
-            className="mt-[14dvh] rounded-full bg-gradient-to-r from-[#2577ff] to-[#49d5e8] px-9 py-4 text-lg font-bold text-white shadow-[0_18px_42px_rgba(37,119,255,0.38)] transition hover:scale-[1.03] hover:shadow-[0_24px_54px_rgba(37,119,255,0.42)] active:scale-[0.98] sm:px-12 sm:text-2xl"
+            className="mt-[10dvh] rounded-full border border-[rgb(255_252_245_/_0.48)] bg-[linear-gradient(135deg,#315f50,#a67c52_58%,#735a3a)] px-9 py-4 text-lg font-extrabold text-white shadow-[0_22px_58px_rgb(74_63_53_/_0.34),inset_0_1px_0_rgb(255_255_255_/_0.28)] transition hover:scale-[1.03] hover:shadow-[0_28px_70px_rgb(74_63_53_/_0.42)] active:scale-[0.98] sm:px-12 sm:text-2xl"
           >
-            Khám Phá Ngay!
+            Khám phá ngay
           </button>
 
-          <div className="mt-[9dvh] grid w-full max-w-xl grid-cols-2 gap-5 px-4 sm:gap-8">
+          <div className="mt-[8dvh] grid w-full max-w-2xl grid-cols-2 gap-4 px-4 sm:gap-8">
             <WelcomeCard image={dinhCardImage} label="Đình Làng" rotate="-rotate-6" />
             <WelcomeCard image={shrineCardImage} label="Nhà thờ tổ nghề" rotate="rotate-5" />
           </div>
@@ -301,12 +409,12 @@ function WelcomeCard({
 }) {
   return (
     <div
-      className={`rounded-[8px] bg-white p-2 shadow-[0_18px_42px_rgba(29,42,52,0.24)] ${rotate}`}
+      className={`rounded-[8px] border border-[rgb(166_124_82_/_0.18)] bg-[var(--card)] p-2 shadow-[0_22px_58px_rgb(74_63_53_/_0.24)] ${rotate}`}
     >
       <div className="relative aspect-[4/3] overflow-hidden rounded-[6px]">
         <Image src={image} alt={label} fill sizes="240px" className="object-cover" priority />
       </div>
-      <p className="py-2 text-sm font-semibold text-[#4b403d] sm:text-base">{label}</p>
+      <p className="font-display-vn py-2 text-sm font-bold text-[var(--foreground)] sm:text-base">{label}</p>
     </div>
   );
 }
@@ -319,6 +427,8 @@ function TourExperience() {
   const [autoRotate, setAutoRotate] = useState(false);
   const [wideAngle, setWideAngle] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(false);
+  const [vrMode, setVrMode] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const mountRef = useRef<HTMLDivElement | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -327,6 +437,9 @@ function TourExperience() {
   const textureCacheRef = useRef<Map<string, THREE.Texture>>(new Map());
   const hotspotRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const currentSceneRef = useRef<TourScene>(sceneById.get("scene-5")!);
+  const lastOrientationRef = useRef<{ alpha: number; beta: number; gamma: number } | null>(null);
+
+  const { orientation, isSupported: isVrSupported, requestPermission, startListening } = useDeviceOrientation();
 
   const activeScene = useMemo(
     () => sceneById.get(currentSceneId) ?? sceneById.get("scene-5")!,
@@ -431,7 +544,7 @@ function TourExperience() {
     controls.enableZoom = true;
     controls.minDistance = 0.08;
     controls.maxDistance = 0.72;
-    controls.rotateSpeed = 0.42;
+    controls.rotateSpeed = -0.42;
     controls.zoomSpeed = 0.48;
     controls.minPolarAngle = 0.03;
     controls.maxPolarAngle = Math.PI - 0.03;
@@ -496,7 +609,61 @@ function TourExperience() {
 
   useEffect(() => {
     currentSceneRef.current = activeScene;
-    positionCamera(activeScene);
+    
+    // Google Street View style zoom transition
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+    
+    if (camera && controls) {
+      setIsTransitioning(true);
+      
+      // Zoom in animation (0.12 -> 0.01)
+      const startDistance = camera.position.length();
+      const zoomInDuration = 300;
+      const zoomOutDuration = 300;
+      const startTime = Date.now();
+      
+      const animateZoomIn = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / zoomInDuration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+        
+        const newDistance = startDistance + (0.01 - startDistance) * eased;
+        const direction = camera.position.clone().normalize();
+        camera.position.copy(direction.multiplyScalar(newDistance));
+        controls.update();
+        
+        if (progress < 1) {
+          requestAnimationFrame(animateZoomIn);
+        } else {
+          // Switch scene at peak zoom
+          positionCamera(activeScene);
+          
+          // Zoom out animation
+          const zoomOutStart = Date.now();
+          const animateZoomOut = () => {
+            const elapsed = Date.now() - zoomOutStart;
+            const progress = Math.min(elapsed / zoomOutDuration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            
+            const newDistance = 0.01 + (0.12 - 0.01) * eased;
+            const direction = camera.position.clone().normalize();
+            camera.position.copy(direction.multiplyScalar(newDistance));
+            controls.update();
+            
+            if (progress < 1) {
+              requestAnimationFrame(animateZoomOut);
+            } else {
+              setIsTransitioning(false);
+            }
+          };
+          animateZoomOut();
+        }
+      };
+      animateZoomIn();
+    } else {
+      positionCamera(activeScene);
+    }
 
     const material = materialRef.current;
 
@@ -509,7 +676,6 @@ function TourExperience() {
     if (cachedTexture) {
       material.map = cachedTexture;
       material.needsUpdate = true;
-      requestAnimationFrame(() => setIsLoading(false));
       updateHotspots();
       return;
     }
@@ -529,14 +695,12 @@ function TourExperience() {
         textureCacheRef.current.set(activeScene.image, texture);
         material.map = texture;
         material.needsUpdate = true;
-        setIsLoading(false);
         updateHotspots();
       },
       undefined,
       () => {
         if (!cancelled) {
           setLoadError("Không tải được ảnh panorama cho cảnh này.");
-          setIsLoading(false);
         }
       },
     );
@@ -546,22 +710,73 @@ function TourExperience() {
     };
   }, [activeScene, positionCamera, updateHotspots]);
 
-  const goToScene = (sceneId: SceneId) => {
+  // VR Mode - Device Orientation
+  useEffect(() => {
+    if (!vrMode || !orientation) return;
+
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+    if (!camera || !controls) return;
+
+    const last = lastOrientationRef.current;
+    if (last) {
+      const alphaChange = orientation.alpha - last.alpha;
+      const betaChange = orientation.beta - last.beta;
+      
+      // Apply rotation based on device orientation
+      const euler = new THREE.Euler(
+        THREE.MathUtils.degToRad(betaChange * 0.5),
+        THREE.MathUtils.degToRad(-alphaChange * 0.5),
+        0,
+        'YXZ'
+      );
+      
+      camera.rotation.x += euler.x;
+      camera.rotation.y += euler.y;
+      controls.update();
+    }
+    
+    lastOrientationRef.current = orientation;
+  }, [orientation, vrMode]);
+
+  const toggleVrMode = useCallback(async () => {
+    if (!vrMode) {
+      const permitted = await requestPermission();
+      if (permitted) {
+        startListening();
+        setVrMode(true);
+        if (controlsRef.current) {
+          controlsRef.current.enabled = false;
+        }
+      }
+    } else {
+      setVrMode(false);
+      lastOrientationRef.current = null;
+      if (controlsRef.current) {
+        controlsRef.current.enabled = true;
+      }
+    }
+  }, [vrMode, requestPermission, startListening]);
+
+  const goToScene = (sceneId: SceneId, keepPanel = false) => {
     if (sceneId !== currentSceneId) {
       setLoadError(null);
       setIsLoading(true);
+      setIsTransitioning(true);
     }
 
     setCurrentSceneId(sceneId);
-    setActivePanel(null);
+    if (!keepPanel) {
+      setActivePanel(null);
+    }
   };
 
   return (
-    <main className="fixed inset-0 min-h-[100dvh] overflow-hidden bg-[#090b0d] text-white">
+    <main className="fixed inset-0 min-h-[100dvh] overflow-hidden bg-[var(--tour-wood)] text-white">
       <div ref={mountRef} className="absolute inset-0 cursor-grab active:cursor-grabbing" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(5,7,10,0.08)_0%,rgba(5,7,10,0.02)_42%,rgba(5,7,10,0.58)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(45,38,33,0.1)_0%,rgba(45,38,33,0.02)_42%,rgba(45,38,33,0.68)_100%)]" />
 
-      <div className="absolute inset-0 z-10">
+      <div className="pointer-events-none absolute inset-0 z-10">
         {activeScene.hotspots.map((hotspot) => (
           <button
             key={`${activeScene.id}-${hotspot.targetId}`}
@@ -599,41 +814,50 @@ function TourExperience() {
         ))}
       </div>
 
-      <div className="absolute bottom-3 left-1/2 z-30 w-[min(94vw,560px)] -translate-x-1/2 sm:bottom-6">
+      <div
+        className={`absolute left-1/2 z-30 -translate-x-1/2 transition-[bottom,width,max-width,transform] duration-300 ease-out ${
+          activePanel === "scenes" ? "w-[calc(100vw-32px)] max-w-[1480px]" : "w-[min(94vw,560px)]"
+        } ${activePanel === "scenes" ? "bottom-1 sm:bottom-2" : "bottom-3 sm:bottom-6"}`}
+      >
         {activePanel ? (
-          <section className="mb-3 max-h-[58dvh] overflow-hidden rounded-[8px] border border-white/16 bg-[#111418]/88 shadow-[0_22px_80px_rgba(0,0,0,0.42)] backdrop-blur-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+          <section className="mb-2 max-h-[46dvh] animate-[tourPanelIn_260ms_cubic-bezier(.2,.9,.2,1)_both] overflow-hidden rounded-[8px] border border-[rgb(255_252_245_/_0.18)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.12),rgb(255_252_245_/_0.04)_38%,transparent_70%),rgb(45_38_33_/_0.48)] shadow-[0_24px_86px_rgb(0_0_0_/_0.28),inset_0_1px_0_rgb(255_255_255_/_0.18),inset_0_-1px_0_rgb(0_0_0_/_0.16)] backdrop-blur-xl backdrop-saturate-150 sm:mb-3">
+            <div className="flex items-center justify-between border-b border-[rgb(255_252_245_/_0.1)] bg-[rgb(255_252_245_/_0.035)] px-4 py-2.5">
               <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                <Compass className="h-4 w-4 text-cyan-200" strokeWidth={1.9} />
+                <Compass className="h-4 w-4 text-[var(--tour-gold-light)]" strokeWidth={1.9} />
                 {panelTitle(activePanel)}
               </div>
               <button
                 type="button"
                 onClick={() => setActivePanel(null)}
-                className="grid h-8 w-8 place-items-center rounded-[8px] text-white/70 transition hover:bg-white/10 hover:text-white active:scale-95"
+                className="grid h-9 w-9 place-items-center rounded-[8px] text-white transition hover:bg-white/10 active:scale-95"
                 aria-label="Đóng bảng"
               >
-                <X className="h-4 w-4" strokeWidth={1.9} />
+                <X className="h-5 w-5" strokeWidth={2.5} />
               </button>
             </div>
 
             {activePanel === "scenes" ? (
-              <div className="grid max-h-[46dvh] gap-2 overflow-auto p-3 sm:grid-cols-2">
+              <div className="flex w-full gap-3 overflow-x-auto overflow-y-hidden px-3 py-3 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin]">
                 {scenes.map((scene) => (
                   <button
                     key={scene.id}
                     type="button"
-                    onClick={() => goToScene(scene.id)}
-                    className={`flex items-center gap-3 rounded-[8px] border p-3 text-left transition active:scale-[0.99] ${
+                    onClick={() => goToScene(scene.id, true)}
+                    aria-current={scene.id === activeScene.id ? "true" : undefined}
+                    className={`group relative h-24 w-[68vw] shrink-0 overflow-hidden rounded-[8px] border text-left transition-[border-color,box-shadow,filter] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tour-gold-light)] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(45_38_33_/_0.62)] active:scale-[0.99] sm:h-28 sm:w-56 lg:w-64 ${
                       scene.id === activeScene.id
-                        ? "border-cyan-200/56 bg-cyan-300/16"
-                        : "border-white/10 bg-white/[0.04] hover:border-white/24 hover:bg-white/[0.08]"
+                        ? "border-[var(--tour-gold-light)] bg-[rgb(192_160_128_/_0.16)] shadow-[0_0_0_2px_rgb(232_207_170_/_0.28),0_16px_40px_rgb(0_0_0_/_0.28)]"
+                        : "border-white/14 bg-white/[0.04] shadow-[0_12px_30px_rgb(0_0_0_/_0.18)] hover:border-[rgb(232_207_170_/_0.46)] hover:shadow-[0_16px_38px_rgb(0_0_0_/_0.24)]"
                     }`}
                   >
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[8px] bg-white/10 font-mono text-xs font-semibold text-white">
+                    <Image src={scene.image} alt={scene.title} fill sizes="220px" className="object-cover transition duration-500 group-hover:saturate-[1.06]" />
+                    <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.03)_22%,rgba(0,0,0,0.68)_100%)] opacity-90" />
+                    <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-[linear-gradient(180deg,rgb(255_252_245_/_0.18),transparent)] opacity-55" />
+                    <span className="absolute inset-x-3 top-2 h-px bg-[linear-gradient(90deg,transparent,rgb(255_252_245_/_0.52),transparent)]" />
+                    <span className="absolute left-3 top-3 grid h-7 min-w-9 place-items-center rounded-full bg-[rgb(255_252_245_/_0.84)] px-2 font-mono text-[11px] font-bold text-[var(--tour-wood)] shadow-[0_8px_22px_rgb(0_0_0_/_0.18)]">
                       {scene.order}
                     </span>
-                    <span className="min-w-0">
+                    <span className="absolute inset-x-3 bottom-2.5 min-w-0">
                       <span className="block truncate text-sm font-semibold text-white">
                         {scene.title}
                       </span>
@@ -641,6 +865,11 @@ function TourExperience() {
                         {scene.location}
                       </span>
                     </span>
+                    {scene.id === activeScene.id ? (
+                      <span className="absolute right-3 top-3 rounded-full border border-[rgb(255_252_245_/_0.42)] bg-[rgb(49_95_80_/_0.86)] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-white shadow-[0_8px_24px_rgb(0_0_0_/_0.24)]">
+                        Đang xem
+                      </span>
+                    ) : null}
                   </button>
                 ))}
               </div>
@@ -685,62 +914,79 @@ function TourExperience() {
           </section>
         ) : null}
 
-        <nav className="grid grid-cols-5 overflow-hidden rounded-[8px] border border-white/18 bg-[#d0a393]/94 p-2 text-white shadow-[0_24px_80px_rgba(0,0,0,0.36)] backdrop-blur-2xl">
-          <BottomButton
-            icon={Layers3}
-            label="Cảnh"
-            active={activePanel === "scenes"}
-            onClick={() => setActivePanel(activePanel === "scenes" ? null : "scenes")}
-          />
-          <BottomButton
-            icon={Info}
-            label="Thông tin"
-            active={activePanel === "info"}
-            onClick={() => setActivePanel(activePanel === "info" ? null : "info")}
-          />
-          <BottomButton
-            icon={soundEnabled ? Volume2 : VolumeX}
-            label="Âm thanh"
-            active={soundEnabled}
-            onClick={() => setSoundEnabled((value) => !value)}
-          />
-          <BottomButton
-            icon={MapPin}
-            label="Vị trí"
-            active={activePanel === "map"}
-            onClick={() => setActivePanel(activePanel === "map" ? null : "map")}
-          />
-          <BottomButton
-            icon={Settings}
-            label="Cài đặt"
-            active={activePanel === "settings"}
-            onClick={() => setActivePanel(activePanel === "settings" ? null : "settings")}
-          />
-        </nav>
+        {activePanel !== "scenes" ? (
+          <nav className="grid grid-cols-5 overflow-hidden rounded-[8px] border border-[rgb(255_252_245_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.14),transparent_36%),rgb(115_90_58_/_0.62)] p-2 text-white shadow-[0_24px_80px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.18)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-out">
+            <BottomButton
+              icon={Layers3}
+              label="Cảnh"
+              active={false}
+              onClick={() => setActivePanel("scenes")}
+            />
+            <BottomButton
+              icon={Info}
+              label="Thông tin"
+              active={activePanel === "info"}
+              onClick={() => setActivePanel(activePanel === "info" ? null : "info")}
+            />
+            <BottomButton
+              icon={soundEnabled ? Volume2 : VolumeX}
+              label="Âm thanh"
+              active={soundEnabled}
+              onClick={() => setSoundEnabled((value) => !value)}
+            />
+            <BottomButton
+              icon={MapPin}
+              label="Vị trí"
+              active={activePanel === "map"}
+              onClick={() => setActivePanel(activePanel === "map" ? null : "map")}
+            />
+            <BottomButton
+              icon={Settings}
+              label="Cài đặt"
+              active={activePanel === "settings"}
+              onClick={() => setActivePanel(activePanel === "settings" ? null : "settings")}
+            />
+          </nav>
+        ) : null}
       </div>
 
-      {isLoading || loadError ? (
-        <div className="pointer-events-none absolute inset-0 z-40 grid place-items-center bg-[#090b0d]/46 backdrop-blur-sm">
-          <div className="w-[min(82vw,340px)] rounded-[8px] border border-white/16 bg-black/48 p-5 text-center shadow-[0_18px_70px_rgba(0,0,0,0.42)] backdrop-blur-2xl">
-            <div className="mx-auto h-1.5 w-36 overflow-hidden rounded-full bg-white/12">
-              <div className="h-full w-1/2 animate-[tourLoading_1.15s_ease-in-out_infinite] rounded-full bg-cyan-200" />
-            </div>
-            <p className="mt-4 text-sm font-semibold text-white">
-              {loadError ?? "Đang tải panorama"}
-            </p>
+      {/* VR Mode Button */}
+      {isVrSupported && (
+        <button
+          type="button"
+          onClick={toggleVrMode}
+          className={`fixed right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border p-3 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-all active:scale-95 sm:p-4 ${
+            vrMode
+              ? "border-[var(--tour-gold-light)] bg-[rgb(192_160_128_/_0.24)] text-white"
+              : "border-white/20 bg-[rgb(45_38_33_/_0.48)] text-white/80 hover:bg-[rgb(45_38_33_/_0.62)]"
+          }`}
+          aria-label={vrMode ? "Tắt chế độ VR" : "Bật chế độ VR"}
+          title={vrMode ? "Tắt chế độ VR" : "Bật chế độ VR"}
+        >
+          <Compass className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={2} />
+        </button>
+      )}
+
+      {loadError ? (
+        <div className="pointer-events-none absolute inset-0 z-40 grid place-items-center bg-[rgb(45_38_33_/_0.46)] backdrop-blur-sm">
+          <div className="w-[min(82vw,340px)] rounded-[8px] border border-[rgb(255_252_245_/_0.16)] bg-[rgb(45_38_33_/_0.62)] p-5 text-center shadow-[0_18px_70px_rgba(0,0,0,0.42)] backdrop-blur-2xl">
+            <p className="text-sm font-semibold text-white">{loadError}</p>
           </div>
         </div>
       ) : null}
 
       <style jsx global>{`
-        @keyframes tourLoading {
-          0% {
-            transform: translateX(-100%);
+        @keyframes tourPanelIn {
+          from {
+            opacity: 0;
+            transform: translateY(14px) scale(0.985);
           }
-          100% {
-            transform: translateX(220%);
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
           }
         }
+
 
         canvas {
           display: block;
@@ -768,7 +1014,7 @@ function panelTitle(panel: Exclude<Panel, null>) {
 
 function LocationCard({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-[8px] border border-white/10 bg-white/[0.05] p-3">
+    <div className="rounded-[8px] border border-[rgb(255_252_245_/_0.14)] bg-[rgb(255_252_245_/_0.06)] p-3">
       <p className="font-semibold text-white">{title}</p>
       <p className="mt-1 leading-6 text-white/68">{detail}</p>
     </div>
@@ -777,11 +1023,13 @@ function LocationCard({ title, detail }: { title: string; detail: string }) {
 
 function BottomButton({
   active,
+  hideLabel = false,
   icon: Icon,
   label,
   onClick,
 }: {
   active: boolean;
+  hideLabel?: boolean;
   icon: LucideIcon;
   label: string;
   onClick: () => void;
@@ -791,14 +1039,17 @@ function BottomButton({
       type="button"
       onClick={onClick}
       className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-[8px] px-1.5 py-2.5 text-center transition active:scale-95 ${
-        active ? "bg-white/18 text-white" : "text-white/92 hover:bg-white/12"
+        active ? "bg-[rgb(255_252_245_/_0.2)] text-white shadow-[inset_0_1px_0_rgb(255_255_255_/_0.18)]" : "text-white/92 hover:bg-white/12"
       }`}
       aria-label={label}
+      title={label}
     >
       <Icon className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={2.2} />
-      <span className="w-full truncate text-[11px] font-semibold leading-tight sm:text-sm">
-        {label}
-      </span>
+      {hideLabel ? null : (
+        <span className="w-full truncate text-[11px] font-semibold leading-tight sm:text-sm">
+          {label}
+        </span>
+      )}
     </button>
   );
 }
@@ -820,12 +1071,12 @@ function ToggleButton({
       onClick={onClick}
       className={`flex items-center justify-between rounded-[8px] border px-3 py-3 text-sm font-semibold transition active:scale-[0.99] ${
         active
-          ? "border-cyan-200/52 bg-cyan-300/14 text-white"
+          ? "border-[rgb(232_207_170_/_0.56)] bg-[rgb(192_160_128_/_0.16)] text-white"
           : "border-white/10 bg-white/[0.04] text-white/78 hover:border-white/24"
       }`}
     >
       <span className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-cyan-100" strokeWidth={1.9} />
+        <Icon className="h-4 w-4 text-[var(--tour-gold-light)]" strokeWidth={1.9} />
         {label}
       </span>
       <span className="h-2.5 w-2.5 rounded-full bg-current opacity-80" />
