@@ -71,7 +71,7 @@ const scenes: TourScene[] = [
     location: "Đình Làng Định Công Thượng",
     image: panoramaPath("1. trước cổng.jpg"),
     initialYaw: 0,
-    hotspots: [{ targetId: "scene-2", label: "Vào sân trước", yaw: 0, pitch: -18 }],
+    hotspots: [{ targetId: "scene-2", label: "Vào sân trước", yaw: 118, pitch: -20 }],
   },
   {
     id: "scene-2",
@@ -81,8 +81,8 @@ const scenes: TourScene[] = [
     image: panoramaPath("2. Sân trước.jpg"),
     initialYaw: 0,
     hotspots: [
-      { targetId: "scene-1", label: "Ra cổng", yaw: 180, pitch: -18, rotation: 180 },
-      { targetId: "scene-3a", label: "Qua hồ sâu", yaw: 0, pitch: -16 },
+      { targetId: "scene-1", label: "Ra cổng", yaw: -75, pitch: -10, rotation: -0 },
+      { targetId: "scene-3a", label: "Qua hồ sâu", yaw: 168, pitch: -16, rotation: 20 },
     ],
   },
   {
