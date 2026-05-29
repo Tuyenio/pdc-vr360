@@ -345,16 +345,26 @@ export default function VirtualTour() {
         return;
       }
 
+      const setSafeVolume = (value: number) => {
+        const safeValue = THREE.MathUtils.clamp(Number.isFinite(value) ? value : 0, 0, 1);
+        audio.volume = safeValue;
+        return safeValue;
+      };
+
       if (audioFadeRef.current) {
         cancelAnimationFrame(audioFadeRef.current);
       }
 
       const clampedTarget = THREE.MathUtils.clamp(targetVolume, 0, 1);
-      const startVolume = audio.volume ?? 0;
+      const startVolume = THREE.MathUtils.clamp(
+        Number.isFinite(audio.volume) ? audio.volume : 0,
+        0,
+        1,
+      );
       const delta = clampedTarget - startVolume;
 
       if (duration <= 0 || Math.abs(delta) < 0.01) {
-        audio.volume = clampedTarget;
+        setSafeVolume(clampedTarget);
         if (pauseAfter && clampedTarget === 0) {
           audio.pause();
         }
@@ -366,7 +376,7 @@ export default function VirtualTour() {
 
       const tick = (now: number) => {
         const progress = Math.min((now - startTime) / duration, 1);
-        audio.volume = startVolume + delta * easeOutCubic(progress);
+        setSafeVolume(startVolume + delta * easeOutCubic(progress));
 
         if (progress < 1) {
           audioFadeRef.current = requestAnimationFrame(tick);
