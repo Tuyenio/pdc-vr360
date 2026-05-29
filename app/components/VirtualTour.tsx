@@ -958,7 +958,7 @@ function TourExperience({
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.075;
+    controls.dampingFactor = 0.09;
     controls.enablePan = false;
     controls.enableZoom = false;
     controls.rotateSpeed = -0.42;
@@ -1128,7 +1128,7 @@ function TourExperience({
 
     if (controls) {
       controls.autoRotate = autoRotate && !vrMode;
-      controls.autoRotateSpeed = 0.35;
+      controls.autoRotateSpeed = 0.85;
     }
   }, [autoRotate, vrMode]);
 
