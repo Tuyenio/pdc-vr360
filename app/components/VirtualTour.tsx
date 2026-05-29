@@ -89,7 +89,7 @@ const scenes: TourScene[] = [
     location: "Đình Làng Định Công Thượng",
     image: panoramaPath("1. trước cổng.jpg"),
     initialYaw: 113,
-    hotspots: [{ targetId: "scene-2", label: "Vào sân trước", yaw: 118, pitch: -20 }],
+    hotspots: [{ targetId: "scene-2", label: "Vào sân trước", yaw: 115, pitch: -20}],
   },
   {
     id: "scene-2",
@@ -244,6 +244,56 @@ const scenes: TourScene[] = [
 ];
 
 const sceneById = new Map(scenes.map((scene) => [scene.id, scene]));
+const panoramaTextureCache = new Map<string, THREE.Texture>();
+const panoramaTexturePromises = new Map<string, Promise<THREE.Texture>>();
+
+function loadPanoramaTexture(image: string) {
+  const cachedTexture = panoramaTextureCache.get(image);
+
+  if (cachedTexture) {
+    return Promise.resolve(cachedTexture);
+  }
+
+  const pendingTexture = panoramaTexturePromises.get(image);
+
+  if (pendingTexture) {
+    return pendingTexture;
+  }
+
+  const texturePromise = new Promise<THREE.Texture>((resolve, reject) => {
+    const loader = new THREE.TextureLoader();
+    loader.load(
+      image,
+      (texture) => {
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.anisotropy = 8;
+        panoramaTextureCache.set(image, texture);
+        panoramaTexturePromises.delete(image);
+        resolve(texture);
+      },
+      undefined,
+      () => {
+        panoramaTexturePromises.delete(image);
+        reject(new Error("load-failed"));
+      },
+    );
+  });
+
+  panoramaTexturePromises.set(image, texturePromise);
+  return texturePromise;
+}
+
+function preloadSceneAndHotspots(scene: TourScene) {
+  loadPanoramaTexture(scene.image).catch(() => undefined);
+
+  scene.hotspots.forEach((hotspot) => {
+    const targetScene = sceneById.get(hotspot.targetId);
+
+    if (targetScene) {
+      loadPanoramaTexture(targetScene.image).catch(() => undefined);
+    }
+  });
+}
 
 function yawFromDirection(direction: THREE.Vector3) {
   return normalizeYaw(THREE.MathUtils.radToDeg(Math.atan2(direction.x, -direction.z)));
@@ -259,15 +309,6 @@ function directionFromYawPitch(yaw: number, pitch: number) {
     Math.sin(pitchRad),
     -Math.cos(yawRad) * cosPitch,
   );
-}
-
-function getArrivalYaw(targetScene: TourScene, sourceSceneId?: SceneId) {
-  if (!sourceSceneId) {
-    return targetScene.initialYaw;
-  }
-
-  const returnHotspot = targetScene.hotspots.find((hotspot) => hotspot.targetId === sourceSceneId);
-  return returnHotspot?.yaw ?? targetScene.initialYaw;
 }
 
 export default function VirtualTour() {
@@ -382,6 +423,10 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
     scene.add(sphere);
 
     const loader = new THREE.TextureLoader();
+    const preloadTimer = window.setTimeout(() => {
+      preloadSceneAndHotspots(sceneById.get("scene-1")!);
+    }, 180);
+
     loader.load(heroImage, (texture) => {
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.anisotropy = 8;
@@ -407,6 +452,7 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      window.clearTimeout(preloadTimer);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -522,7 +568,7 @@ function TourExperience() {
   const controlsRef = useRef<OrbitControls | null>(null);
   const materialRef = useRef<THREE.MeshBasicMaterial | null>(null);
   const transitionMaterialRef = useRef<THREE.MeshBasicMaterial | null>(null);
-  const textureCacheRef = useRef<Map<string, THREE.Texture>>(new Map());
+  const textureCacheRef = useRef<Map<string, THREE.Texture>>(panoramaTextureCache);
   const hotspotRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const currentSceneRef = useRef<TourScene>(sceneById.get("scene-1")!);
   const lastOrientationRef = useRef<{ alpha: number; beta: number; gamma: number } | null>(null);
@@ -638,7 +684,6 @@ function TourExperience() {
       return;
     }
 
-    const textureCache = textureCacheRef.current;
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: false,
@@ -789,7 +834,6 @@ function TourExperience() {
       geometry.dispose();
       material.dispose();
       transitionMaterial.dispose();
-      textureCache.forEach((texture) => texture.dispose());
       renderer.dispose();
       renderer.domElement.remove();
     };
@@ -822,7 +866,7 @@ function TourExperience() {
   }, []);
 
   const runSceneTransition = useCallback(
-    (scene: TourScene, targetHotspot?: Hotspot) => {
+    (scene: TourScene, arrivalYaw = scene.initialYaw) => {
       currentSceneRef.current = scene;
       const camera = cameraRef.current;
       const controls = controlsRef.current;
@@ -847,13 +891,9 @@ function TourExperience() {
       const preloadNextScenes = () => {
         scene.hotspots.forEach((hotspot) => {
           const nextScene = sceneById.get(hotspot.targetId);
-          if (nextScene && !textureCacheRef.current.has(nextScene.image)) {
-            const loader = new THREE.TextureLoader();
-            loader.load(nextScene.image, (texture) => {
-              texture.colorSpace = THREE.SRGBColorSpace;
-              texture.anisotropy = 8;
-              textureCacheRef.current.set(nextScene.image, texture);
-            });
+
+          if (nextScene) {
+            loadPanoramaTexture(nextScene.image).catch(() => undefined);
           }
         });
       };
@@ -871,7 +911,7 @@ function TourExperience() {
         const startRotation = camera.rotation.clone();
         
         // Calculate target position and rotation
-        const targetYaw = targetHotspot?.yaw ?? scene.initialYaw;
+        const targetYaw = arrivalYaw;
         const targetDirection = directionFromYawPitch(targetYaw, 0).normalize();
         const targetPosition = targetDirection.multiplyScalar(-PANORAMA_CAMERA_DISTANCE);
 
@@ -886,22 +926,7 @@ function TourExperience() {
         let loadedTexture: THREE.Texture | null = null;
 
         // Load texture in background
-        const loadTexture = cachedTexture
-          ? Promise.resolve(cachedTexture)
-          : new Promise<THREE.Texture>((resolve, reject) => {
-              const loader = new THREE.TextureLoader();
-              loader.load(
-                scene.image,
-                (texture) => {
-                  texture.colorSpace = THREE.SRGBColorSpace;
-                  texture.anisotropy = 8;
-                  textureCacheRef.current.set(scene.image, texture);
-                  resolve(texture);
-                },
-                undefined,
-                () => reject(new Error("load-failed")),
-              );
-            });
+        const loadTexture = cachedTexture ? Promise.resolve(cachedTexture) : loadPanoramaTexture(scene.image);
 
         loadTexture
           .then((texture) => {
@@ -964,7 +989,7 @@ function TourExperience() {
             transitionMaterial.needsUpdate = true;
           }
           
-          positionCamera(scene);
+          positionCamera(scene, PANORAMA_CAMERA_DISTANCE, targetYaw);
           setTransitionVisuals(0);
           setIsTransitioning(false);
           setIsLoading(false);
@@ -978,22 +1003,7 @@ function TourExperience() {
       }
 
       // Initial scene load
-      const loadTexture = cachedTexture
-        ? Promise.resolve(cachedTexture)
-        : new Promise<THREE.Texture>((resolve, reject) => {
-            const loader = new THREE.TextureLoader();
-            loader.load(
-              scene.image,
-              (texture) => {
-                texture.colorSpace = THREE.SRGBColorSpace;
-                texture.anisotropy = 8;
-                textureCacheRef.current.set(scene.image, texture);
-                resolve(texture);
-              },
-              undefined,
-              () => reject(new Error("load-failed")),
-            );
-          });
+      const loadTexture = cachedTexture ? Promise.resolve(cachedTexture) : loadPanoramaTexture(scene.image);
 
       setIsLoading(true);
       loadTexture
@@ -1118,7 +1128,7 @@ function TourExperience() {
     }
   }, []);
 
-  const goToScene = (sceneId: SceneId, keepPanel = false, sourceSceneId?: SceneId) => {
+  const goToScene = (sceneId: SceneId, keepPanel = false, arrivalYaw?: number) => {
     if (sceneId === currentSceneId || transitionLockRef.current) {
       return;
     }
@@ -1129,13 +1139,9 @@ function TourExperience() {
       setActivePanel(null);
     }
 
-    // Find the hotspot that leads to this scene
-    const sourceScene = sourceSceneId ? sceneById.get(sourceSceneId) : null;
-    const hotspot = sourceScene?.hotspots.find(h => h.targetId === sceneId);
-    
     const targetScene = sceneById.get(sceneId);
     if (targetScene) {
-      runSceneTransition(targetScene, hotspot);
+      runSceneTransition(targetScene, arrivalYaw ?? targetScene.initialYaw);
     }
   };
 
@@ -1173,7 +1179,7 @@ function TourExperience() {
                 "--hotspot-angle": `${hotspot.rotation ?? 0}deg`,
               } as CSSProperties
             }
-            onClick={() => goToScene(hotspot.targetId, false, activeScene.id)}
+            onClick={() => goToScene(hotspot.targetId, false, hotspot.yaw)}
             aria-label={hotspot.label}
             title={hotspot.label}
           >
