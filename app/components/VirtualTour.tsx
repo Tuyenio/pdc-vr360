@@ -672,9 +672,9 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
         <div className="flex w-full max-w-5xl flex-col items-center text-center">
           <div className="max-w-4xl">
 
-            <h1 className="font-display-vn mt-4 text-balance text-[2.4rem] font-bold uppercase leading-[0.98] text-[var(--tour-ink)] drop-shadow-[0_2px_0_rgba(255,252,245,0.86)] sm:text-[3.6rem] lg:text-[4.8rem]">
+            <h1 className="font-display-vn mt-4 text-balance text-[2.05rem] font-bold uppercase leading-[1.12] text-[var(--tour-ink)] drop-shadow-[0_2px_0_rgba(255,252,245,0.86)] sm:text-[3.6rem] sm:leading-[1.02] lg:text-[4.8rem]">
               Số hóa di tích
-              <span className="block text-[var(--primary)]">lịch sử văn hóa</span>
+              <span className="mt-1 block text-[var(--primary)] sm:mt-0">lịch sử văn hóa</span>
             </h1>
             <p className="mt-4 text-[0.85rem] font-extrabold text-[rgb(74_63_53_/_0.9)] sm:text-[1.2rem]">
               Đình Làng Định Công Thượng · Đền thờ Tổ nghề Kim hoàn
@@ -775,6 +775,7 @@ function TourExperience({
   const stopOrientationRef = useRef<(() => void) | null>(null);
   const vrModeRef = useRef(false);
   const vrDragOffsetRef = useRef({ yaw: 0, pitch: 0 });
+  const vrYawOffsetRef = useRef<number | null>(null);
   const vrPointerRef = useRef<{ id: number; x: number; y: number } | null>(null);
   const transitionFrameRef = useRef<number | null>(null);
   const transitionTokenRef = useRef(0);
@@ -1168,6 +1169,7 @@ function TourExperience({
       }
 
       const token = ++transitionTokenRef.current;
+      const isVrTransition = vrModeRef.current;
       setLoadError(null);
       transitionLockRef.current = !initialSceneRef.current;
       preloadTourScene(scene);
@@ -1240,13 +1242,15 @@ function TourExperience({
           const eased = easeInOutQuart(progress);
           let fadeProgress = 0;
 
-          camera.position.lerpVectors(startPosition, targetPosition, eased);
-          camera.rotation.x = THREE.MathUtils.lerp(startRotation.x, 0, eased);
-          camera.rotation.y = THREE.MathUtils.lerp(startRotation.y, THREE.MathUtils.degToRad(targetYaw), eased);
-          camera.rotation.z = THREE.MathUtils.lerp(startRotation.z, 0, eased);
+          if (!isVrTransition) {
+            camera.position.lerpVectors(startPosition, targetPosition, eased);
+            camera.rotation.x = THREE.MathUtils.lerp(startRotation.x, 0, eased);
+            camera.rotation.y = THREE.MathUtils.lerp(startRotation.y, THREE.MathUtils.degToRad(targetYaw), eased);
+            camera.rotation.z = THREE.MathUtils.lerp(startRotation.z, 0, eased);
 
-          camera.position.setLength(PANORAMA_CAMERA_DISTANCE);
-          controls.update();
+            camera.position.setLength(PANORAMA_CAMERA_DISTANCE);
+            controls.update();
+          }
 
           // Fade when texture is loaded
           if (textureLoaded && loadedTexture) {
@@ -1288,7 +1292,9 @@ function TourExperience({
           }
 
           transitionFrameRef.current = null;
-          positionCamera(scene, PANORAMA_CAMERA_DISTANCE, targetYaw);
+          if (!isVrTransition) {
+            positionCamera(scene, PANORAMA_CAMERA_DISTANCE, targetYaw);
+          }
           setTransitionVisuals(0);
           setIsTransitioning(false);
           setIsLoading(false);
@@ -1379,6 +1385,24 @@ function TourExperience({
     const headsetCorrection = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5));
     const screenCorrection = new THREE.Quaternion().setFromAxisAngle(zee, -screenOrientation);
     const dragOffset = vrDragOffsetRef.current;
+    const orientationQuaternion = new THREE.Quaternion()
+      .setFromEuler(euler)
+      .multiply(headsetCorrection)
+      .multiply(screenCorrection);
+    const orientationDirection = new THREE.Vector3(0, 0, -1).applyQuaternion(orientationQuaternion);
+    const orientationYaw = yawFromDirection(orientationDirection);
+
+    if (vrYawOffsetRef.current === null) {
+      const currentDirection = new THREE.Vector3();
+      camera.getWorldDirection(currentDirection);
+      vrYawOffsetRef.current = normalizeYaw(yawFromDirection(currentDirection) - orientationYaw);
+    }
+
+    const yawOffset = vrYawOffsetRef.current ?? 0;
+    const yawCorrection = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 1, 0),
+      THREE.MathUtils.degToRad(yawOffset),
+    );
     const dragCorrection = new THREE.Quaternion().setFromEuler(
       new THREE.Euler(
         THREE.MathUtils.degToRad(dragOffset.pitch),
@@ -1388,9 +1412,8 @@ function TourExperience({
       ),
     );
 
-    camera.quaternion.setFromEuler(euler);
-    camera.quaternion.multiply(headsetCorrection);
-    camera.quaternion.multiply(screenCorrection);
+    camera.quaternion.copy(orientationQuaternion);
+    camera.quaternion.premultiply(yawCorrection);
     camera.quaternion.premultiply(dragCorrection);
     lastOrientationRef.current = orientation;
   }, [orientation, vrMode]);
@@ -1418,6 +1441,7 @@ function TourExperience({
         setVrMode(true);
         setAutoRotate(false);
         vrDragOffsetRef.current = { yaw: 0, pitch: 0 };
+        vrYawOffsetRef.current = null;
         vrPointerRef.current = null;
         lastOrientationRef.current = null;
         if (controlsRef.current) {
@@ -1430,6 +1454,7 @@ function TourExperience({
       stopOrientationRef.current?.();
       stopOrientationRef.current = null;
       vrPointerRef.current = null;
+      vrYawOffsetRef.current = null;
       lastOrientationRef.current = null;
       if (controlsRef.current) {
         controlsRef.current.enabled = true;
@@ -1711,7 +1736,7 @@ function TourExperience({
         ) : null}
 
         {activePanel !== "scenes" ? (
-          <nav className="grid grid-cols-5 gap-1.5 overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.14),transparent_36%),rgb(115_90_58_/_0.62)] p-1.5 text-white shadow-[0_24px_80px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.18)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-out sm:gap-2">
+          <nav className="grid grid-cols-5 gap-1 overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.14),transparent_36%),rgb(115_90_58_/_0.62)] p-1.5 text-white shadow-[0_24px_80px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.18)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-out sm:gap-1.5">
             <BottomButton
               icon={Layers3}
               label="Cảnh"
@@ -1725,16 +1750,16 @@ function TourExperience({
               onClick={() => setActivePanel(activePanel === "info" ? null : "info")}
             />
             <BottomButton
-              icon={soundEnabled ? Volume2 : VolumeX}
-              label="Âm thanh"
-              active={soundEnabled}
-              onClick={onToggleSound}
-            />
-            <BottomButton
               icon={MapPin}
               label="Vị trí"
               active={activePanel === "map"}
               onClick={() => setActivePanel(activePanel === "map" ? null : "map")}
+            />
+            <BottomButton
+              icon={soundEnabled ? Volume2 : VolumeX}
+              label="Âm thanh"
+              active={soundEnabled}
+              onClick={onToggleSound}
             />
             <BottomButton
               icon={Settings}
