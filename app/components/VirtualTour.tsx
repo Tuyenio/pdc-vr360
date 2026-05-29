@@ -105,10 +105,10 @@ const scenes: TourScene[] = [
     initialYaw: 118,
     mapPosition: { x: 50, y: 76 },
     hotspots: [
-      { targetId: "scene-1", label: "Cổng Đình", yaw: -75, pitch: -10, rotation: 180 },
-      { targetId: "scene-3", label: "Tả Hồ", yaw: -118, pitch: -16, rotation: -35 },
-      { targetId: "scene-4", label: "Hữu Hồ", yaw: 118, pitch: -16, rotation: 35 },
-      { targetId: "scene-6", label: "Trung Đình", yaw: 168, pitch: -16, rotation: 0 },
+      { targetId: "scene-1", label: "Cổng Đình", yaw: -75, pitch: -10, rotation: 0 },
+      { targetId: "scene-3", label: "Tả Hồ", yaw: 58, pitch: -16, rotation: -35 },
+      { targetId: "scene-4", label: "Hữu Hồ", yaw: 172, pitch: -16, rotation: 35 },
+      { targetId: "scene-6", label: "Trung Đình", yaw: 118, pitch: -16, rotation: 0 },
     ],
   },
   {
@@ -120,8 +120,8 @@ const scenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 30, y: 65 },
     hotspots: [
-      { targetId: "scene-2", label: "Tiền Đình", yaw: 168, pitch: -18, rotation: 180 },
-      { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: -12, pitch: -15 },
+      { targetId: "scene-2", label: "Tiền Đình", yaw: -40, pitch: -18, rotation: 2 },
+      { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: -220, pitch: -15 },
     ],
   },
   {
@@ -133,8 +133,8 @@ const scenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 70, y: 65 },
     hotspots: [
-      { targetId: "scene-2", label: "Tiền Đình", yaw: -168, pitch: -18, rotation: 180 },
-      { targetId: "scene-5", label: "Vườn cảnh phía Đông", yaw: 45, pitch: -15, rotation: 24 },
+      { targetId: "scene-2", label: "Tiền Đình", yaw: 72  , pitch: -18, rotation: -12 },
+      { targetId: "scene-5", label: "Vườn cảnh phía Đông", yaw: 222, pitch: -15, rotation: -2 },
     ],
   },
   {
@@ -146,8 +146,8 @@ const scenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 84, y: 54 },
     hotspots: [
-      { targetId: "scene-4", label: "Hữu Hồ", yaw: 178, pitch: -18, rotation: 180 },
-      { targetId: "scene-6", label: "Trung Đình", yaw: -58, pitch: -15, rotation: -30 },
+      { targetId: "scene-4", label: "Hữu Hồ", yaw: 198, pitch: -18, rotation: -10 },
+      { targetId: "scene-6", label: "Trung Đình", yaw: -2, pitch: -15, rotation: 0 },
     ],
   },
   {
@@ -159,10 +159,10 @@ const scenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 50, y: 55 },
     hotspots: [
-      { targetId: "scene-2", label: "Tiền Đình", yaw: 180, pitch: -18, rotation: 180 },
-      { targetId: "scene-7", label: "Tả đình làng", yaw: -48, pitch: -15, rotation: -35 },
-      { targetId: "scene-10", label: "Sân hậu", yaw: 0, pitch: -15 },
-      { targetId: "scene-11", label: "Lối dẫn sang Đền thờ Tổ", yaw: 112, pitch: -15, rotation: 58 },
+      { targetId: "scene-2", label: "Tiền Đình", yaw: -78, pitch: -18, rotation: 0 },
+      { targetId: "scene-7", label: "Tả đình làng", yaw: 82, pitch: -15, rotation: 0 },
+      { targetId: "scene-10", label: "Sân hậu", yaw: 121, pitch: -15 },
+      { targetId: "scene-11", label: "Lối dẫn sang Đền thờ Tổ", yaw: -190, pitch: -15 , rotation: 22 },
     ],
   },
   {
@@ -174,8 +174,8 @@ const scenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 44, y: 49 },
     hotspots: [
-      { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: -54, pitch: -15, rotation: -35 },
-      { targetId: "scene-6", label: "Trung Đình", yaw: 176, pitch: -17, rotation: 180 },
+      { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: 159, pitch: -15, rotation: 0 },
+      { targetId: "scene-6", label: "Trung Đình", yaw: 49, pitch: -17, rotation: 0 },
     ],
   },
   {
@@ -187,9 +187,9 @@ const scenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 38, y: 43 },
     hotspots: [
-      { targetId: "scene-9", label: "Chính điện Đình làng", yaw: 0, pitch: -14 },
-      { targetId: "scene-3", label: "Tả Hồ", yaw: 178, pitch: -17, rotation: 180 },
-      { targetId: "scene-7", label: "Tả đình làng", yaw: 72, pitch: -15, rotation: 42 },
+      { targetId: "scene-9", label: "Chính điện Đình làng", yaw: -87, pitch: -14 },
+      { targetId: "scene-3", label: "Tả Hồ", yaw: -166, pitch: -17, rotation: -20 },
+      { targetId: "scene-7", label: "Tả đình làng", yaw: -37, pitch: -15, rotation: 10 },
     ],
   },
   {
@@ -200,17 +200,17 @@ const scenes: TourScene[] = [
     image: panoramaPath("9 Chính điện Đình làng.jpg"),
     initialYaw: 0,
     mapPosition: { x: 38, y: 28 },
-    hotspots: [{ targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: 180, pitch: -16, rotation: 180 }],
-  },
-  {
-    id: "scene-10",
-    order: "10",
-    title: "Sân hậu",
+    hotspots: [{ targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: 180, pitch: -30, rotation: -30 }],
+    },
+    {
+      id: "scene-10",
+      order: "10",
+      title: "Sân hậu",
     location: "Đình Làng Định Công Thượng",
     image: panoramaPath("10 Sân hậu.jpg"),
     initialYaw: 0,
     mapPosition: { x: 50, y: 35 },
-    hotspots: [{ targetId: "scene-6", label: "Trung Đình", yaw: 180, pitch: -16, rotation: 180 }],
+    hotspots: [{ targetId: "scene-6", label: "Trung Đình", yaw: -62, pitch: -16, rotation: 0 }],
   },
   {
     id: "scene-11",
@@ -221,8 +221,8 @@ const scenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 67, y: 30 },
     hotspots: [
-      { targetId: "scene-6", label: "Trung Đình", yaw: -128, pitch: -16, rotation: -115 },
-      { targetId: "scene-12", label: "Không gian kết nối di tích", yaw: 42, pitch: -15, rotation: 24 },
+      { targetId: "scene-6", label: "Trung Đình", yaw: 31, pitch: -16, rotation: 0 },
+      { targetId: "scene-12", label: "Không gian kết nối di tích", yaw: 110, pitch: -15, rotation: 10 },
     ],
   },
   {
@@ -234,8 +234,8 @@ const scenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 80, y: 23 },
     hotspots: [
-      { targetId: "scene-11", label: "Lối dẫn sang Đền thờ Tổ", yaw: -138, pitch: -16, rotation: -125 },
-      { targetId: "scene-13", label: "Chính điện Đền thờ Tổ", yaw: 12, pitch: -14 },
+      { targetId: "scene-11", label: "Lối dẫn sang Đền thờ Tổ", yaw: 92, pitch: -16, rotation: 0 },
+      { targetId: "scene-13", label: "Chính điện Đền thờ Tổ", yaw: -68, pitch: -14 },
     ],
   },
   {
@@ -246,7 +246,9 @@ const scenes: TourScene[] = [
     image: panoramaPath("13 Chính điện Đền thờ Tổ nghề.jpg"),
     initialYaw: 0,
     mapPosition: { x: 80, y: 10 },
-    hotspots: [],
+    hotspots: [
+      { targetId: "scene-12", label: "Quay lại", yaw: -68, pitch: -14 },
+    ],
   },
 ];
 
