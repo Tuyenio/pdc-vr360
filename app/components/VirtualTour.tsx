@@ -63,6 +63,24 @@ const shrineCardImage = encodeURI(`${basePath}/9. Nhà thờ tổ nghề Kim Ho�
 
 const panoramaPath = (fileName: string) => encodeURI(`${basePath}/${fileName}`);
 
+const PANORAMA_CAMERA_DISTANCE = 0.12;
+const DEFAULT_FOV = 76;
+const WIDE_FOV = 88;
+const MIN_ZOOM_FOV = 36;
+const MAX_ZOOM_FOV = 96;
+
+const clampFov = (fov: number) => THREE.MathUtils.clamp(fov, MIN_ZOOM_FOV, MAX_ZOOM_FOV);
+
+const normalizeYaw = (yaw: number) => {
+  const normalized = ((yaw + 180) % 360) - 180;
+  return normalized === -180 ? 180 : normalized;
+};
+
+// Manual start-view calibration:
+// Open Settings -> "Căn hướng ảnh", rotate to the desired opening view,
+// then copy "Yaw hiện tại" into the matching scene's initialYaw below.
+// Positive yaw turns the starting view to the right; negative yaw turns it to the left.
+
 const scenes: TourScene[] = [
   {
     id: "scene-1",
@@ -70,7 +88,7 @@ const scenes: TourScene[] = [
     title: "Trước cổng",
     location: "Đình Làng Định Công Thượng",
     image: panoramaPath("1. trước cổng.jpg"),
-    initialYaw: 0,
+    initialYaw: 113,
     hotspots: [{ targetId: "scene-2", label: "Vào sân trước", yaw: 118, pitch: -20 }],
   },
   {
@@ -79,7 +97,7 @@ const scenes: TourScene[] = [
     title: "Sân trước",
     location: "Đình Làng Định Công Thượng",
     image: panoramaPath("2. Sân trước.jpg"),
-    initialYaw: 0,
+    initialYaw: 118,
     hotspots: [
       { targetId: "scene-1", label: "Ra cổng", yaw: -75, pitch: -10, rotation: -0 },
       { targetId: "scene-3a", label: "Qua hồ sâu", yaw: 168, pitch: -16, rotation: 20 },
@@ -227,6 +245,10 @@ const scenes: TourScene[] = [
 
 const sceneById = new Map(scenes.map((scene) => [scene.id, scene]));
 
+function yawFromDirection(direction: THREE.Vector3) {
+  return normalizeYaw(THREE.MathUtils.radToDeg(Math.atan2(direction.x, -direction.z)));
+}
+
 function directionFromYawPitch(yaw: number, pitch: number) {
   const yawRad = THREE.MathUtils.degToRad(yaw);
   const pitchRad = THREE.MathUtils.degToRad(pitch);
@@ -237,6 +259,15 @@ function directionFromYawPitch(yaw: number, pitch: number) {
     Math.sin(pitchRad),
     -Math.cos(yawRad) * cosPitch,
   );
+}
+
+function getArrivalYaw(targetScene: TourScene, sourceSceneId?: SceneId) {
+  if (!sourceSceneId) {
+    return targetScene.initialYaw;
+  }
+
+  const returnHotspot = targetScene.hotspots.find((hotspot) => hotspot.targetId === sourceSceneId);
+  return returnHotspot?.yaw ?? targetScene.initialYaw;
 }
 
 export default function VirtualTour() {
@@ -482,6 +513,7 @@ function TourExperience() {
   const [vrMode, setVrMode] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [currentViewYaw, setCurrentViewYaw] = useState(0);
 
   const rootRef = useRef<HTMLElement | null>(null);
   const canvasWrapRef = useRef<HTMLDivElement | null>(null);
@@ -498,6 +530,10 @@ function TourExperience() {
   const transitionTokenRef = useRef(0);
   const initialSceneRef = useRef(true);
   const transitionLockRef = useRef(false);
+  const currentFovRef = useRef(DEFAULT_FOV);
+  const targetFovRef = useRef(DEFAULT_FOV);
+  const lastPinchDistanceRef = useRef<number | null>(null);
+  const lastYawReadoutAtRef = useRef(0);
 
   const { orientation, requestPermission, startListening } = useDeviceOrientation();
 
@@ -506,7 +542,7 @@ function TourExperience() {
     [currentSceneId],
   );
 
-  const positionCamera = useCallback((scene: TourScene, distance?: number) => {
+  const positionCamera = useCallback((scene: TourScene, distance = PANORAMA_CAMERA_DISTANCE, yaw = scene.initialYaw) => {
     const camera = cameraRef.current;
     const controls = controlsRef.current;
 
@@ -514,11 +550,25 @@ function TourExperience() {
       return;
     }
 
-    const direction = directionFromYawPitch(scene.initialYaw, 0).normalize();
-    const targetDistance = distance ?? 0.12;
-    camera.position.copy(direction.multiplyScalar(-targetDistance));
+    const direction = directionFromYawPitch(yaw, 0).normalize();
+    camera.position.copy(direction.multiplyScalar(-distance));
     controls.target.set(0, 0, 0);
     controls.update();
+  }, []);
+
+  const getTouchDistance = useCallback((touches: TouchList) => {
+    if (touches.length < 2) {
+      return null;
+    }
+
+    const first = touches.item(0);
+    const second = touches.item(1);
+
+    if (!first || !second) {
+      return null;
+    }
+
+    return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY);
   }, []);
 
   const updateHotspots = useCallback(() => {
@@ -564,6 +614,23 @@ function TourExperience() {
     });
   }, []);
 
+  const setTargetFov = useCallback(
+    (nextFov: number, immediate = false) => {
+      const camera = cameraRef.current;
+      const fov = clampFov(nextFov);
+
+      targetFovRef.current = fov;
+
+      if (immediate && camera) {
+        currentFovRef.current = fov;
+        camera.fov = fov;
+        camera.updateProjectionMatrix();
+        updateHotspots();
+      }
+    },
+    [updateHotspots],
+  );
+
   useEffect(() => {
     const mount = mountRef.current;
 
@@ -584,12 +651,12 @@ function TourExperience() {
     mount.appendChild(renderer.domElement);
 
     const camera = new THREE.PerspectiveCamera(
-      76,
+      currentFovRef.current,
       mount.clientWidth / mount.clientHeight,
       0.1,
       1000,
     );
-    camera.position.set(0, 0, 0.12);
+    camera.position.set(0, 0, PANORAMA_CAMERA_DISTANCE);
 
     const threeScene = new THREE.Scene();
     const geometry = new THREE.SphereGeometry(500, 128, 72);
@@ -609,17 +676,61 @@ function TourExperience() {
     controls.enableDamping = true;
     controls.dampingFactor = 0.075;
     controls.enablePan = false;
-    controls.enableZoom = true;
-    controls.minDistance = 0.08;
-    controls.maxDistance = 0.72;
+    controls.enableZoom = false;
     controls.rotateSpeed = -0.42;
-    controls.zoomSpeed = 0.48;
     controls.minPolarAngle = 0.03;
     controls.maxPolarAngle = Math.PI - 0.03;
     controls.touches = {
       ONE: THREE.TOUCH.ROTATE,
-      TWO: THREE.TOUCH.DOLLY_ROTATE,
+      TWO: THREE.TOUCH.ROTATE,
     };
+
+    const handleWheel = (event: WheelEvent) => {
+      if (vrMode || transitionLockRef.current) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const deltaModeScale = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? 320 : 1;
+      const normalizedDelta = THREE.MathUtils.clamp(event.deltaY * deltaModeScale, -240, 240);
+      const sensitivity = event.ctrlKey ? 0.028 : 0.038;
+      setTargetFov(targetFovRef.current + normalizedDelta * sensitivity);
+    };
+
+    const handleTouchStart = (event: TouchEvent) => {
+      lastPinchDistanceRef.current = getTouchDistance(event.touches);
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (vrMode || transitionLockRef.current || event.touches.length !== 2) {
+        return;
+      }
+
+      const distance = getTouchDistance(event.touches);
+      const previousDistance = lastPinchDistanceRef.current;
+
+      if (!distance || !previousDistance) {
+        lastPinchDistanceRef.current = distance;
+        return;
+      }
+
+      event.preventDefault();
+
+      const ratio = THREE.MathUtils.clamp(previousDistance / distance, 0.82, 1.18);
+      setTargetFov(targetFovRef.current * ratio);
+      lastPinchDistanceRef.current = distance;
+    };
+
+    const handleTouchEnd = (event: TouchEvent) => {
+      lastPinchDistanceRef.current = getTouchDistance(event.touches);
+    };
+
+    renderer.domElement.addEventListener("wheel", handleWheel, { passive: false });
+    renderer.domElement.addEventListener("touchstart", handleTouchStart, { passive: false });
+    renderer.domElement.addEventListener("touchmove", handleTouchMove, { passive: false });
+    renderer.domElement.addEventListener("touchend", handleTouchEnd, { passive: false });
+    renderer.domElement.addEventListener("touchcancel", handleTouchEnd, { passive: false });
 
     cameraRef.current = camera;
     controlsRef.current = controls;
@@ -637,8 +748,29 @@ function TourExperience() {
     };
 
     const animate = () => {
+      const targetFov = targetFovRef.current;
+
+      if (Math.abs(currentFovRef.current - targetFov) > 0.01) {
+        currentFovRef.current += (targetFov - currentFovRef.current) * 0.16;
+        camera.fov = currentFovRef.current;
+        camera.updateProjectionMatrix();
+      } else if (camera.fov !== targetFov) {
+        currentFovRef.current = targetFov;
+        camera.fov = targetFov;
+        camera.updateProjectionMatrix();
+      }
+
       controls.update();
       updateHotspots();
+
+      const now = performance.now();
+      if (now - lastYawReadoutAtRef.current > 140) {
+        const viewDirection = new THREE.Vector3();
+        camera.getWorldDirection(viewDirection);
+        setCurrentViewYaw(Math.round(yawFromDirection(viewDirection)));
+        lastYawReadoutAtRef.current = now;
+      }
+
       renderer.render(threeScene, camera);
     };
 
@@ -647,6 +779,11 @@ function TourExperience() {
 
     return () => {
       window.removeEventListener("resize", resize);
+      renderer.domElement.removeEventListener("wheel", handleWheel);
+      renderer.domElement.removeEventListener("touchstart", handleTouchStart);
+      renderer.domElement.removeEventListener("touchmove", handleTouchMove);
+      renderer.domElement.removeEventListener("touchend", handleTouchEnd);
+      renderer.domElement.removeEventListener("touchcancel", handleTouchEnd);
       renderer.setAnimationLoop(null);
       controls.dispose();
       geometry.dispose();
@@ -656,7 +793,7 @@ function TourExperience() {
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [positionCamera, updateHotspots]);
+  }, [getTouchDistance, positionCamera, setTargetFov, updateHotspots, vrMode]);
 
   useEffect(() => {
     const controls = controlsRef.current;
@@ -668,14 +805,8 @@ function TourExperience() {
   }, [autoRotate]);
 
   useEffect(() => {
-    const camera = cameraRef.current;
-
-    if (camera) {
-      camera.fov = wideAngle ? 88 : 76;
-      camera.updateProjectionMatrix();
-      updateHotspots();
-    }
-  }, [updateHotspots, wideAngle]);
+    setTargetFov(wideAngle ? WIDE_FOV : DEFAULT_FOV);
+  }, [setTargetFov, wideAngle]);
 
   const setTransitionVisuals = useCallback((progress: number) => {
     const wrap = canvasWrapRef.current;
@@ -685,13 +816,13 @@ function TourExperience() {
     }
 
     const intensity = Math.sin(Math.PI * progress);
-    wrap.style.setProperty("--tour-blur", `${(8 * intensity).toFixed(2)}px`);
-    wrap.style.setProperty("--tour-scale", `${(1 + intensity * 0.02).toFixed(3)}`);
-    wrap.style.setProperty("--tour-vignette", `${(0.35 * intensity).toFixed(3)}`);
+    wrap.style.setProperty("--tour-blur", `${(4 * intensity).toFixed(2)}px`);
+    wrap.style.setProperty("--tour-scale", `${(1 + intensity * 0.01).toFixed(3)}`);
+    wrap.style.setProperty("--tour-vignette", `${(0.2 * intensity).toFixed(3)}`);
   }, []);
 
   const runSceneTransition = useCallback(
-    (scene: TourScene) => {
+    (scene: TourScene, targetHotspot?: Hotspot) => {
       currentSceneRef.current = scene;
       const camera = cameraRef.current;
       const controls = controlsRef.current;
@@ -710,10 +841,143 @@ function TourExperience() {
 
       const token = ++transitionTokenRef.current;
       setLoadError(null);
-      setIsLoading(true);
       transitionLockRef.current = !initialSceneRef.current;
 
+      // Preload next scene textures (Google Street View style)
+      const preloadNextScenes = () => {
+        scene.hotspots.forEach((hotspot) => {
+          const nextScene = sceneById.get(hotspot.targetId);
+          if (nextScene && !textureCacheRef.current.has(nextScene.image)) {
+            const loader = new THREE.TextureLoader();
+            loader.load(nextScene.image, (texture) => {
+              texture.colorSpace = THREE.SRGBColorSpace;
+              texture.anisotropy = 8;
+              textureCacheRef.current.set(nextScene.image, texture);
+            });
+          }
+        });
+      };
+
       const cachedTexture = textureCacheRef.current.get(scene.image);
+      
+      // START TRANSITION IMMEDIATELY - Don't wait for texture load
+      if (!initialSceneRef.current) {
+        setIsTransitioning(true);
+        setIsLoading(true);
+        setTransitionVisuals(0);
+
+        // Capture start position
+        const startPosition = camera.position.clone();
+        const startRotation = camera.rotation.clone();
+        
+        // Calculate target position and rotation
+        const targetYaw = targetHotspot?.yaw ?? scene.initialYaw;
+        const targetDirection = directionFromYawPitch(targetYaw, 0).normalize();
+        const targetPosition = targetDirection.multiplyScalar(-PANORAMA_CAMERA_DISTANCE);
+
+        const duration = 1200;
+        const startTime = performance.now();
+
+        // Smoother easing function
+        const easeInOutQuart = (t: number) =>
+          t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
+
+        let textureLoaded = false;
+        let loadedTexture: THREE.Texture | null = null;
+
+        // Load texture in background
+        const loadTexture = cachedTexture
+          ? Promise.resolve(cachedTexture)
+          : new Promise<THREE.Texture>((resolve, reject) => {
+              const loader = new THREE.TextureLoader();
+              loader.load(
+                scene.image,
+                (texture) => {
+                  texture.colorSpace = THREE.SRGBColorSpace;
+                  texture.anisotropy = 8;
+                  textureCacheRef.current.set(scene.image, texture);
+                  resolve(texture);
+                },
+                undefined,
+                () => reject(new Error("load-failed")),
+              );
+            });
+
+        loadTexture
+          .then((texture) => {
+            if (transitionTokenRef.current !== token) return;
+            textureLoaded = true;
+            loadedTexture = texture;
+            setIsLoading(false);
+            
+            // Set up transition material when texture is ready
+            transitionMaterial.map = texture;
+            transitionMaterial.opacity = 0;
+            transitionMaterial.needsUpdate = true;
+          })
+          .catch(() => {
+            if (transitionTokenRef.current !== token) return;
+            setLoadError("Không tải được ảnh panorama cho cảnh này.");
+            setIsLoading(false);
+          });
+
+        const tick = (now: number) => {
+          if (transitionTokenRef.current !== token) {
+            return;
+          }
+
+          const progress = Math.min((now - startTime) / duration, 1);
+          const eased = easeInOutQuart(progress);
+
+          // Smooth camera movement with interpolation
+          camera.position.lerpVectors(startPosition, targetPosition, eased);
+          camera.rotation.x = THREE.MathUtils.lerp(startRotation.x, 0, eased);
+          camera.rotation.y = THREE.MathUtils.lerp(startRotation.y, THREE.MathUtils.degToRad(targetYaw), eased);
+          camera.rotation.z = THREE.MathUtils.lerp(startRotation.z, 0, eased);
+
+          camera.position.setLength(PANORAMA_CAMERA_DISTANCE);
+          controls.update();
+
+          // Only fade when texture is loaded
+          if (textureLoaded && loadedTexture) {
+            const fadeStart = 0.3;
+            const fadeEnd = 0.95;
+            const fadeProgress = Math.min(Math.max((progress - fadeStart) / (fadeEnd - fadeStart), 0), 1);
+            const fadeEase = easeInOutQuart(fadeProgress);
+            transitionMaterial.opacity = fadeEase;
+            material.opacity = 1 - fadeEase;
+          }
+
+          setTransitionVisuals(progress);
+
+          if (progress < 1) {
+            transitionFrameRef.current = requestAnimationFrame(tick);
+            return;
+          }
+
+          // Transition complete
+          if (textureLoaded && loadedTexture) {
+            material.map = loadedTexture;
+            material.opacity = 1;
+            material.needsUpdate = true;
+            transitionMaterial.opacity = 0;
+            transitionMaterial.needsUpdate = true;
+          }
+          
+          positionCamera(scene);
+          setTransitionVisuals(0);
+          setIsTransitioning(false);
+          setIsLoading(false);
+          transitionLockRef.current = false;
+          updateHotspots();
+          preloadNextScenes();
+        };
+
+        transitionFrameRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
+      // Initial scene load
       const loadTexture = cachedTexture
         ? Promise.resolve(cachedTexture)
         : new Promise<THREE.Texture>((resolve, reject) => {
@@ -731,96 +995,29 @@ function TourExperience() {
             );
           });
 
+      setIsLoading(true);
       loadTexture
         .then((texture) => {
-          if (transitionTokenRef.current !== token) {
-            return;
-          }
+          if (transitionTokenRef.current !== token) return;
 
-          if (initialSceneRef.current) {
-            material.map = texture;
-            material.opacity = 1;
-            material.needsUpdate = true;
-            transitionMaterial.map = texture;
-            transitionMaterial.opacity = 0;
-            transitionMaterial.needsUpdate = true;
-            positionCamera(scene);
-            updateHotspots();
-            initialSceneRef.current = false;
-            setIsTransitioning(false);
-            setIsLoading(false);
-            setTransitionVisuals(0);
-            transitionLockRef.current = false;
-            return;
-          }
-
-          setIsTransitioning(true);
-          setTransitionVisuals(0);
-
-          const startDistance = camera.position.length() || 0.12;
-          const minDistance = Math.max(0.06, startDistance * 0.65);
-          const duration = 900;
-          const startTime = performance.now();
-
+          material.map = texture;
+          material.opacity = 1;
+          material.needsUpdate = true;
           transitionMaterial.map = texture;
           transitionMaterial.opacity = 0;
           transitionMaterial.needsUpdate = true;
-          material.opacity = 1;
-          positionCamera(scene, startDistance);
-
-          const easeInOutCubic = (t: number) =>
-            t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-          const tick = (now: number) => {
-            if (transitionTokenRef.current !== token) {
-              return;
-            }
-
-            const progress = Math.min((now - startTime) / duration, 1);
-            const zoomPhase = progress < 0.55 ? progress / 0.55 : (1 - progress) / 0.45;
-            const zoomEase = easeInOutCubic(Math.min(Math.max(zoomPhase, 0), 1));
-            const distance =
-              progress < 0.55
-                ? startDistance + (minDistance - startDistance) * zoomEase
-                : minDistance + (startDistance - minDistance) * zoomEase;
-
-            const direction = camera.position.clone().normalize();
-            camera.position.copy(direction.multiplyScalar(distance));
-            controls.update();
-
-            const fadeProgress = Math.min(Math.max((progress - 0.12) / 0.88, 0), 1);
-            const fadeEase = easeInOutCubic(fadeProgress);
-            transitionMaterial.opacity = fadeEase;
-            material.opacity = 1 - fadeEase;
-
-            setTransitionVisuals(progress);
-
-            if (progress < 1) {
-              transitionFrameRef.current = requestAnimationFrame(tick);
-              return;
-            }
-
-            material.map = texture;
-            material.opacity = 1;
-            material.needsUpdate = true;
-            transitionMaterial.opacity = 0;
-            transitionMaterial.needsUpdate = true;
-            setTransitionVisuals(0);
-            setIsTransitioning(false);
-            setIsLoading(false);
-            transitionLockRef.current = false;
-            updateHotspots();
-          };
-
-          transitionFrameRef.current = requestAnimationFrame(tick);
-        })
-        .catch(() => {
-          if (transitionTokenRef.current !== token) {
-            return;
-          }
+          positionCamera(scene);
+          updateHotspots();
+          initialSceneRef.current = false;
           setIsTransitioning(false);
           setIsLoading(false);
           setTransitionVisuals(0);
+          transitionLockRef.current = false;
+          preloadNextScenes();
+        })
+        .catch(() => {
+          if (transitionTokenRef.current !== token) return;
+          setIsLoading(false);
           setLoadError("Không tải được ảnh panorama cho cảnh này.");
           transitionLockRef.current = false;
         });
@@ -829,7 +1026,10 @@ function TourExperience() {
   );
 
   useEffect(() => {
-    runSceneTransition(activeScene);
+    // Only run auto-transition when scene changes from scene list
+    if (!transitionLockRef.current) {
+      runSceneTransition(activeScene);
+    }
   }, [activeScene, runSceneTransition]);
 
   useEffect(() => {
@@ -918,16 +1118,24 @@ function TourExperience() {
     }
   }, []);
 
-  const goToScene = (sceneId: SceneId, keepPanel = false) => {
+  const goToScene = (sceneId: SceneId, keepPanel = false, sourceSceneId?: SceneId) => {
     if (sceneId === currentSceneId || transitionLockRef.current) {
       return;
     }
 
     setLoadError(null);
-    setIsLoading(true);
     setCurrentSceneId(sceneId);
     if (!keepPanel) {
       setActivePanel(null);
+    }
+
+    // Find the hotspot that leads to this scene
+    const sourceScene = sourceSceneId ? sceneById.get(sourceSceneId) : null;
+    const hotspot = sourceScene?.hotspots.find(h => h.targetId === sceneId);
+    
+    const targetScene = sceneById.get(sceneId);
+    if (targetScene) {
+      runSceneTransition(targetScene, hotspot);
     }
   };
 
@@ -965,7 +1173,7 @@ function TourExperience() {
                 "--hotspot-angle": `${hotspot.rotation ?? 0}deg`,
               } as CSSProperties
             }
-            onClick={() => goToScene(hotspot.targetId)}
+            onClick={() => goToScene(hotspot.targetId, false, activeScene.id)}
             aria-label={hotspot.label}
             title={hotspot.label}
           >
@@ -1077,6 +1285,26 @@ function TourExperience() {
                   label="Góc rộng"
                   onClick={() => setWideAngle((value) => !value)}
                 />
+                <div className="sm:col-span-2 rounded-[6px] border border-[rgb(232_207_170_/_0.24)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.1),rgb(255_252_245_/_0.035))] p-3 text-white shadow-[inset_0_1px_0_rgb(255_255_255_/_0.12)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[0.76rem] font-black uppercase tracking-[0.12em] text-[var(--tour-gold-light)]">
+                        Căn hướng ảnh
+                      </p>
+                      <p className="mt-1 max-w-[34rem] text-[0.78rem] leading-5 text-white/68">
+                        Xoay tới góc muốn mở đầu, rồi copy số “Yaw hiện tại” vào
+                        <span className="font-mono text-white"> initialYaw</span> của cảnh này.
+                      </p>
+                    </div>
+                    <div className="shrink-0 rounded-[6px] border border-white/12 bg-black/18 px-3 py-2 text-right font-mono shadow-[inset_0_1px_0_rgb(255_255_255_/_0.08)]">
+                      <p className="text-[10px] uppercase tracking-[0.12em] text-white/48">Yaw hiện tại</p>
+                      <p className="mt-0.5 text-lg font-black text-white">{currentViewYaw}°</p>
+                    </div>
+                  </div>
+                  <div className="mt-2 rounded-[5px] bg-black/16 px-2.5 py-2 font-mono text-[0.72rem] text-white/78">
+                    {`id: "${activeScene.id}", initialYaw: ${currentViewYaw}`}
+                  </div>
+                </div>
               </div>
             ) : null}
           </section>
@@ -1183,6 +1411,7 @@ function TourExperience() {
           filter: blur(var(--tour-blur));
           transform: scale(var(--tour-scale));
           will-change: transform, filter;
+          transition: filter 80ms ease-out, transform 80ms ease-out;
         }
       `}</style>
     </main>
