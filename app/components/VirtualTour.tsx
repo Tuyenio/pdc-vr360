@@ -1687,7 +1687,7 @@ function TourExperience({
         ) : null}
 
         {activePanel !== "scenes" ? (
-          <nav className="grid grid-cols-4 gap-1.5 overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.14),transparent_36%),rgb(115_90_58_/_0.62)] p-1.5 text-white shadow-[0_24px_80px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.18)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-out sm:grid-cols-5 sm:gap-2">
+          <nav className="grid grid-cols-5 gap-1.5 overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.14),transparent_36%),rgb(115_90_58_/_0.62)] p-1.5 text-white shadow-[0_24px_80px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.18)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-out sm:gap-2">
             <BottomButton
               icon={Layers3}
               label="Cảnh"
@@ -1706,14 +1706,12 @@ function TourExperience({
               active={soundEnabled}
               onClick={onToggleSound}
             />
-            <div className="hidden sm:block">
-              <BottomButton
-                icon={MapPin}
-                label="Vị trí"
-                active={activePanel === "map"}
-                onClick={() => setActivePanel(activePanel === "map" ? null : "map")}
-              />
-            </div>
+            <BottomButton
+              icon={MapPin}
+              label="Vị trí"
+              active={activePanel === "map"}
+              onClick={() => setActivePanel(activePanel === "map" ? null : "map")}
+            />
             <BottomButton
               icon={Settings}
               label="Cài đặt"
