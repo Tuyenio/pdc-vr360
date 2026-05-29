@@ -64,6 +64,7 @@ const hotspotIcon = encodeURI("/icon/hotspotelement.png");
 const heroImage = encodeURI(`${basePath}/6 Trung Đình.jpg`);
 const dinhCardImage = encodeURI(`${basePath}/1 Cổng Đình.jpg`);
 const shrineCardImage = encodeURI(`${basePath}/13 Chính điện Đền thờ Tổ nghề.jpg`);
+const backgroundAudio = encodeURI("/media/Nhạc Phật Giáo sâu lắng.mp3");
 
 const panoramaPath = (fileName: string) => encodeURI(`${basePath}/${fileName}`);
 
@@ -72,6 +73,8 @@ const DEFAULT_FOV = 76;
 const WIDE_FOV = 88;
 const MIN_ZOOM_FOV = 36;
 const MAX_ZOOM_FOV = 96;
+const AUDIO_TARGET_VOLUME = 0.2;
+const AUDIO_FADE_DURATION = 650;
 
 const clampFov = (fov: number) => THREE.MathUtils.clamp(fov, MIN_ZOOM_FOV, MAX_ZOOM_FOV);
 
@@ -329,7 +332,85 @@ function directionFromYawPitch(yaw: number, pitch: number) {
 export default function VirtualTour() {
   const [hasEntered, setHasEntered] = useState(false);
   const [isEntering, setIsEntering] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const enterTimerRef = useRef<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioFadeRef = useRef<number | null>(null);
+
+  const fadeAudioTo = useCallback(
+    (targetVolume: number, duration = AUDIO_FADE_DURATION, pauseAfter = false) => {
+      const audio = audioRef.current;
+
+      if (!audio) {
+        return;
+      }
+
+      if (audioFadeRef.current) {
+        cancelAnimationFrame(audioFadeRef.current);
+      }
+
+      const clampedTarget = THREE.MathUtils.clamp(targetVolume, 0, 1);
+      const startVolume = audio.volume ?? 0;
+      const delta = clampedTarget - startVolume;
+
+      if (duration <= 0 || Math.abs(delta) < 0.01) {
+        audio.volume = clampedTarget;
+        if (pauseAfter && clampedTarget === 0) {
+          audio.pause();
+        }
+        return;
+      }
+
+      const startTime = performance.now();
+      const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+      const tick = (now: number) => {
+        const progress = Math.min((now - startTime) / duration, 1);
+        audio.volume = startVolume + delta * easeOutCubic(progress);
+
+        if (progress < 1) {
+          audioFadeRef.current = requestAnimationFrame(tick);
+          return;
+        }
+
+        audioFadeRef.current = null;
+        if (pauseAfter && clampedTarget === 0) {
+          audio.pause();
+        }
+      };
+
+      audioFadeRef.current = requestAnimationFrame(tick);
+    },
+    [],
+  );
+
+  const playAudio = useCallback(async () => {
+    const audio = audioRef.current;
+
+    if (!audio) {
+      return;
+    }
+
+    if (audio.paused) {
+      audio.volume = 0;
+      try {
+        await audio.play();
+      } catch (error) {
+        console.error("Audio autoplay blocked:", error);
+        return;
+      }
+    }
+
+    fadeAudioTo(AUDIO_TARGET_VOLUME, AUDIO_FADE_DURATION);
+  }, [fadeAudioTo]);
+
+  const pauseAudio = useCallback(() => {
+    fadeAudioTo(0, AUDIO_FADE_DURATION, true);
+  }, [fadeAudioTo]);
+
+  const toggleSound = useCallback(() => {
+    setSoundEnabled((value) => !value);
+  }, []);
 
   const handleEnter = useCallback(() => {
     if (isEntering) {
@@ -337,6 +418,9 @@ export default function VirtualTour() {
     }
 
     setIsEntering(true);
+    if (soundEnabled) {
+      void playAudio();
+    }
     if (enterTimerRef.current) {
       window.clearTimeout(enterTimerRef.current);
     }
@@ -344,7 +428,33 @@ export default function VirtualTour() {
     enterTimerRef.current = window.setTimeout(() => {
       setHasEntered(true);
     }, 720);
-  }, [isEntering]);
+  }, [isEntering, playAudio, soundEnabled]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+
+    if (audio) {
+      audio.volume = 0;
+    }
+
+    return () => {
+      if (audioFadeRef.current) {
+        cancelAnimationFrame(audioFadeRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasEntered) {
+      return;
+    }
+
+    if (soundEnabled) {
+      void playAudio();
+    } else {
+      pauseAudio();
+    }
+  }, [hasEntered, pauseAudio, playAudio, soundEnabled]);
 
   useEffect(() => {
     return () => {
@@ -354,11 +464,16 @@ export default function VirtualTour() {
     };
   }, []);
 
-  if (!hasEntered) {
-    return <WelcomeScreen isEntering={isEntering} onEnter={handleEnter} />;
-  }
-
-  return <TourExperience />;
+  return (
+    <>
+      <audio ref={audioRef} src={backgroundAudio} preload="auto" loop playsInline />
+      {!hasEntered ? (
+        <WelcomeScreen isEntering={isEntering} onEnter={handleEnter} />
+      ) : (
+        <TourExperience soundEnabled={soundEnabled} onToggleSound={toggleSound} />
+      )}
+    </>
+  );
 }
 
 function useDeviceOrientation() {
@@ -563,14 +678,19 @@ function WelcomeCard({
   );
 }
 
-function TourExperience() {
+function TourExperience({
+  soundEnabled,
+  onToggleSound,
+}: {
+  soundEnabled: boolean;
+  onToggleSound: () => void;
+}) {
   const [currentSceneId, setCurrentSceneId] = useState<SceneId>("scene-1");
   const [activePanel, setActivePanel] = useState<Panel>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [autoRotate, setAutoRotate] = useState(false);
   const [wideAngle, setWideAngle] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(false);
   const [vrMode, setVrMode] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -1427,7 +1547,7 @@ function TourExperience() {
               icon={soundEnabled ? Volume2 : VolumeX}
               label="Âm thanh"
               active={soundEnabled}
-              onClick={() => setSoundEnabled((value) => !value)}
+              onClick={onToggleSound}
             />
             <BottomButton
               icon={MapPin}
