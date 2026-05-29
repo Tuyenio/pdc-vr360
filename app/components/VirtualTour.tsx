@@ -41,6 +41,7 @@ type Hotspot = {
   yaw: number;
   pitch: number;
   rotation?: number;
+  nextYaw?: number;
 };
 
 type TourScene = {
@@ -59,14 +60,18 @@ type TourScene = {
 
 type Panel = "scenes" | "info" | "map" | "settings" | null;
 
-const basePath = "/images/Đình Làng-Đền Thờ";
+const basePath = "/images-tour/Đình Làng-Đền Thờ";
+const previewBasePath = "/images-preview/Đình Làng-Đền Thờ";
 const hotspotIcon = encodeURI("/icon/hotspotelement.png");
 const heroImage = encodeURI(`${basePath}/6 Trung Đình.jpg`);
+const heroPreviewImage = encodeURI(`${previewBasePath}/6 Trung Đình.jpg`);
 const dinhCardImage = encodeURI(`${basePath}/1 Cổng Đình.jpg`);
 const shrineCardImage = encodeURI(`${basePath}/13 Chính điện Đền thờ Tổ nghề.jpg`);
 const backgroundAudio = encodeURI("/media/Nhạc Phật Giáo sâu lắng.mp3");
 
 const panoramaPath = (fileName: string) => encodeURI(`${basePath}/${fileName}`);
+const previewImageForScene = (scene: TourScene) =>
+  scene.image.replace(encodeURI(basePath), encodeURI(previewBasePath));
 
 const PANORAMA_CAMERA_DISTANCE = 0.12;
 const DEFAULT_FOV = 76;
@@ -124,7 +129,7 @@ const scenes: TourScene[] = [
     mapPosition: { x: 30, y: 65 },
     hotspots: [
       { targetId: "scene-2", label: "Tiền Đình", yaw: -40, pitch: -18, rotation: 2 },
-      { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: -220, pitch: -15 },
+      { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: -220, pitch: -15, nextYaw: -180 },
     ],
   },
   {
@@ -302,13 +307,13 @@ function loadPanoramaTexture(image: string) {
 }
 
 function preloadSceneAndHotspots(scene: TourScene) {
-  loadPanoramaTexture(scene.image).catch(() => undefined);
+  loadPanoramaTexture(previewImageForScene(scene)).catch(() => undefined);
 
   scene.hotspots.forEach((hotspot) => {
     const targetScene = sceneById.get(hotspot.targetId);
 
     if (targetScene) {
-      loadPanoramaTexture(targetScene.image).catch(() => undefined);
+      loadPanoramaTexture(previewImageForScene(targetScene)).catch(() => undefined);
     }
   });
 }
@@ -522,14 +527,15 @@ function useDeviceOrientation() {
       }
     };
 
-    window.addEventListener('deviceorientation', handleOrientation);
-    return () => window.removeEventListener('deviceorientation', handleOrientation);
+    window.addEventListener("deviceorientation", handleOrientation, true);
+    return () => window.removeEventListener("deviceorientation", handleOrientation, true);
   }, []);
 
   return { orientation, isSupported, requestPermission, startListening };
 }
 
 function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: () => void }) {
+  const [isPanoramaReady, setIsPanoramaReady] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
 
@@ -562,17 +568,35 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
     const sphere = new THREE.Mesh(geometry, material);
     scene.add(sphere);
 
-    const loader = new THREE.TextureLoader();
-    const preloadTimer = window.setTimeout(() => {
-      preloadSceneAndHotspots(sceneById.get("scene-1")!);
-    }, 180);
+    let isDisposed = false;
+    preloadSceneAndHotspots(sceneById.get("scene-1")!);
 
-    loader.load(heroImage, (texture) => {
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.anisotropy = 8;
-      material.map = texture;
-      material.needsUpdate = true;
-    });
+    loadPanoramaTexture(heroPreviewImage)
+      .then((texture) => {
+        if (isDisposed) {
+          return;
+        }
+
+        material.map = texture;
+        material.needsUpdate = true;
+        setIsPanoramaReady(true);
+      })
+      .catch(() => {
+        if (!isDisposed) {
+          setIsPanoramaReady(true);
+        }
+      });
+
+    loadPanoramaTexture(heroImage)
+      .then((texture) => {
+        if (isDisposed) {
+          return;
+        }
+
+        material.map = texture;
+        material.needsUpdate = true;
+      })
+      .catch(() => undefined);
 
     let rotation = 0;
     const animate = () => {
@@ -591,14 +615,13 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
     window.addEventListener("resize", handleResize);
 
     return () => {
+      isDisposed = true;
       window.removeEventListener("resize", handleResize);
-      window.clearTimeout(preloadTimer);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
       geometry.dispose();
       material.dispose();
-      if (material.map) material.map.dispose();
       renderer.dispose();
     };
   }, []);
@@ -609,13 +632,32 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
         isEntering ? "pointer-events-none scale-[1.02] opacity-0 blur-[2px]" : "opacity-100"
       }`}
     >
-      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+      <canvas
+        ref={canvasRef}
+        className={`absolute inset-0 h-full w-full transition-opacity duration-500 ${
+          isPanoramaReady ? "opacity-100" : "opacity-0"
+        }`}
+      />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,252,245,0.9)_0%,rgba(245,241,230,0.64)_36%,rgba(45,38,33,0.34)_100%)]" />
       <div className="absolute inset-x-0 top-0 h-[46dvh] bg-[radial-gradient(ellipse_at_center,rgba(255,252,245,0.96)_0%,rgba(255,252,245,0.78)_45%,rgba(255,252,245,0)_76%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_86%,rgba(166,124,82,0.26),transparent_36%),radial-gradient(circle_at_84%_12%,rgba(49,95,80,0.18),transparent_28%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(74,63,53,0.08)_0_1px,transparent_1px)] bg-[length:92px_100%] opacity-60" />
 
-      <section className="relative z-10 grid min-h-[100dvh] place-items-center px-4 py-8">
+      <div
+        className={`absolute inset-0 z-20 grid place-items-center bg-[var(--background)] text-[var(--tour-ink)] transition-opacity duration-500 ${
+          isPanoramaReady ? "pointer-events-none opacity-0" : "opacity-100"
+        }`}
+      >
+        <div className="rounded-full border border-[rgb(166_124_82_/_0.22)] bg-[rgb(255_252_245_/_0.72)] px-5 py-2 text-[0.82rem] font-black uppercase tracking-[0.18em] shadow-[0_18px_52px_rgb(74_63_53_/_0.16)]">
+          Đang tải không gian 360°
+        </div>
+      </div>
+
+      <section
+        className={`relative z-10 grid min-h-[100dvh] place-items-center px-4 py-8 transition-[opacity,transform] duration-500 ${
+          isPanoramaReady ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+        }`}
+      >
         <div className="flex w-full max-w-5xl flex-col items-center text-center">
           <div className="max-w-4xl">
 
@@ -631,7 +673,7 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
           <button
             type="button"
             onClick={onEnter}
-            disabled={isEntering}
+            disabled={isEntering || !isPanoramaReady}
             className="mt-[8dvh] rounded-full border border-[rgb(255_252_245_/_0.48)] bg-[linear-gradient(135deg,#315f50,#a67c52_58%,#735a3a)] px-7 py-3 text-[0.95rem] font-extrabold text-white shadow-[0_22px_58px_rgb(74_63_53_/_0.34),inset_0_1px_0_rgb(255_255_255_/_0.28)] transition hover:scale-[1.03] hover:shadow-[0_28px_70px_rgb(74_63_53_/_0.42)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70 sm:px-9 sm:text-[1.25rem]"
           >
             Khám phá ngay
@@ -710,14 +752,19 @@ function TourExperience({
   const rootRef = useRef<HTMLElement | null>(null);
   const canvasWrapRef = useRef<HTMLDivElement | null>(null);
   const mountRef = useRef<HTMLDivElement | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
   const materialRef = useRef<THREE.MeshBasicMaterial | null>(null);
   const transitionMaterialRef = useRef<THREE.MeshBasicMaterial | null>(null);
-  const textureCacheRef = useRef<Map<string, THREE.Texture>>(panoramaTextureCache);
+  const warmedTextureUrlsRef = useRef<Set<string>>(new Set());
   const hotspotRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const currentSceneRef = useRef<TourScene>(sceneById.get("scene-1")!);
   const lastOrientationRef = useRef<{ alpha: number; beta: number; gamma: number } | null>(null);
+  const stopOrientationRef = useRef<(() => void) | null>(null);
+  const vrModeRef = useRef(false);
+  const vrDragOffsetRef = useRef({ yaw: 0, pitch: 0 });
+  const vrPointerRef = useRef<{ id: number; x: number; y: number } | null>(null);
   const transitionFrameRef = useRef<number | null>(null);
   const transitionTokenRef = useRef(0);
   const initialSceneRef = useRef(true);
@@ -728,6 +775,10 @@ function TourExperience({
   const lastYawReadoutAtRef = useRef(0);
 
   const { orientation, isSupported, requestPermission, startListening } = useDeviceOrientation();
+
+  useEffect(() => {
+    vrModeRef.current = vrMode;
+  }, [vrMode]);
 
   const activeScene = useMemo(
     () => sceneById.get(currentSceneId) ?? sceneById.get("scene-1")!,
@@ -823,6 +874,63 @@ function TourExperience({
     [updateHotspots],
   );
 
+  const warmPanoramaTexture = useCallback((image: string, texture: THREE.Texture) => {
+    const renderer = rendererRef.current;
+
+    if (!renderer || warmedTextureUrlsRef.current.has(image)) {
+      return;
+    }
+
+    renderer.initTexture(texture);
+    warmedTextureUrlsRef.current.add(image);
+  }, []);
+
+  const preloadTourScene = useCallback(
+    (scene: TourScene) => {
+      const preloadImage = (image: string) => {
+        loadPanoramaTexture(image)
+          .then((texture) => warmPanoramaTexture(image, texture))
+          .catch(() => undefined);
+      };
+
+      preloadImage(previewImageForScene(scene));
+      scene.hotspots.forEach((hotspot) => {
+        const targetScene = sceneById.get(hotspot.targetId);
+
+        if (targetScene) {
+          preloadImage(previewImageForScene(targetScene));
+        }
+      });
+    },
+    [warmPanoramaTexture],
+  );
+
+  const upgradeSceneToHighRes = useCallback(
+    (scene: TourScene, token: number) => {
+      window.setTimeout(() => {
+        loadPanoramaTexture(scene.image)
+          .then((texture) => {
+            const material = materialRef.current;
+
+            if (
+              transitionTokenRef.current !== token ||
+              currentSceneRef.current.id !== scene.id ||
+              !material
+            ) {
+              return;
+            }
+
+            warmPanoramaTexture(scene.image, texture);
+            material.map = texture;
+            material.opacity = 1;
+            material.needsUpdate = true;
+          })
+          .catch(() => undefined);
+      }, 120);
+    },
+    [warmPanoramaTexture],
+  );
+
   useEffect(() => {
     const mount = mountRef.current;
 
@@ -840,6 +948,7 @@ function TourExperience({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     mount.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
 
     const camera = new THREE.PerspectiveCamera(
       currentFovRef.current,
@@ -877,7 +986,7 @@ function TourExperience({
     };
 
     const handleWheel = (event: WheelEvent) => {
-      if (vrMode || transitionLockRef.current) {
+      if (vrModeRef.current || transitionLockRef.current) {
         return;
       }
 
@@ -894,7 +1003,7 @@ function TourExperience({
     };
 
     const handleTouchMove = (event: TouchEvent) => {
-      if (vrMode || transitionLockRef.current || event.touches.length !== 2) {
+      if (vrModeRef.current || transitionLockRef.current || event.touches.length !== 2) {
         return;
       }
 
@@ -917,11 +1026,57 @@ function TourExperience({
       lastPinchDistanceRef.current = getTouchDistance(event.touches);
     };
 
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!vrModeRef.current || transitionLockRef.current || event.pointerType === "mouse") {
+        return;
+      }
+
+      event.preventDefault();
+      vrPointerRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
+      renderer.domElement.setPointerCapture(event.pointerId);
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      const pointer = vrPointerRef.current;
+
+      if (!vrModeRef.current || !pointer || pointer.id !== event.pointerId) {
+        return;
+      }
+
+      event.preventDefault();
+      const deltaX = event.clientX - pointer.x;
+      const deltaY = event.clientY - pointer.y;
+      vrDragOffsetRef.current.yaw += deltaX * 0.18;
+      vrDragOffsetRef.current.pitch = THREE.MathUtils.clamp(
+        vrDragOffsetRef.current.pitch + deltaY * 0.12,
+        -55,
+        55,
+      );
+      vrPointerRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    };
+
+    const handlePointerEnd = (event: PointerEvent) => {
+      const pointer = vrPointerRef.current;
+
+      if (!pointer || pointer.id !== event.pointerId) {
+        return;
+      }
+
+      vrPointerRef.current = null;
+      if (renderer.domElement.hasPointerCapture(event.pointerId)) {
+        renderer.domElement.releasePointerCapture(event.pointerId);
+      }
+    };
+
     renderer.domElement.addEventListener("wheel", handleWheel, { passive: false });
     renderer.domElement.addEventListener("touchstart", handleTouchStart, { passive: false });
     renderer.domElement.addEventListener("touchmove", handleTouchMove, { passive: false });
     renderer.domElement.addEventListener("touchend", handleTouchEnd, { passive: false });
     renderer.domElement.addEventListener("touchcancel", handleTouchEnd, { passive: false });
+    renderer.domElement.addEventListener("pointerdown", handlePointerDown, { passive: false });
+    renderer.domElement.addEventListener("pointermove", handlePointerMove, { passive: false });
+    renderer.domElement.addEventListener("pointerup", handlePointerEnd);
+    renderer.domElement.addEventListener("pointercancel", handlePointerEnd);
 
     cameraRef.current = camera;
     controlsRef.current = controls;
@@ -951,7 +1106,9 @@ function TourExperience({
         camera.updateProjectionMatrix();
       }
 
-      controls.update();
+      if (!vrModeRef.current) {
+        controls.update();
+      }
       updateHotspots();
 
       const now = performance.now();
@@ -975,6 +1132,10 @@ function TourExperience({
       renderer.domElement.removeEventListener("touchmove", handleTouchMove);
       renderer.domElement.removeEventListener("touchend", handleTouchEnd);
       renderer.domElement.removeEventListener("touchcancel", handleTouchEnd);
+      renderer.domElement.removeEventListener("pointerdown", handlePointerDown);
+      renderer.domElement.removeEventListener("pointermove", handlePointerMove);
+      renderer.domElement.removeEventListener("pointerup", handlePointerEnd);
+      renderer.domElement.removeEventListener("pointercancel", handlePointerEnd);
       renderer.setAnimationLoop(null);
       controls.dispose();
       geometry.dispose();
@@ -982,17 +1143,18 @@ function TourExperience({
       transitionMaterial.dispose();
       renderer.dispose();
       renderer.domElement.remove();
+      rendererRef.current = null;
     };
-  }, [getTouchDistance, positionCamera, setTargetFov, updateHotspots, vrMode]);
+  }, [getTouchDistance, positionCamera, setTargetFov, updateHotspots]);
 
   useEffect(() => {
     const controls = controlsRef.current;
 
     if (controls) {
-      controls.autoRotate = autoRotate;
+      controls.autoRotate = autoRotate && !vrMode;
       controls.autoRotateSpeed = 0.35;
     }
-  }, [autoRotate]);
+  }, [autoRotate, vrMode]);
 
   useEffect(() => {
     setTargetFov(wideAngle ? WIDE_FOV : DEFAULT_FOV);
@@ -1032,65 +1194,59 @@ function TourExperience({
       const token = ++transitionTokenRef.current;
       setLoadError(null);
       transitionLockRef.current = !initialSceneRef.current;
+      preloadTourScene(scene);
 
-      // Preload next scene textures (Google Street View style)
-      const preloadNextScenes = () => {
-        scene.hotspots.forEach((hotspot) => {
-          const nextScene = sceneById.get(hotspot.targetId);
+      const previewImage = previewImageForScene(scene);
+      const highResTexture = panoramaTextureCache.get(scene.image);
+      const transitionTexture = highResTexture ?? panoramaTextureCache.get(previewImage);
 
-          if (nextScene) {
-            loadPanoramaTexture(nextScene.image).catch(() => undefined);
-          }
-        });
-      };
-
-      const cachedTexture = textureCacheRef.current.get(scene.image);
-      
-      // START TRANSITION IMMEDIATELY - Don't wait for texture load
       if (!initialSceneRef.current) {
-        setIsTransitioning(true);
-        setIsLoading(true);
-        setTransitionVisuals(0);
-
-        // Capture start position
         const startPosition = camera.position.clone();
         const startRotation = camera.rotation.clone();
-        
-        // Calculate target position and rotation
         const targetYaw = arrivalYaw;
         const targetDirection = directionFromYawPitch(targetYaw, 0).normalize();
         const targetPosition = targetDirection.multiplyScalar(-PANORAMA_CAMERA_DISTANCE);
 
-        const duration = 1200;
+        const duration = 1000;
         const startTime = performance.now();
-
-        // Smoother easing function
         const easeInOutQuart = (t: number) =>
           t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
 
-        let textureLoaded = false;
-        let loadedTexture: THREE.Texture | null = null;
+        let textureLoaded = !!transitionTexture;
+        let loadedTexture: THREE.Texture | null = transitionTexture || null;
+        let textureFailed = false;
 
-        // Load texture in background
-        const loadTexture = cachedTexture ? Promise.resolve(cachedTexture) : loadPanoramaTexture(scene.image);
+        setIsTransitioning(true);
+        setIsLoading(!transitionTexture);
+        setTransitionVisuals(0);
 
-        loadTexture
-          .then((texture) => {
-            if (transitionTokenRef.current !== token) return;
-            textureLoaded = true;
-            loadedTexture = texture;
-            setIsLoading(false);
-            
-            // Set up transition material when texture is ready
-            transitionMaterial.map = texture;
-            transitionMaterial.opacity = 0;
-            transitionMaterial.needsUpdate = true;
-          })
-          .catch(() => {
-            if (transitionTokenRef.current !== token) return;
-            setLoadError("Không tải được ảnh panorama cho cảnh này.");
-            setIsLoading(false);
-          });
+        const prepareTransitionTexture = (image: string, texture: THREE.Texture) => {
+          warmPanoramaTexture(image, texture);
+          transitionMaterial.map = texture;
+          transitionMaterial.opacity = 0;
+          transitionMaterial.needsUpdate = true;
+        };
+
+        if (transitionTexture) {
+          prepareTransitionTexture(highResTexture ? scene.image : previewImage, transitionTexture);
+        } else {
+          loadPanoramaTexture(previewImage)
+            .then((texture) => {
+              if (transitionTokenRef.current !== token) return;
+
+              textureLoaded = true;
+              loadedTexture = texture;
+              setIsLoading(false);
+              prepareTransitionTexture(previewImage, texture);
+            })
+            .catch(() => {
+              if (transitionTokenRef.current !== token) return;
+
+              textureFailed = true;
+              setLoadError("Không tải được ảnh panorama cho cảnh này.");
+              setIsLoading(false);
+            });
+        }
 
         const tick = (now: number) => {
           if (transitionTokenRef.current !== token) {
@@ -1100,7 +1256,6 @@ function TourExperience({
           const progress = Math.min((now - startTime) / duration, 1);
           const eased = easeInOutQuart(progress);
 
-          // Smooth camera movement with interpolation
           camera.position.lerpVectors(startPosition, targetPosition, eased);
           camera.rotation.x = THREE.MathUtils.lerp(startRotation.x, 0, eased);
           camera.rotation.y = THREE.MathUtils.lerp(startRotation.y, THREE.MathUtils.degToRad(targetYaw), eased);
@@ -1109,10 +1264,10 @@ function TourExperience({
           camera.position.setLength(PANORAMA_CAMERA_DISTANCE);
           controls.update();
 
-          // Only fade when texture is loaded
+          // Fade when texture is loaded
           if (textureLoaded && loadedTexture) {
-            const fadeStart = 0.3;
-            const fadeEnd = 0.95;
+            const fadeStart = 0.2;
+            const fadeEnd = 0.9;
             const fadeProgress = Math.min(Math.max((progress - fadeStart) / (fadeEnd - fadeStart), 0), 1);
             const fadeEase = easeInOutQuart(fadeProgress);
             transitionMaterial.opacity = fadeEase;
@@ -1126,36 +1281,49 @@ function TourExperience({
             return;
           }
 
-          // Transition complete
+          if (!textureLoaded && !textureFailed) {
+            setIsLoading(true);
+            transitionFrameRef.current = requestAnimationFrame(tick);
+            return;
+          }
+
           if (textureLoaded && loadedTexture) {
             material.map = loadedTexture;
             material.opacity = 1;
             material.needsUpdate = true;
             transitionMaterial.opacity = 0;
             transitionMaterial.needsUpdate = true;
+          } else {
+            material.opacity = 1;
+            transitionMaterial.opacity = 0;
+            transitionMaterial.needsUpdate = true;
           }
-          
+
+          transitionFrameRef.current = null;
           positionCamera(scene, PANORAMA_CAMERA_DISTANCE, targetYaw);
           setTransitionVisuals(0);
           setIsTransitioning(false);
           setIsLoading(false);
           transitionLockRef.current = false;
           updateHotspots();
-          preloadNextScenes();
+          preloadTourScene(scene);
+          upgradeSceneToHighRes(scene, token);
         };
 
         transitionFrameRef.current = requestAnimationFrame(tick);
         return;
       }
 
-      // Initial scene load
-      const loadTexture = cachedTexture ? Promise.resolve(cachedTexture) : loadPanoramaTexture(scene.image);
+      // Initial scene load - use global cache
+      const initialCachedTexture = panoramaTextureCache.get(previewImage);
+      const loadTexture = initialCachedTexture ? Promise.resolve(initialCachedTexture) : loadPanoramaTexture(previewImage);
 
       setIsLoading(true);
       loadTexture
         .then((texture) => {
           if (transitionTokenRef.current !== token) return;
 
+          warmPanoramaTexture(previewImage, texture);
           material.map = texture;
           material.opacity = 1;
           material.needsUpdate = true;
@@ -1169,7 +1337,8 @@ function TourExperience({
           setIsLoading(false);
           setTransitionVisuals(0);
           transitionLockRef.current = false;
-          preloadNextScenes();
+          preloadTourScene(scene);
+          upgradeSceneToHighRes(scene, token);
         })
         .catch(() => {
           if (transitionTokenRef.current !== token) return;
@@ -1178,7 +1347,7 @@ function TourExperience({
           transitionLockRef.current = false;
         });
     },
-    [positionCamera, setTransitionVisuals, updateHotspots],
+    [positionCamera, preloadTourScene, setTransitionVisuals, updateHotspots, upgradeSceneToHighRes, warmPanoramaTexture],
   );
 
   useEffect(() => {
@@ -1193,6 +1362,8 @@ function TourExperience({
       if (transitionFrameRef.current) {
         cancelAnimationFrame(transitionFrameRef.current);
       }
+
+      stopOrientationRef.current?.();
     };
   }, []);
 
@@ -1204,24 +1375,28 @@ function TourExperience({
     const controls = controlsRef.current;
     if (!camera || !controls) return;
 
-    const last = lastOrientationRef.current;
-    if (last) {
-      const alphaChange = orientation.alpha - last.alpha;
-      const betaChange = orientation.beta - last.beta;
-      
-      // Apply rotation based on device orientation
-      const euler = new THREE.Euler(
-        THREE.MathUtils.degToRad(betaChange * 0.5),
-        THREE.MathUtils.degToRad(-alphaChange * 0.5),
+    const alpha = THREE.MathUtils.degToRad(orientation.alpha);
+    const beta = THREE.MathUtils.degToRad(orientation.beta);
+    const gamma = THREE.MathUtils.degToRad(orientation.gamma);
+    const screenOrientation = THREE.MathUtils.degToRad(window.screen.orientation?.angle ?? window.orientation ?? 0);
+    const zee = new THREE.Vector3(0, 0, 1);
+    const euler = new THREE.Euler(beta, alpha, -gamma, "YXZ");
+    const headsetCorrection = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5));
+    const screenCorrection = new THREE.Quaternion().setFromAxisAngle(zee, -screenOrientation);
+    const dragOffset = vrDragOffsetRef.current;
+    const dragCorrection = new THREE.Quaternion().setFromEuler(
+      new THREE.Euler(
+        THREE.MathUtils.degToRad(dragOffset.pitch),
+        THREE.MathUtils.degToRad(dragOffset.yaw),
         0,
-        'YXZ'
-      );
-      
-      camera.rotation.x += euler.x;
-      camera.rotation.y += euler.y;
-      controls.update();
-    }
-    
+        "YXZ",
+      ),
+    );
+
+    camera.quaternion.setFromEuler(euler);
+    camera.quaternion.multiply(headsetCorrection);
+    camera.quaternion.multiply(screenCorrection);
+    camera.quaternion.premultiply(dragCorrection);
     lastOrientationRef.current = orientation;
   }, [orientation, vrMode]);
 
@@ -1243,17 +1418,27 @@ function TourExperience({
     if (!vrMode) {
       const permitted = await requestPermission();
       if (permitted) {
-        startListening();
+        stopOrientationRef.current?.();
+        stopOrientationRef.current = startListening();
         setVrMode(true);
+        setAutoRotate(false);
+        vrDragOffsetRef.current = { yaw: 0, pitch: 0 };
+        vrPointerRef.current = null;
+        lastOrientationRef.current = null;
         if (controlsRef.current) {
+          controlsRef.current.autoRotate = false;
           controlsRef.current.enabled = false;
         }
       }
     } else {
       setVrMode(false);
+      stopOrientationRef.current?.();
+      stopOrientationRef.current = null;
+      vrPointerRef.current = null;
       lastOrientationRef.current = null;
       if (controlsRef.current) {
         controlsRef.current.enabled = true;
+        controlsRef.current.update();
       }
     }
   }, [vrMode, requestPermission, startListening]);
@@ -1301,7 +1486,7 @@ function TourExperience({
       </div>
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(45,38,33,0.1)_0%,rgba(45,38,33,0.02)_42%,rgba(45,38,33,0.68)_100%)]" />
       <div
-        className={`fixed left-3 top-3 z-20 transition-[width,opacity,transform] duration-300 sm:left-4 sm:top-4 ${
+        className={`fixed left-3 top-3 z-20 hidden transition-[width,opacity,transform] duration-300 sm:left-4 sm:top-4 sm:block ${
           isMiniMapExpanded ? "w-[min(52vw,220px)] sm:w-[240px]" : "w-[min(72vw,260px)] sm:w-auto"
         }`}
       >
@@ -1368,7 +1553,7 @@ function TourExperience({
                 "--hotspot-angle": `${hotspot.rotation ?? 0}deg`,
               } as CSSProperties
             }
-            onClick={() => goToScene(hotspot.targetId, false, hotspot.yaw)}
+            onClick={() => goToScene(hotspot.targetId, false, hotspot.nextYaw ?? hotspot.yaw)}
             aria-label={hotspot.label}
             title={hotspot.label}
           >
@@ -1477,7 +1662,7 @@ function TourExperience({
                         <button
                           key={`${activeScene.id}-map-${hotspot.targetId}`}
                           type="button"
-                          onClick={() => goToScene(hotspot.targetId, true, hotspot.yaw)}
+                          onClick={() => goToScene(hotspot.targetId, true, hotspot.nextYaw ?? hotspot.yaw)}
                           className="rounded-[6px] border border-white/12 bg-white/[0.06] px-2.5 py-1.5 text-[0.76rem] font-semibold text-white transition hover:border-[var(--tour-gold-light)] hover:bg-white/[0.12] active:scale-95"
                         >
                           {hotspot.label}
@@ -1540,7 +1725,7 @@ function TourExperience({
         ) : null}
 
         {activePanel !== "scenes" ? (
-          <nav className="grid grid-cols-5 overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.14),transparent_36%),rgb(115_90_58_/_0.62)] p-1.5 text-white shadow-[0_24px_80px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.18)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-out">
+          <nav className="grid grid-cols-4 overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.14),transparent_36%),rgb(115_90_58_/_0.62)] p-1.5 text-white shadow-[0_24px_80px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.18)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-out sm:grid-cols-5">
             <BottomButton
               icon={Layers3}
               label="Cảnh"
@@ -1559,12 +1744,14 @@ function TourExperience({
               active={soundEnabled}
               onClick={onToggleSound}
             />
-            <BottomButton
-              icon={MapPin}
-              label="Vị trí"
-              active={activePanel === "map"}
-              onClick={() => setActivePanel(activePanel === "map" ? null : "map")}
-            />
+            <div className="hidden sm:block">
+              <BottomButton
+                icon={MapPin}
+                label="Vị trí"
+                active={activePanel === "map"}
+                onClick={() => setActivePanel(activePanel === "map" ? null : "map")}
+              />
+            </div>
             <BottomButton
               icon={Settings}
               label="Cài đặt"
@@ -1638,9 +1825,12 @@ function TourExperience({
         .tour-canvas canvas {
           display: block;
           filter: blur(var(--tour-blur));
-          transform: scale(var(--tour-scale));
+          transform: scale(var(--tour-scale)) translateZ(0);
           will-change: transform, filter;
-          transition: filter 80ms ease-out, transform 80ms ease-out;
+          transition: filter 120ms cubic-bezier(0.4, 0, 0.2, 1),
+                      transform 120ms cubic-bezier(0.4, 0, 0.2, 1);
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
         }
       `}</style>
     </main>
@@ -1674,7 +1864,7 @@ function MiniMap({
 }) {
   return (
     <section
-      className={`relative overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.18)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.14),rgb(255_252_245_/_0.045)_45%,transparent),rgb(45_38_33_/_0.58)] shadow-[0_18px_70px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.16)] backdrop-blur-xl backdrop-saturate-150 ${
+      className={`relative overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.18)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.07),rgb(255_252_245_/_0.018)_45%,transparent),rgb(45_38_33_/_0.36)] shadow-[0_18px_70px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.12)] backdrop-blur-xl backdrop-saturate-150 ${
         compact ? "p-2.5" : "min-h-[260px] p-3"
       }`}
       aria-label="Mini-map vị trí tham quan"
@@ -1688,14 +1878,10 @@ function MiniMap({
             {activeScene.title}
           </p>
         </div>
-        <span className="flex shrink-0 items-center gap-1 rounded-full border border-white/14 bg-white/[0.08] px-2 py-1 text-[0.62rem] font-bold text-white/86">
-          <span className="h-2 w-2 rounded-full bg-[#e83030] shadow-[0_0_0_3px_rgb(232_48_48_/_0.18)]" />
-          Ở đây
-        </span>
       </div>
 
       <div
-        className={`relative rounded-[5px] border border-white/12 bg-[radial-gradient(circle_at_50%_76%,rgb(232_207_170_/_0.16),transparent_24%),linear-gradient(180deg,rgb(255_252_245_/_0.08),rgb(0_0_0_/_0.08))] ${
+        className={`relative rounded-[5px] border border-white/[0.07] bg-[radial-gradient(circle_at_50%_76%,rgb(232_207_170_/_0.055),transparent_24%),linear-gradient(180deg,rgb(255_252_245_/_0.026),rgb(0_0_0_/_0.025))] ${
           compact ? "aspect-[4/3]" : "aspect-[5/4]"
         }`}
       >
