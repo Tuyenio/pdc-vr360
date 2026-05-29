@@ -23,17 +23,17 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 type SceneId =
   | "scene-1"
   | "scene-2"
-  | "scene-3a"
-  | "scene-3b"
+  | "scene-3"
   | "scene-4"
   | "scene-5"
   | "scene-6"
   | "scene-7"
-  | "scene-8a"
-  | "scene-8b"
+  | "scene-8"
   | "scene-9"
   | "scene-10"
-  | "scene-11";
+  | "scene-11"
+  | "scene-12"
+  | "scene-13";
 
 type Hotspot = {
   targetId: SceneId;
@@ -47,19 +47,23 @@ type TourScene = {
   id: SceneId;
   order: string;
   title: string;
-  location: "Đình Làng Định Công Thượng" | "Nhà thờ Tổ nghề Kim hoàn";
+  location: string;
   image: string;
   initialYaw: number;
+  mapPosition: {
+    x: number;
+    y: number;
+  };
   hotspots: Hotspot[];
 };
 
 type Panel = "scenes" | "info" | "map" | "settings" | null;
 
-const basePath = "/images/Đình Làng-Nhà thờ tổ nghề";
+const basePath = "/images/Đình Làng-Đền Thờ";
 const hotspotIcon = encodeURI("/icon/hotspotelement.png");
-const heroImage = encodeURI(`${basePath}/5. Bên trái vào Đình Thành Hoàng Làng.jpg`);
-const dinhCardImage = encodeURI(`${basePath}/1. trước cổng.jpg`);
-const shrineCardImage = encodeURI(`${basePath}/9. Nhà thờ tổ nghề Kim Hoàn.jpg`);
+const heroImage = encodeURI(`${basePath}/6 Trung Đình.jpg`);
+const dinhCardImage = encodeURI(`${basePath}/1 Cổng Đình.jpg`);
+const shrineCardImage = encodeURI(`${basePath}/13 Chính điện Đền thờ Tổ nghề.jpg`);
 
 const panoramaPath = (fileName: string) => encodeURI(`${basePath}/${fileName}`);
 
@@ -85,165 +89,174 @@ const scenes: TourScene[] = [
   {
     id: "scene-1",
     order: "01",
-    title: "Trước cổng",
+    title: "Cổng Đình",
     location: "Đình Làng Định Công Thượng",
-    image: panoramaPath("1. trước cổng.jpg"),
+    image: panoramaPath("1 Cổng Đình.jpg"),
     initialYaw: 113,
-    hotspots: [{ targetId: "scene-2", label: "Vào sân trước", yaw: 115, pitch: -20}],
+    mapPosition: { x: 50, y: 88 },
+    hotspots: [{ targetId: "scene-2", label: "Tiền Đình", yaw: 115, pitch: -20 }],
   },
   {
     id: "scene-2",
     order: "02",
-    title: "Sân trước",
+    title: "Tiền Đình",
     location: "Đình Làng Định Công Thượng",
-    image: panoramaPath("2. Sân trước.jpg"),
+    image: panoramaPath("2 Tiền Đình.jpg"),
     initialYaw: 118,
+    mapPosition: { x: 50, y: 76 },
     hotspots: [
-      { targetId: "scene-1", label: "Ra cổng", yaw: -75, pitch: -10, rotation: -0 },
-      { targetId: "scene-3a", label: "Qua hồ sâu", yaw: 168, pitch: -16, rotation: 20 },
+      { targetId: "scene-1", label: "Cổng Đình", yaw: -75, pitch: -10, rotation: 180 },
+      { targetId: "scene-3", label: "Tả Hồ", yaw: -118, pitch: -16, rotation: -35 },
+      { targetId: "scene-4", label: "Hữu Hồ", yaw: 118, pitch: -16, rotation: 35 },
+      { targetId: "scene-6", label: "Trung Đình", yaw: 168, pitch: -16, rotation: 0 },
     ],
   },
   {
-    id: "scene-3a",
-    order: "03A",
-    title: "Hồ sâu",
+    id: "scene-3",
+    order: "03",
+    title: "Tả Hồ",
     location: "Đình Làng Định Công Thượng",
-    image: panoramaPath("3. Hồ sâu .jpg"),
+    image: panoramaPath("3 Tả Hồ.jpg"),
     initialYaw: 0,
+    mapPosition: { x: 30, y: 65 },
     hotspots: [
-      { targetId: "scene-2", label: "Quay lại sân trước", yaw: 180, pitch: -18, rotation: 180 },
-      { targetId: "scene-3b", label: "Xem góc hồ sâu phụ", yaw: 42, pitch: -16, rotation: 20 },
-      { targetId: "scene-4", label: "Lên sân Đình", yaw: 0, pitch: -15 },
-    ],
-  },
-  {
-    id: "scene-3b",
-    order: "03B",
-    title: "Hồ sâu, góc phụ",
-    location: "Đình Làng Định Công Thượng",
-    image: panoramaPath("3. Hồ sâu.jpg"),
-    initialYaw: 0,
-    hotspots: [
-      { targetId: "scene-3a", label: "Trở lại hồ sâu", yaw: 180, pitch: -16, rotation: 180 },
-      { targetId: "scene-4", label: "Lên sân Đình", yaw: 0, pitch: -15 },
+      { targetId: "scene-2", label: "Tiền Đình", yaw: 168, pitch: -18, rotation: 180 },
+      { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: -12, pitch: -15 },
     ],
   },
   {
     id: "scene-4",
     order: "04",
-    title: "Sân Đình",
+    title: "Hữu Hồ",
     location: "Đình Làng Định Công Thượng",
-    image: panoramaPath("4. Sân Đình.jpg"),
+    image: panoramaPath("4 Hữu Hồ.jpg"),
     initialYaw: 0,
+    mapPosition: { x: 70, y: 65 },
     hotspots: [
-      { targetId: "scene-3a", label: "Về hồ sâu", yaw: 180, pitch: -18, rotation: 180 },
-      { targetId: "scene-5", label: "Vào Đình Thành Hoàng Làng", yaw: -18, pitch: -15 },
-      { targetId: "scene-10", label: "Ra sân sau", yaw: 128, pitch: -16, rotation: 105 },
+      { targetId: "scene-2", label: "Tiền Đình", yaw: -168, pitch: -18, rotation: 180 },
+      { targetId: "scene-5", label: "Vườn cảnh phía Đông", yaw: 45, pitch: -15, rotation: 24 },
     ],
   },
   {
     id: "scene-5",
     order: "05",
-    title: "Bên trái vào Đình Thành Hoàng Làng",
+    title: "Vườn cảnh phía Đông",
     location: "Đình Làng Định Công Thượng",
-    image: heroImage,
+    image: panoramaPath("5 Vườn cảnh phía Đông.jpg"),
     initialYaw: 0,
+    mapPosition: { x: 84, y: 54 },
     hotspots: [
-      { targetId: "scene-4", label: "Ra sân Đình", yaw: 175, pitch: -18, rotation: 180 },
-      { targetId: "scene-6", label: "Vào Công Đồng", yaw: 0, pitch: -14 },
-      {
-        targetId: "scene-8a",
-        label: "Sang Nhà thờ tổ nghề Kim Hoàn",
-        yaw: 78,
-        pitch: -14,
-        rotation: 35,
-      },
+      { targetId: "scene-4", label: "Hữu Hồ", yaw: 178, pitch: -18, rotation: 180 },
+      { targetId: "scene-6", label: "Trung Đình", yaw: -58, pitch: -15, rotation: -30 },
     ],
   },
   {
     id: "scene-6",
     order: "06",
-    title: "Công Đồng",
+    title: "Trung Đình",
     location: "Đình Làng Định Công Thượng",
-    image: panoramaPath("6. Công Đồng.jpg"),
+    image: heroImage,
     initialYaw: 0,
+    mapPosition: { x: 50, y: 55 },
     hotspots: [
-      { targetId: "scene-5", label: "Ra lối bên trái", yaw: 180, pitch: -16, rotation: 180 },
-      { targetId: "scene-7", label: "Đến ban thờ Thần Nông", yaw: 0, pitch: -14 },
+      { targetId: "scene-2", label: "Tiền Đình", yaw: 180, pitch: -18, rotation: 180 },
+      { targetId: "scene-7", label: "Tả đình làng", yaw: -48, pitch: -15, rotation: -35 },
+      { targetId: "scene-10", label: "Sân hậu", yaw: 0, pitch: -15 },
+      { targetId: "scene-11", label: "Lối dẫn sang Đền thờ Tổ", yaw: 112, pitch: -15, rotation: 58 },
     ],
   },
   {
     id: "scene-7",
     order: "07",
-    title: "Ban thờ Thần Nông",
+    title: "Tả đình làng",
     location: "Đình Làng Định Công Thượng",
-    image: panoramaPath("7 Ban thờ Thần Nông.jpg"),
+    image: panoramaPath("7 Tả đình làng.jpg"),
     initialYaw: 0,
-    hotspots: [{ targetId: "scene-6", label: "Quay lại Công Đồng", yaw: 180, pitch: -16, rotation: 180 }],
-  },
-  {
-    id: "scene-8a",
-    order: "08A",
-    title: "Bên phải nối vào Đền thờ tổ nghề Kim Hoàn",
-    location: "Nhà thờ Tổ nghề Kim hoàn",
-    image: panoramaPath("8  Bên Phải Nối Vào Đền Thờ Tổ Nghề Kim Hoàn.jpg"),
-    initialYaw: 0,
+    mapPosition: { x: 44, y: 49 },
     hotspots: [
-      {
-        targetId: "scene-5",
-        label: "Trở lại Đình Thành Hoàng Làng",
-        yaw: 180,
-        pitch: -16,
-        rotation: 180,
-      },
-      { targetId: "scene-8b", label: "Theo đường vào tổ nghề", yaw: 0, pitch: -15 },
+      { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: -54, pitch: -15, rotation: -35 },
+      { targetId: "scene-6", label: "Trung Đình", yaw: 176, pitch: -17, rotation: 180 },
     ],
   },
   {
-    id: "scene-8b",
-    order: "08B",
-    title: "Đường vào tổ nghề",
-    location: "Nhà thờ Tổ nghề Kim hoàn",
-    image: panoramaPath("8 đường vào tổ nghề.jpg"),
+    id: "scene-8",
+    order: "08",
+    title: "Tiền sảnh Đình làng",
+    location: "Đình Làng Định Công Thượng",
+    image: panoramaPath("8 Tiền sảnh Đình làng.jpg"),
     initialYaw: 0,
+    mapPosition: { x: 38, y: 43 },
     hotspots: [
-      { targetId: "scene-8a", label: "Quay lại lối nối", yaw: 180, pitch: -16, rotation: 180 },
-      { targetId: "scene-9", label: "Vào Nhà thờ tổ nghề Kim Hoàn", yaw: 0, pitch: -14 },
+      { targetId: "scene-9", label: "Chính điện Đình làng", yaw: 0, pitch: -14 },
+      { targetId: "scene-3", label: "Tả Hồ", yaw: 178, pitch: -17, rotation: 180 },
+      { targetId: "scene-7", label: "Tả đình làng", yaw: 72, pitch: -15, rotation: 42 },
     ],
   },
   {
     id: "scene-9",
     order: "09",
-    title: "Nhà thờ tổ nghề Kim Hoàn",
-    location: "Nhà thờ Tổ nghề Kim hoàn",
-    image: panoramaPath("9. Nhà thờ tổ nghề Kim Hoàn.jpg"),
+    title: "Chính điện Đình làng",
+    location: "Đình Làng Định Công Thượng",
+    image: panoramaPath("9 Chính điện Đình làng.jpg"),
     initialYaw: 0,
-    hotspots: [
-      { targetId: "scene-8b", label: "Ra đường vào tổ nghề", yaw: 180, pitch: -16, rotation: 180 },
-      { targetId: "scene-11", label: "Xem toàn cảnh khu di tích", yaw: 44, pitch: -15, rotation: 25 },
-    ],
+    mapPosition: { x: 38, y: 28 },
+    hotspots: [{ targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: 180, pitch: -16, rotation: 180 }],
   },
   {
     id: "scene-10",
     order: "10",
-    title: "Sân Sau",
+    title: "Sân hậu",
     location: "Đình Làng Định Công Thượng",
-    image: panoramaPath("Sân Sau.jpg"),
+    image: panoramaPath("10 Sân hậu.jpg"),
     initialYaw: 0,
-    hotspots: [{ targetId: "scene-4", label: "Quay lại sân Đình", yaw: 180, pitch: -16, rotation: 180 }],
+    mapPosition: { x: 50, y: 35 },
+    hotspots: [{ targetId: "scene-6", label: "Trung Đình", yaw: 180, pitch: -16, rotation: 180 }],
   },
   {
     id: "scene-11",
     order: "11",
-    title: "Toàn cảnh khu di tích",
-    location: "Nhà thờ Tổ nghề Kim hoàn",
-    image: panoramaPath("photo360(2).jpg"),
+    title: "Lối dẫn sang Đền thờ Tổ",
+    location: "Đền thờ Tổ nghề Kim hoàn",
+    image: panoramaPath("11 Lối dẫn sang Đền thờ Tổ.jpg"),
     initialYaw: 0,
-    hotspots: [{ targetId: "scene-9", label: "Về Nhà thờ tổ nghề", yaw: 180, pitch: -16, rotation: 180 }],
+    mapPosition: { x: 67, y: 30 },
+    hotspots: [
+      { targetId: "scene-6", label: "Trung Đình", yaw: -128, pitch: -16, rotation: -115 },
+      { targetId: "scene-12", label: "Không gian kết nối di tích", yaw: 42, pitch: -15, rotation: 24 },
+    ],
+  },
+  {
+    id: "scene-12",
+    order: "12",
+    title: "Không gian kết nối di tích",
+    location: "Không gian kết nối",
+    image: panoramaPath("12 Không gian kết nối di tích.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 80, y: 23 },
+    hotspots: [
+      { targetId: "scene-11", label: "Lối dẫn sang Đền thờ Tổ", yaw: -138, pitch: -16, rotation: -125 },
+      { targetId: "scene-13", label: "Chính điện Đền thờ Tổ", yaw: 12, pitch: -14 },
+    ],
+  },
+  {
+    id: "scene-13",
+    order: "13",
+    title: "Chính điện Đền thờ Tổ",
+    location: "Đền thờ Tổ nghề Kim hoàn",
+    image: panoramaPath("13 Chính điện Đền thờ Tổ nghề.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 80, y: 10 },
+    hotspots: [],
   },
 ];
 
 const sceneById = new Map(scenes.map((scene) => [scene.id, scene]));
+const mapEdges = scenes.flatMap((scene) =>
+  scene.hotspots.map((hotspot) => ({
+    from: scene.id,
+    to: hotspot.targetId,
+  })),
+);
 const panoramaTextureCache = new Map<string, THREE.Texture>();
 const panoramaTexturePromises = new Map<string, Promise<THREE.Texture>>();
 
@@ -484,7 +497,7 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
               <span className="block text-[var(--primary)]">lịch sử văn hóa</span>
             </h1>
             <p className="mt-4 text-[0.85rem] font-extrabold text-[rgb(74_63_53_/_0.9)] sm:text-[1.2rem]">
-              Đình Làng Định Công Thượng · Nhà thờ Tổ nghề Kim hoàn
+              Đình Làng Định Công Thượng · Đền thờ Tổ nghề Kim hoàn
             </p>
           </div>
 
@@ -500,7 +513,7 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
           <div className="relative mt-[6dvh] grid w-full max-w-[520px] grid-cols-2 gap-4 px-4 sm:gap-7">
             <span className="pointer-events-none absolute -left-8 -right-8 top-1/2 h-px bg-[linear-gradient(90deg,transparent,rgba(185,139,86,0.55),transparent)]" />
             <WelcomeCard image={dinhCardImage} label="Đình Làng" rotate="-rotate-6" />
-            <WelcomeCard image={shrineCardImage} label="Nhà thờ tổ nghề" rotate="rotate-5" />
+            <WelcomeCard image={shrineCardImage} label="Đền thờ Tổ nghề" rotate="rotate-5" />
           </div>
         </div>
       </section>
@@ -560,6 +573,7 @@ function TourExperience() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentViewYaw, setCurrentViewYaw] = useState(0);
+  const [isMiniMapExpanded, setIsMiniMapExpanded] = useState(true);
 
   const rootRef = useRef<HTMLElement | null>(null);
   const canvasWrapRef = useRef<HTMLDivElement | null>(null);
@@ -581,7 +595,7 @@ function TourExperience() {
   const lastPinchDistanceRef = useRef<number | null>(null);
   const lastYawReadoutAtRef = useRef(0);
 
-  const { orientation, requestPermission, startListening } = useDeviceOrientation();
+  const { orientation, isSupported, requestPermission, startListening } = useDeviceOrientation();
 
   const activeScene = useMemo(
     () => sceneById.get(currentSceneId) ?? sceneById.get("scene-1")!,
@@ -1154,6 +1168,49 @@ function TourExperience() {
         <div ref={mountRef} className="absolute inset-0 cursor-grab active:cursor-grabbing" />
       </div>
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(45,38,33,0.1)_0%,rgba(45,38,33,0.02)_42%,rgba(45,38,33,0.68)_100%)]" />
+      <div
+        className={`fixed left-3 top-3 z-20 transition-[width,opacity,transform] duration-300 sm:left-4 sm:top-4 ${
+          isMiniMapExpanded ? "w-[min(52vw,220px)] sm:w-[240px]" : "w-[min(72vw,260px)] sm:w-auto"
+        }`}
+      >
+        {isMiniMapExpanded ? (
+          <div className="relative">
+            <MiniMap activeScene={activeScene} onSceneSelect={(sceneId) => goToScene(sceneId, true)} compact />
+            <button
+              type="button"
+              onClick={() => setIsMiniMapExpanded(false)}
+              className="absolute right-2 top-2 rounded-[5px] border border-white/14 bg-[rgb(45_38_33_/_0.72)] px-2 py-1 text-[0.62rem] font-bold text-white/86 shadow-[0_8px_22px_rgba(0,0,0,0.22)] backdrop-blur-xl transition hover:bg-[rgb(45_38_33_/_0.86)] active:scale-95"
+              aria-label="Thu gọn mini-map"
+              title="Thu gọn mini-map"
+            >
+              Thu gọn
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIsMiniMapExpanded(true)}
+            className="flex max-w-full items-center gap-2 rounded-[6px] border border-[rgb(255_252_245_/_0.18)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.14),transparent_44%),rgb(45_38_33_/_0.66)] px-2.5 py-2 text-left text-white shadow-[0_18px_54px_rgba(0,0,0,0.3),inset_0_1px_0_rgb(255_255_255_/_0.14)] backdrop-blur-xl transition hover:bg-[rgb(45_38_33_/_0.78)] active:scale-95"
+            aria-label="Mở mini-map"
+            title="Mở mini-map"
+          >
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#e83030] text-[0.65rem] font-black text-white shadow-[0_0_0_4px_rgb(232_48_48_/_0.18)]">
+              {activeScene.order}
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[0.62rem] font-black uppercase tracking-[0.12em] text-[var(--tour-gold-light)]">
+                Mở map
+              </span>
+              <span className="block truncate text-[0.76rem] font-bold text-white">{activeScene.title}</span>
+            </span>
+          </button>
+        )}
+      </div>
+      {isLoading ? (
+        <div className="fixed left-1/2 top-4 z-20 -translate-x-1/2 rounded-full border border-white/16 bg-[rgb(45_38_33_/_0.62)] px-3 py-1.5 text-[0.72rem] font-bold text-white/88 shadow-[0_12px_34px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+          Đang tải ảnh
+        </div>
+      ) : null}
 
       <div
         className={`pointer-events-none absolute inset-0 z-10 transition-opacity duration-200 ${
@@ -1173,7 +1230,7 @@ function TourExperience() {
               }
             }}
             type="button"
-            className="absolute left-1/2 top-1/2 grid h-[3.2rem] w-[3.2rem] -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_10px_18px_rgba(0,0,0,0.46)] transition-[opacity,transform,filter] duration-200 hover:scale-105 hover:drop-shadow-[0_14px_24px_rgba(0,0,0,0.58)] active:scale-96 sm:h-16 sm:w-16"
+            className="group absolute left-1/2 top-1/2 grid h-[3.2rem] w-[3.2rem] -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_10px_18px_rgba(0,0,0,0.46)] transition-[opacity,transform,filter] duration-200 hover:scale-105 hover:drop-shadow-[0_14px_24px_rgba(0,0,0,0.58)] active:scale-96 sm:h-16 sm:w-16"
             style={
               {
                 "--hotspot-angle": `${hotspot.rotation ?? 0}deg`,
@@ -1193,6 +1250,9 @@ function TourExperience() {
               className="h-full w-full object-contain [transform:rotate(var(--hotspot-angle))]"
               draggable={false}
             />
+            <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.35rem)] max-w-[9.5rem] -translate-x-1/2 whitespace-nowrap rounded-[6px] border border-white/16 bg-[rgb(45_38_33_/_0.72)] px-2.5 py-1 text-[0.72rem] font-bold text-white opacity-0 shadow-[0_12px_28px_rgba(0,0,0,0.34)] backdrop-blur-xl transition group-hover:opacity-100 group-focus-visible:opacity-100">
+              {hotspot.label}
+            </span>
           </button>
         ))}
       </div>
@@ -1271,9 +1331,33 @@ function TourExperience() {
             ) : null}
 
             {activePanel === "map" ? (
-              <div className="grid gap-2.5 p-3 text-[0.82rem] text-white/76 sm:grid-cols-2">
-                <LocationCard title="Nhà thờ Tổ nghề Kim hoàn" detail="Không gian thờ tổ nghề, tuyến nối từ sân Đình sang khu tổ nghề." />
-                <LocationCard title="Đình Làng Định Công Thượng" detail="Cổng, sân trước, hồ sâu, sân Đình, Công Đồng và các không gian thờ tự." />
+              <div className="grid gap-3 p-3 text-[0.82rem] text-white/76 sm:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+                <MiniMap activeScene={activeScene} onSceneSelect={(sceneId) => goToScene(sceneId, true)} />
+                <div className="min-w-0 rounded-[6px] border border-[rgb(255_252_245_/_0.14)] bg-[rgb(255_252_245_/_0.06)] p-3">
+                  <p className="text-[0.72rem] font-black uppercase tracking-[0.12em] text-[var(--tour-gold-light)]">
+                    Bạn đang ở đây
+                  </p>
+                  <p className="mt-1 text-base font-bold text-white">{activeScene.title}</p>
+                  <p className="mt-0.5 text-[0.76rem] text-white/58">{activeScene.location}</p>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {activeScene.hotspots.length > 0 ? (
+                      activeScene.hotspots.map((hotspot) => (
+                        <button
+                          key={`${activeScene.id}-map-${hotspot.targetId}`}
+                          type="button"
+                          onClick={() => goToScene(hotspot.targetId, true, hotspot.yaw)}
+                          className="rounded-[6px] border border-white/12 bg-white/[0.06] px-2.5 py-1.5 text-[0.76rem] font-semibold text-white transition hover:border-[var(--tour-gold-light)] hover:bg-white/[0.12] active:scale-95"
+                        >
+                          {hotspot.label}
+                        </button>
+                      ))
+                    ) : (
+                      <span className="rounded-[6px] border border-white/12 bg-white/[0.06] px-2.5 py-1.5 text-[0.76rem] text-white/68">
+                        Điểm cuối tuyến tham quan
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             ) : null}
 
@@ -1290,6 +1374,13 @@ function TourExperience() {
                   icon={Scan}
                   label="Góc rộng"
                   onClick={() => setWideAngle((value) => !value)}
+                />
+                <ToggleButton
+                  active={vrMode}
+                  disabled={!isSupported}
+                  icon={Scan}
+                  label={isSupported ? "VR" : "Không hỗ trợ VR"}
+                  onClick={() => void toggleVrMode()}
                 />
                 <div className="sm:col-span-2 rounded-[6px] border border-[rgb(232_207_170_/_0.24)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.1),rgb(255_252_245_/_0.035))] p-3 text-white shadow-[inset_0_1px_0_rgb(255_255_255_/_0.12)]">
                   <div className="flex items-start justify-between gap-3">
@@ -1440,12 +1531,93 @@ function panelTitle(panel: Exclude<Panel, null>) {
   return "Cài đặt";
 }
 
-function LocationCard({ title, detail }: { title: string; detail: string }) {
+function MiniMap({
+  activeScene,
+  compact = false,
+  onSceneSelect,
+}: {
+  activeScene: TourScene;
+  compact?: boolean;
+  onSceneSelect: (sceneId: SceneId) => void;
+}) {
   return (
-    <div className="rounded-[6px] border border-[rgb(255_252_245_/_0.14)] bg-[rgb(255_252_245_/_0.06)] p-2.5">
-      <p className="font-semibold text-white">{title}</p>
-      <p className="mt-0.5 leading-5 text-white/68">{detail}</p>
-    </div>
+    <section
+      className={`relative overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.18)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.14),rgb(255_252_245_/_0.045)_45%,transparent),rgb(45_38_33_/_0.58)] shadow-[0_18px_70px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.16)] backdrop-blur-xl backdrop-saturate-150 ${
+        compact ? "p-2.5" : "min-h-[260px] p-3"
+      }`}
+      aria-label="Mini-map vị trí tham quan"
+    >
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <p className="truncate text-[0.68rem] font-black uppercase tracking-[0.12em] text-[var(--tour-gold-light)]">
+            Mini-map
+          </p>
+          <p className="truncate text-[0.74rem] font-semibold text-white sm:text-[0.8rem]">
+            {activeScene.title}
+          </p>
+        </div>
+        <span className="flex shrink-0 items-center gap-1 rounded-full border border-white/14 bg-white/[0.08] px-2 py-1 text-[0.62rem] font-bold text-white/86">
+          <span className="h-2 w-2 rounded-full bg-[#e83030] shadow-[0_0_0_3px_rgb(232_48_48_/_0.18)]" />
+          Ở đây
+        </span>
+      </div>
+
+      <div
+        className={`relative rounded-[5px] border border-white/12 bg-[radial-gradient(circle_at_50%_76%,rgb(232_207_170_/_0.16),transparent_24%),linear-gradient(180deg,rgb(255_252_245_/_0.08),rgb(0_0_0_/_0.08))] ${
+          compact ? "aspect-[4/3]" : "aspect-[5/4]"
+        }`}
+      >
+        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" aria-hidden="true">
+          {mapEdges.map((edge, index) => {
+            const fromScene = sceneById.get(edge.from);
+            const toScene = sceneById.get(edge.to);
+
+            if (!fromScene || !toScene) {
+              return null;
+            }
+
+            return (
+              <line
+                key={`${edge.from}-${edge.to}-${index}`}
+                x1={fromScene.mapPosition.x}
+                y1={fromScene.mapPosition.y}
+                x2={toScene.mapPosition.x}
+                y2={toScene.mapPosition.y}
+                stroke="rgba(232,207,170,0.38)"
+                strokeWidth={compact ? 1.2 : 1.5}
+                strokeLinecap="round"
+              />
+            );
+          })}
+        </svg>
+
+        {scenes.map((scene) => {
+          const isActive = scene.id === activeScene.id;
+
+          return (
+            <button
+              key={`map-point-${scene.id}`}
+              type="button"
+              onClick={() => onSceneSelect(scene.id)}
+              aria-current={isActive ? "true" : undefined}
+              aria-label={scene.title}
+              title={scene.title}
+              className={`group absolute grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border text-[0.58rem] font-black transition active:scale-95 ${
+                isActive
+                  ? "h-5 w-5 border-white bg-[#e83030] text-white shadow-[0_0_0_4px_rgb(232_48_48_/_0.22),0_10px_24px_rgb(0_0_0_/_0.38)]"
+                  : "h-5 w-5 border-[rgb(232_207_170_/_0.68)] bg-[rgb(45_38_33_/_0.82)] text-[var(--tour-gold-light)] hover:border-white hover:bg-[var(--tour-jade)]"
+              } ${compact ? "sm:h-5 sm:w-5" : "sm:h-6 sm:w-6"}`}
+              style={{ left: `${scene.mapPosition.x}%`, top: `${scene.mapPosition.y}%` }}
+            >
+              {scene.order}
+              <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.32rem)] z-10 max-w-[8rem] -translate-x-1/2 truncate rounded-[5px] border border-white/12 bg-[rgb(45_38_33_/_0.82)] px-2 py-1 text-[0.65rem] font-bold text-white opacity-0 shadow-[0_10px_24px_rgba(0,0,0,0.36)] backdrop-blur-xl transition group-hover:opacity-100 group-focus-visible:opacity-100">
+                {scene.title}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -1484,11 +1656,13 @@ function BottomButton({
 
 function ToggleButton({
   active,
+  disabled = false,
   icon: Icon,
   label,
   onClick,
 }: {
   active: boolean;
+  disabled?: boolean;
   icon: LucideIcon;
   label: string;
   onClick: () => void;
@@ -1496,8 +1670,9 @@ function ToggleButton({
   return (
     <button
       type="button"
+      disabled={disabled}
       onClick={onClick}
-      className={`flex items-center justify-between rounded-[6px] border px-2.5 py-2.5 text-[0.82rem] font-semibold transition active:scale-[0.99] ${
+      className={`flex items-center justify-between rounded-[6px] border px-2.5 py-2.5 text-[0.82rem] font-semibold transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 ${
         active
           ? "border-[rgb(232_207_170_/_0.56)] bg-[rgb(192_160_128_/_0.16)] text-white"
           : "border-white/10 bg-white/[0.04] text-white/78 hover:border-white/24"

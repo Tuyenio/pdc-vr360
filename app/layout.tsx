@@ -15,9 +15,9 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "VR360 Đình Làng Nhà thờ tổ nghề Kim Hoàn",
+  title: "VR360 Đình làng Định Công Thượng & Đền thờ Tổ nghề Kim hoàn",
   description:
-    "Trải nghiệm số hóa VR360 di tích Đình Làng và Nhà thờ tổ nghề Kim Hoàn tại phường Định Công.",
+    "Trải nghiệm số hóa VR360 di tích Đình làng Định Công Thượng và Đền thờ Tổ nghề Kim hoàn tại phường Định Công.",
 };
 
 export default function RootLayout({
