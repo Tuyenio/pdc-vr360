@@ -61,17 +61,13 @@ type TourScene = {
 type Panel = "scenes" | "info" | "map" | "settings" | null;
 
 const basePath = "/images-tour/Đình Làng-Đền Thờ";
-const previewBasePath = "/images-preview/Đình Làng-Đền Thờ";
 const hotspotIcon = encodeURI("/icon/hotspotelement.png");
 const heroImage = encodeURI(`${basePath}/6 Trung Đình.jpg`);
-const heroPreviewImage = encodeURI(`${previewBasePath}/6 Trung Đình.jpg`);
 const dinhCardImage = encodeURI(`${basePath}/1 Cổng Đình.jpg`);
 const shrineCardImage = encodeURI(`${basePath}/13 Chính điện Đền thờ Tổ nghề.jpg`);
 const backgroundAudio = encodeURI("/media/Nhạc Phật Giáo sâu lắng.mp3");
 
 const panoramaPath = (fileName: string) => encodeURI(`${basePath}/${fileName}`);
-const previewImageForScene = (scene: TourScene) =>
-  scene.image.replace(encodeURI(basePath), encodeURI(previewBasePath));
 
 const PANORAMA_CAMERA_DISTANCE = 0.12;
 const DEFAULT_FOV = 76;
@@ -265,22 +261,50 @@ const mapEdges = scenes.flatMap((scene) =>
 );
 const panoramaTextureCache = new Map<string, THREE.Texture>();
 const panoramaTexturePromises = new Map<string, Promise<THREE.Texture>>();
+const panoramaTextureProgress = new Map<string, number>();
+const panoramaTextureProgressListeners = new Map<string, Set<(progress: number) => void>>();
 
-function loadPanoramaTexture(image: string) {
+function notifyPanoramaProgress(image: string, progress: number) {
+  panoramaTextureProgress.set(image, progress);
+  panoramaTextureProgressListeners.get(image)?.forEach((listener) => listener(progress));
+}
+
+function subscribePanoramaProgress(image: string, listener?: (progress: number) => void) {
+  if (!listener) {
+    return () => undefined;
+  }
+
+  const listeners = panoramaTextureProgressListeners.get(image) ?? new Set<(progress: number) => void>();
+  listeners.add(listener);
+  panoramaTextureProgressListeners.set(image, listeners);
+  listener(panoramaTextureProgress.get(image) ?? 0);
+
+  return () => {
+    listeners.delete(listener);
+    if (listeners.size === 0) {
+      panoramaTextureProgressListeners.delete(image);
+    }
+  };
+}
+
+function loadPanoramaTexture(image: string, onProgress?: (progress: number) => void) {
   const cachedTexture = panoramaTextureCache.get(image);
 
   if (cachedTexture) {
+    onProgress?.(100);
     return Promise.resolve(cachedTexture);
   }
 
+  const unsubscribe = subscribePanoramaProgress(image, onProgress);
   const pendingTexture = panoramaTexturePromises.get(image);
 
   if (pendingTexture) {
-    return pendingTexture;
+    return pendingTexture.finally(unsubscribe);
   }
 
   const texturePromise = new Promise<THREE.Texture>((resolve, reject) => {
     const loader = new THREE.TextureLoader();
+    notifyPanoramaProgress(image, 0);
     loader.load(
       image,
       (texture) => {
@@ -288,28 +312,34 @@ function loadPanoramaTexture(image: string) {
         texture.anisotropy = 8;
         panoramaTextureCache.set(image, texture);
         panoramaTexturePromises.delete(image);
+        notifyPanoramaProgress(image, 100);
         resolve(texture);
       },
-      undefined,
+      (event) => {
+        if (event.lengthComputable && event.total > 0) {
+          notifyPanoramaProgress(image, Math.round((event.loaded / event.total) * 100));
+        }
+      },
       () => {
         panoramaTexturePromises.delete(image);
+        panoramaTextureProgress.delete(image);
         reject(new Error("load-failed"));
       },
     );
   });
 
   panoramaTexturePromises.set(image, texturePromise);
-  return texturePromise;
+  return texturePromise.finally(unsubscribe);
 }
 
 function preloadSceneAndHotspots(scene: TourScene) {
-  loadPanoramaTexture(previewImageForScene(scene)).catch(() => undefined);
+  loadPanoramaTexture(scene.image).catch(() => undefined);
 
   scene.hotspots.forEach((hotspot) => {
     const targetScene = sceneById.get(hotspot.targetId);
 
     if (targetScene) {
-      loadPanoramaTexture(previewImageForScene(targetScene)).catch(() => undefined);
+      loadPanoramaTexture(targetScene.image).catch(() => undefined);
     }
   });
 }
@@ -563,7 +593,7 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
     let isDisposed = false;
     preloadSceneAndHotspots(sceneById.get("scene-1")!);
 
-    loadPanoramaTexture(heroPreviewImage)
+    loadPanoramaTexture(heroImage)
       .then((texture) => {
         if (isDisposed) {
           return;
@@ -578,17 +608,6 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
           setIsPanoramaReady(true);
         }
       });
-
-    loadPanoramaTexture(heroImage)
-      .then((texture) => {
-        if (isDisposed) {
-          return;
-        }
-
-        material.map = texture;
-        material.needsUpdate = true;
-      })
-      .catch(() => undefined);
 
     let rotation = 0;
     const animate = () => {
@@ -732,6 +751,7 @@ function TourExperience({
   const [currentSceneId, setCurrentSceneId] = useState<SceneId>("scene-1");
   const [activePanel, setActivePanel] = useState<Panel>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadProgress, setLoadProgress] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [autoRotate, setAutoRotate] = useState(false);
   const [wideAngle, setWideAngle] = useState(false);
@@ -883,40 +903,14 @@ function TourExperience({
           .catch(() => undefined);
       };
 
-      preloadImage(previewImageForScene(scene));
+      preloadImage(scene.image);
       scene.hotspots.forEach((hotspot) => {
         const targetScene = sceneById.get(hotspot.targetId);
 
         if (targetScene) {
-          preloadImage(previewImageForScene(targetScene));
+          preloadImage(targetScene.image);
         }
       });
-    },
-    [warmPanoramaTexture],
-  );
-
-  const upgradeSceneToHighRes = useCallback(
-    (scene: TourScene, token: number) => {
-      window.setTimeout(() => {
-        loadPanoramaTexture(scene.image)
-          .then((texture) => {
-            const material = materialRef.current;
-
-            if (
-              transitionTokenRef.current !== token ||
-              currentSceneRef.current.id !== scene.id ||
-              !material
-            ) {
-              return;
-            }
-
-            warmPanoramaTexture(scene.image, texture);
-            material.map = texture;
-            material.opacity = 1;
-            material.needsUpdate = true;
-          })
-          .catch(() => undefined);
-      }, 120);
     },
     [warmPanoramaTexture],
   );
@@ -1178,9 +1172,7 @@ function TourExperience({
       transitionLockRef.current = !initialSceneRef.current;
       preloadTourScene(scene);
 
-      const previewImage = previewImageForScene(scene);
-      const highResTexture = panoramaTextureCache.get(scene.image);
-      const transitionTexture = highResTexture ?? panoramaTextureCache.get(previewImage);
+      const cachedTexture = panoramaTextureCache.get(scene.image);
 
       if (!initialSceneRef.current) {
         const startPosition = camera.position.clone();
@@ -1194,32 +1186,40 @@ function TourExperience({
         const easeInOutQuart = (t: number) =>
           t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
 
-        let textureLoaded = !!transitionTexture;
-        let loadedTexture: THREE.Texture | null = transitionTexture || null;
+        let textureLoaded = !!cachedTexture;
+        let loadedTexture: THREE.Texture | null = cachedTexture || null;
         let textureFailed = false;
+        let textureReadyAt = cachedTexture ? startTime : 0;
 
         setIsTransitioning(true);
-        setIsLoading(!transitionTexture);
+        setIsLoading(!cachedTexture);
+        setLoadProgress(cachedTexture ? 100 : 0);
         setTransitionVisuals(0);
 
-        const prepareTransitionTexture = (image: string, texture: THREE.Texture) => {
-          warmPanoramaTexture(image, texture);
+        const prepareTransitionTexture = (texture: THREE.Texture) => {
+          warmPanoramaTexture(scene.image, texture);
           transitionMaterial.map = texture;
           transitionMaterial.opacity = 0;
           transitionMaterial.needsUpdate = true;
         };
 
-        if (transitionTexture) {
-          prepareTransitionTexture(highResTexture ? scene.image : previewImage, transitionTexture);
+        if (cachedTexture) {
+          prepareTransitionTexture(cachedTexture);
         } else {
-          loadPanoramaTexture(previewImage)
+          loadPanoramaTexture(scene.image, (progress) => {
+            if (transitionTokenRef.current === token) {
+              setLoadProgress(progress);
+            }
+          })
             .then((texture) => {
               if (transitionTokenRef.current !== token) return;
 
               textureLoaded = true;
               loadedTexture = texture;
+              textureReadyAt = performance.now();
               setIsLoading(false);
-              prepareTransitionTexture(previewImage, texture);
+              setLoadProgress(100);
+              prepareTransitionTexture(texture);
             })
             .catch(() => {
               if (transitionTokenRef.current !== token) return;
@@ -1235,8 +1235,10 @@ function TourExperience({
             return;
           }
 
-          const progress = Math.min((now - startTime) / duration, 1);
+          const rawProgress = (now - startTime) / duration;
+          const progress = !textureLoaded && !textureFailed ? Math.min(rawProgress, 0.72) : Math.min(rawProgress, 1);
           const eased = easeInOutQuart(progress);
+          let fadeProgress = 0;
 
           camera.position.lerpVectors(startPosition, targetPosition, eased);
           camera.rotation.x = THREE.MathUtils.lerp(startRotation.x, 0, eased);
@@ -1250,7 +1252,10 @@ function TourExperience({
           if (textureLoaded && loadedTexture) {
             const fadeStart = 0.2;
             const fadeEnd = 0.9;
-            const fadeProgress = Math.min(Math.max((progress - fadeStart) / (fadeEnd - fadeStart), 0), 1);
+            fadeProgress =
+              textureReadyAt > startTime + duration * fadeEnd
+                ? Math.min(Math.max((now - textureReadyAt) / 420, 0), 1)
+                : Math.min(Math.max((progress - fadeStart) / (fadeEnd - fadeStart), 0), 1);
             const fadeEase = easeInOutQuart(fadeProgress);
             transitionMaterial.opacity = fadeEase;
             material.opacity = 1 - fadeEase;
@@ -1258,13 +1263,14 @@ function TourExperience({
 
           setTransitionVisuals(progress);
 
-          if (progress < 1) {
+          if (progress < 1 || (textureLoaded && loadedTexture && fadeProgress < 1)) {
             transitionFrameRef.current = requestAnimationFrame(tick);
             return;
           }
 
           if (!textureLoaded && !textureFailed) {
             setIsLoading(true);
+            setTransitionVisuals(0.5);
             transitionFrameRef.current = requestAnimationFrame(tick);
             return;
           }
@@ -1286,10 +1292,10 @@ function TourExperience({
           setTransitionVisuals(0);
           setIsTransitioning(false);
           setIsLoading(false);
+          setLoadProgress(100);
           transitionLockRef.current = false;
           updateHotspots();
           preloadTourScene(scene);
-          upgradeSceneToHighRes(scene, token);
         };
 
         transitionFrameRef.current = requestAnimationFrame(tick);
@@ -1297,15 +1303,22 @@ function TourExperience({
       }
 
       // Initial scene load - use global cache
-      const initialCachedTexture = panoramaTextureCache.get(previewImage);
-      const loadTexture = initialCachedTexture ? Promise.resolve(initialCachedTexture) : loadPanoramaTexture(previewImage);
+      const initialCachedTexture = panoramaTextureCache.get(scene.image);
+      const loadTexture = initialCachedTexture
+        ? Promise.resolve(initialCachedTexture)
+        : loadPanoramaTexture(scene.image, (progress) => {
+            if (transitionTokenRef.current === token) {
+              setLoadProgress(progress);
+            }
+          });
 
       setIsLoading(true);
+      setLoadProgress(initialCachedTexture ? 100 : 0);
       loadTexture
         .then((texture) => {
           if (transitionTokenRef.current !== token) return;
 
-          warmPanoramaTexture(previewImage, texture);
+          warmPanoramaTexture(scene.image, texture);
           material.map = texture;
           material.opacity = 1;
           material.needsUpdate = true;
@@ -1317,10 +1330,10 @@ function TourExperience({
           initialSceneRef.current = false;
           setIsTransitioning(false);
           setIsLoading(false);
+          setLoadProgress(100);
           setTransitionVisuals(0);
           transitionLockRef.current = false;
           preloadTourScene(scene);
-          upgradeSceneToHighRes(scene, token);
         })
         .catch(() => {
           if (transitionTokenRef.current !== token) return;
@@ -1329,7 +1342,7 @@ function TourExperience({
           transitionLockRef.current = false;
         });
     },
-    [positionCamera, preloadTourScene, setTransitionVisuals, updateHotspots, upgradeSceneToHighRes, warmPanoramaTexture],
+    [positionCamera, preloadTourScene, setTransitionVisuals, updateHotspots, warmPanoramaTexture],
   );
 
   useEffect(() => {
@@ -1506,8 +1519,19 @@ function TourExperience({
         )}
       </div>
       {isLoading ? (
-        <div className="fixed left-1/2 top-4 z-20 -translate-x-1/2 rounded-full border border-white/16 bg-[rgb(45_38_33_/_0.62)] px-3 py-1.5 text-[0.72rem] font-bold text-white/88 shadow-[0_12px_34px_rgba(0,0,0,0.28)] backdrop-blur-xl">
-          Đang tải ảnh
+        <div className="fixed left-1/2 top-4 z-20 w-[min(84vw,280px)] -translate-x-1/2 rounded-[7px] border border-white/16 bg-[rgb(45_38_33_/_0.68)] px-3 py-2 text-white shadow-[0_12px_34px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+          <div className="flex items-center justify-between gap-3 text-[0.68rem] font-black uppercase tracking-[0.12em] text-white/88">
+            <span>Tải không gian 360</span>
+            <span className="font-mono text-[0.74rem] text-[var(--tour-gold-light)]">
+              {Math.max(0, Math.min(100, Math.round(loadProgress)))}%
+            </span>
+          </div>
+          <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/14">
+            <div
+              className="h-full rounded-full bg-[linear-gradient(90deg,#e8cfaa,#ffffff)] transition-[width] duration-200"
+              style={{ width: `${Math.max(4, Math.min(100, Math.round(loadProgress)))}%` }}
+            />
+          </div>
         </div>
       ) : null}
 
