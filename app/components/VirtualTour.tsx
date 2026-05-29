@@ -83,10 +83,6 @@ const AUDIO_FADE_DURATION = 650;
 
 const clampFov = (fov: number) => THREE.MathUtils.clamp(fov, MIN_ZOOM_FOV, MAX_ZOOM_FOV);
 
-const normalizeYaw = (yaw: number) => {
-  const normalized = ((yaw + 180) % 360) - 180;
-  return normalized === -180 ? 180 : normalized;
-};
 
 // Manual start-view calibration:
 // Open Settings -> "Căn hướng ảnh", rotate to the desired opening view,
@@ -316,10 +312,6 @@ function preloadSceneAndHotspots(scene: TourScene) {
       loadPanoramaTexture(previewImageForScene(targetScene)).catch(() => undefined);
     }
   });
-}
-
-function yawFromDirection(direction: THREE.Vector3) {
-  return normalizeYaw(THREE.MathUtils.radToDeg(Math.atan2(direction.x, -direction.z)));
 }
 
 function directionFromYawPitch(yaw: number, pitch: number) {
@@ -746,7 +738,6 @@ function TourExperience({
   const [vrMode, setVrMode] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [currentViewYaw, setCurrentViewYaw] = useState(0);
   const [isMiniMapExpanded, setIsMiniMapExpanded] = useState(true);
 
   const rootRef = useRef<HTMLElement | null>(null);
@@ -772,7 +763,6 @@ function TourExperience({
   const currentFovRef = useRef(DEFAULT_FOV);
   const targetFovRef = useRef(DEFAULT_FOV);
   const lastPinchDistanceRef = useRef<number | null>(null);
-  const lastYawReadoutAtRef = useRef(0);
 
   const { orientation, isSupported, requestPermission, startListening } = useDeviceOrientation();
 
@@ -1110,14 +1100,6 @@ function TourExperience({
         controls.update();
       }
       updateHotspots();
-
-      const now = performance.now();
-      if (now - lastYawReadoutAtRef.current > 140) {
-        const viewDirection = new THREE.Vector3();
-        camera.getWorldDirection(viewDirection);
-        setCurrentViewYaw(Math.round(yawFromDirection(viewDirection)));
-        lastYawReadoutAtRef.current = now;
-      }
 
       renderer.render(threeScene, camera);
     };
@@ -1699,33 +1681,13 @@ function TourExperience({
                   label={isSupported ? "VR" : "Không hỗ trợ VR"}
                   onClick={() => void toggleVrMode()}
                 />
-                <div className="sm:col-span-2 rounded-[6px] border border-[rgb(232_207_170_/_0.24)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.1),rgb(255_252_245_/_0.035))] p-3 text-white shadow-[inset_0_1px_0_rgb(255_255_255_/_0.12)]">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-[0.76rem] font-black uppercase tracking-[0.12em] text-[var(--tour-gold-light)]">
-                        Căn hướng ảnh
-                      </p>
-                      <p className="mt-1 max-w-[34rem] text-[0.78rem] leading-5 text-white/68">
-                        Xoay tới góc muốn mở đầu, rồi copy số “Yaw hiện tại” vào
-                        <span className="font-mono text-white"> initialYaw</span> của cảnh này.
-                      </p>
-                    </div>
-                    <div className="shrink-0 rounded-[6px] border border-white/12 bg-black/18 px-3 py-2 text-right font-mono shadow-[inset_0_1px_0_rgb(255_255_255_/_0.08)]">
-                      <p className="text-[10px] uppercase tracking-[0.12em] text-white/48">Yaw hiện tại</p>
-                      <p className="mt-0.5 text-lg font-black text-white">{currentViewYaw}°</p>
-                    </div>
-                  </div>
-                  <div className="mt-2 rounded-[5px] bg-black/16 px-2.5 py-2 font-mono text-[0.72rem] text-white/78">
-                    {`id: "${activeScene.id}", initialYaw: ${currentViewYaw}`}
-                  </div>
-                </div>
               </div>
             ) : null}
           </section>
         ) : null}
 
         {activePanel !== "scenes" ? (
-          <nav className="grid grid-cols-4 overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.14),transparent_36%),rgb(115_90_58_/_0.62)] p-1.5 text-white shadow-[0_24px_80px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.18)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-out sm:grid-cols-5">
+          <nav className="grid grid-cols-4 gap-1.5 overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.14),transparent_36%),rgb(115_90_58_/_0.62)] p-1.5 text-white shadow-[0_24px_80px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.18)] backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ease-out sm:grid-cols-5 sm:gap-2">
             <BottomButton
               icon={Layers3}
               label="Cảnh"
@@ -1765,7 +1727,7 @@ function TourExperience({
       <button
         type="button"
         onClick={toggleFullscreen}
-        className={`fixed right-4 top-4 z-20 rounded-full border p-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-all active:scale-95 sm:p-3 ${
+        className={`fixed right-4 top-4 z-20 hidden rounded-full border p-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-all active:scale-95 sm:p-3 lg:inline-flex lg:items-center lg:justify-center ${
           isFullscreen
             ? "border-[var(--tour-gold-light)] bg-[rgb(192_160_128_/_0.24)] text-white"
             : "border-white/20 bg-[rgb(45_38_33_/_0.48)] text-white/80 hover:bg-[rgb(45_38_33_/_0.62)]"
@@ -1890,7 +1852,7 @@ function MiniMap({
             const fromScene = sceneById.get(edge.from);
             const toScene = sceneById.get(edge.to);
 
-            if (!fromScene || !toScene) {
+            if (!fromScene?.mapPosition || !toScene?.mapPosition) {
               return null;
             }
 
@@ -1910,6 +1872,9 @@ function MiniMap({
         </svg>
 
         {scenes.map((scene) => {
+          if (!scene?.mapPosition) {
+            return null;
+          }
           const isActive = scene.id === activeScene.id;
 
           return (
@@ -1956,7 +1921,7 @@ function BottomButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-[6px] px-1 py-2 text-center transition active:scale-95 ${
+      className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-[6px] px-1.5 py-2 text-center transition active:scale-95 ${
         active ? "bg-[rgb(255_252_245_/_0.2)] text-white shadow-[inset_0_1px_0_rgb(255_255_255_/_0.18)]" : "text-white/92 hover:bg-white/12"
       }`}
       aria-label={label}
