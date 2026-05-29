@@ -79,6 +79,10 @@ const AUDIO_FADE_DURATION = 650;
 
 const clampFov = (fov: number) => THREE.MathUtils.clamp(fov, MIN_ZOOM_FOV, MAX_ZOOM_FOV);
 
+const normalizeYaw = (yaw: number) => {
+  const normalized = ((yaw + 180) % 360) - 180;
+  return normalized === -180 ? 180 : normalized;
+};
 
 // Manual start-view calibration:
 // Open Settings -> "Căn hướng ảnh", rotate to the desired opening view,
@@ -342,6 +346,10 @@ function preloadSceneAndHotspots(scene: TourScene) {
       loadPanoramaTexture(targetScene.image).catch(() => undefined);
     }
   });
+}
+
+function yawFromDirection(direction: THREE.Vector3) {
+  return normalizeYaw(THREE.MathUtils.radToDeg(Math.atan2(direction.x, -direction.z)));
 }
 
 function directionFromYawPitch(yaw: number, pitch: number) {
