@@ -83,6 +83,8 @@ type MapRoute = {
 
 const basePath = "/images-tour/Đình Làng-Đền Thờ";
 const panoramaPath = (fileName: string) => encodeURI(`${basePath}/${fileName}`);
+const narrationBasePath = "/media/voice định công";
+const narrationPath = (fileName: string) => encodeURI(`${narrationBasePath}/${fileName}`);
 const hotspotIcon = encodeURI("/icon/hotspotelement.png");
 const infoModalBackground = encodeURI("/modal/modal-2.png");
 const welcomeTitleBackground = encodeURI("/modal/background-1.png");
@@ -98,6 +100,8 @@ const WIDE_FOV = 88;
 const MIN_ZOOM_FOV = 36;
 const MAX_ZOOM_FOV = 96;
 const AUDIO_TARGET_VOLUME = 0.2;
+const BACKGROUND_DUCK_VOLUME = 0.08;
+const NARRATION_TARGET_VOLUME = 0.78;
 const AUDIO_FADE_DURATION = 650;
 
 const clampFov = (fov: number) => THREE.MathUtils.clamp(fov, MIN_ZOOM_FOV, MAX_ZOOM_FOV);
@@ -293,6 +297,20 @@ const scenes: TourScene[] = [
     ],
   },
 ];
+
+const sceneNarration = new Map<SceneId, string[]>([
+  ["scene-1", [narrationPath("Chào mừng.mp3"), narrationPath("CỔNG ĐẠI MÔN.mp3")]],
+  ["scene-2", [narrationPath("SÂN ĐÌNH.mp3")]],
+  ["scene-3", [narrationPath("HỒ SÂU.mp3")]],
+  ["scene-4", [narrationPath("HỒ SÂU.mp3")]],
+  ["scene-5", [narrationPath("HỒ SÂU.mp3")]],
+  ["scene-7", [narrationPath("BAN THỜ THẦN NÔNG.mp3")]],
+  ["scene-8", [narrationPath("TOÀ ĐẠI BÁI.mp3")]],
+  ["scene-9", [narrationPath("CÔNG ĐỒNG.mp3")]],
+  ["scene-11", [narrationPath("NHÀ THỜ TỔ NGHỀ KIM HOÀN.mp3")]],
+  ["scene-12", [narrationPath("NHÀ THỜ TỔ NGHỀ KIM HOÀN.mp3")]],
+  ["scene-13", [narrationPath("NHÀ THỜ TỔ NGHỀ KIM HOÀN.mp3")]],
+]);
 
 const sceneById = new Map(scenes.map((scene) => [scene.id, scene]));
 const mapRoutes: MapRoute[] = [
@@ -548,6 +566,17 @@ export default function VirtualTour() {
     };
   }, []);
 
+  const handleNarrationStateChange = useCallback(
+    (isPlaying: boolean) => {
+      if (!soundEnabled) {
+        return;
+      }
+
+      fadeAudioTo(isPlaying ? BACKGROUND_DUCK_VOLUME : AUDIO_TARGET_VOLUME, AUDIO_FADE_DURATION);
+    },
+    [fadeAudioTo, soundEnabled],
+  );
+
   useEffect(() => {
     if (!hasEntered) {
       return;
@@ -574,7 +603,11 @@ export default function VirtualTour() {
       {!hasEntered ? (
         <WelcomeScreen isEntering={isEntering} onEnter={handleEnter} />
       ) : (
-        <TourExperience soundEnabled={soundEnabled} onToggleSound={toggleSound} />
+        <TourExperience
+          soundEnabled={soundEnabled}
+          onToggleSound={toggleSound}
+          onNarrationStateChange={handleNarrationStateChange}
+        />
       )}
     </>
   );
@@ -983,9 +1016,11 @@ function WelcomeCard({
 function TourExperience({
   soundEnabled,
   onToggleSound,
+  onNarrationStateChange,
 }: {
   soundEnabled: boolean;
   onToggleSound: () => void;
+  onNarrationStateChange?: (isPlaying: boolean) => void;
 }) {
   const [currentSceneId, setCurrentSceneId] = useState<SceneId>("scene-1");
   const [activePanel, setActivePanel] = useState<Panel>(null);
@@ -1034,12 +1069,109 @@ function TourExperience({
   const [hoveredMarkerId, setHoveredMarkerId] = useState<string | null>(null);
   const openingInfoTimerRef = useRef<number | null>(null);
   const closingInfoTimerRef = useRef<number | null>(null);
+  const narrationRef = useRef<HTMLAudioElement | null>(null);
+  const narrationQueueRef = useRef<string[]>([]);
+  const narrationTokenRef = useRef(0);
+  const activeNarrationSrcRef = useRef<string | null>(null);
 
   const { orientation, isSupported, requestPermission, startListening } = useDeviceOrientation();
+
+  const stopNarration = useCallback(() => {
+    const audio = narrationRef.current;
+    narrationTokenRef.current += 1;
+    narrationQueueRef.current = [];
+    activeNarrationSrcRef.current = null;
+
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.onended = null;
+    }
+
+    onNarrationStateChange?.(false);
+  }, [onNarrationStateChange]);
+
+  const playNarrationSequence = useCallback(
+    async (sources: string[]) => {
+      const audio = narrationRef.current;
+
+      if (!audio || sources.length === 0) {
+        onNarrationStateChange?.(false);
+        return;
+      }
+
+      narrationTokenRef.current += 1;
+      const token = narrationTokenRef.current;
+      narrationQueueRef.current = [...sources];
+
+      const playNext = async () => {
+        if (token !== narrationTokenRef.current) {
+          return;
+        }
+
+        const nextSource = narrationQueueRef.current.shift();
+
+        if (!nextSource) {
+          activeNarrationSrcRef.current = null;
+          onNarrationStateChange?.(false);
+          return;
+        }
+
+        if (audio.src !== nextSource) {
+          audio.src = nextSource;
+        }
+
+        audio.currentTime = 0;
+        audio.volume = NARRATION_TARGET_VOLUME;
+        activeNarrationSrcRef.current = nextSource;
+
+        try {
+          await audio.play();
+          onNarrationStateChange?.(true);
+        } catch (error) {
+          console.error("Narration autoplay blocked:", error);
+          onNarrationStateChange?.(false);
+        }
+      };
+
+      audio.onended = () => {
+        void playNext();
+      };
+
+      void playNext();
+    },
+    [onNarrationStateChange],
+  );
 
   useEffect(() => {
     vrModeRef.current = vrMode;
   }, [vrMode]);
+
+  useEffect(() => {
+    if (!soundEnabled) {
+      stopNarration();
+      return;
+    }
+
+    const narrationSources = sceneNarration.get(currentSceneId);
+
+    if (!narrationSources || narrationSources.length === 0) {
+      stopNarration();
+      return;
+    }
+
+    const audio = narrationRef.current;
+
+    if (
+      audio &&
+      activeNarrationSrcRef.current === narrationSources[0] &&
+      !audio.paused
+    ) {
+      return;
+    }
+
+    void playNarrationSequence(narrationSources);
+  }, [currentSceneId, playNarrationSequence, soundEnabled, stopNarration]);
 
   const activeScene = useMemo(
     () => sceneById.get(currentSceneId) ?? sceneById.get("scene-1")!,
@@ -1085,6 +1217,9 @@ function TourExperience({
       }
       if (closingInfoTimerRef.current) {
         window.clearTimeout(closingInfoTimerRef.current);
+      }
+      if (narrationRef.current) {
+        narrationRef.current.onended = null;
       }
     };
   }, []);
@@ -1832,6 +1967,7 @@ function TourExperience({
       ref={rootRef}
       className="fixed inset-0 min-h-[100dvh] overflow-hidden bg-[var(--tour-wood)] text-white"
     >
+      <audio ref={narrationRef} preload="auto" playsInline />
       <div ref={canvasWrapRef} className="tour-canvas absolute inset-0">
         <div ref={mountRef} className="absolute inset-0 cursor-grab active:cursor-grabbing" />
       </div>
