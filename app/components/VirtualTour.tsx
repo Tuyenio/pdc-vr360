@@ -1144,6 +1144,9 @@ function TourExperience({
           await audio.play();
           onNarrationStateChange?.(true);
         } catch (error) {
+          if (error instanceof DOMException && error.name === "AbortError") {
+            return;
+          }
           console.error("Narration autoplay blocked:", error);
           onNarrationStateChange?.(false);
         }
@@ -1191,10 +1194,6 @@ function TourExperience({
     ) {
       lastNarrationSceneRef.current = currentSceneId;
       return;
-    }
-
-    if (audio && activeNarrationSrcRef.current === narrationSources[0] && !audio.paused) {
-      stopNarration();
     }
 
     void playNarrationSequence(narrationSources);
