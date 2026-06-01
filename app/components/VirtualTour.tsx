@@ -2796,13 +2796,6 @@ function MiniMap({
   const nodeSize = compact ? 5.2 : 5.2;
   const edgeInset = nodeSize / 2;
   const clampMapPoint = (value: number) => THREE.MathUtils.clamp(value, edgeInset, 100 - edgeInset);
-  const getNodeLineInset = (isActive: boolean) => {
-    if (compact) {
-      return isActive ? 3.6 : 2.9;
-    }
-
-    return isActive ? 3.4 : 2.7;
-  };
   const getMapPosition = (scene: TourScene) => {
     if (!scene.mapPosition || (!isOverview && !activeScene.mapPosition)) return null;
 
@@ -2827,31 +2820,6 @@ function MiniMap({
       y: clampMapPoint(50 + rotatedY),
     };
   };
-  const getLineEndpoint = (
-    from: { x: number; y: number },
-    to: { x: number; y: number },
-    startInset: number,
-    endInset: number,
-  ) => {
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
-    const length = Math.hypot(dx, dy);
-
-    if (length <= startInset + endInset) {
-      return { start: from, end: to };
-    }
-
-    const startOffsetX = (dx / length) * startInset;
-    const startOffsetY = (dy / length) * startInset;
-    const endOffsetX = (dx / length) * endInset;
-    const endOffsetY = (dy / length) * endInset;
-
-    return {
-      start: { x: from.x + startOffsetX, y: from.y + startOffsetY },
-      end: { x: to.x - endOffsetX, y: to.y - endOffsetY },
-    };
-  };
-
   return (
     <section
       className={`relative overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.18)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.07),rgb(255_252_245_/_0.018)_45%,transparent),rgb(45_38_33_/_0.18)] shadow-[0_18px_70px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.12)] backdrop-blur-xl backdrop-saturate-150 ${
@@ -2878,6 +2846,7 @@ function MiniMap({
         <svg
           className="absolute inset-0 h-full w-full transition-opacity duration-200 ease-out"
           viewBox="0 0 100 100"
+          preserveAspectRatio="none"
           aria-hidden="true"
         >
           {mapRoutes.map((edge, index) => {
@@ -2896,20 +2865,13 @@ function MiniMap({
               : getMapPosition(toScene);
 
             if (!fromPos || !toPos) return null;
-            const endpoint = getLineEndpoint(
-              fromPos,
-              toPos,
-              getNodeLineInset(fromScene.id === activeScene.id),
-              getNodeLineInset(toScene.id === activeScene.id),
-            );
-
             return (
               <line
                 key={`${edge.from}-${edge.to}-${index}`}
-                x1={endpoint.start.x}
-                y1={endpoint.start.y}
-                x2={endpoint.end.x}
-                y2={endpoint.end.y}
+                x1={fromPos.x}
+                y1={fromPos.y}
+                x2={toPos.x}
+                y2={toPos.y}
                 stroke="rgba(232,207,170,0.42)"
                 strokeWidth={compact ? 0.9 : 1.05}
                 strokeLinecap="round"
