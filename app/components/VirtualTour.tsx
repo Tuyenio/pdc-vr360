@@ -17,6 +17,7 @@ import {
   Volume2,
   VolumeX,
   X,
+  Landmark,
 } from "lucide-react";
 import Image from "next/image";
 import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -57,6 +58,7 @@ type InfoMarker = {
   pitch: number;
   rotation?: number;
   content: string[];
+   iconType?: "envelope" | "landmark";
 };
 
 type TourScene = {
@@ -136,6 +138,7 @@ const scenes: TourScene[] = [
         yaw: 120,
         pitch: -6,
         rotation: -3,
+        iconType: "envelope",
         content: [
           "Tam Quan là lối vào chính dẫn bách gia trăm họ vào không gian linh thiêng của Đình Định Công Thượng, được xây dựng theo phong cách kiến trúc nghi môn truyền thống dưới dạng các cột trụ biểu cao vút gồm 4 trụ: hai trụ lớn ở giữa đỉnh chạm hình bốn chim phượng, hai trụ nhỏ hai bên đỉnh đắp đôi nghê chầu uốn mình uy nghiêm nhằm soi xét tâm linh con người trước khi bước vào nơi điện thờ.",
           "Trải qua bao thăng trầm thời gian và các đợt trùng tu lớn dưới thời nhà Nguyễn (thế kỷ XIX), cổng Đại Môn không chỉ là ranh giới kiến trúc chuyển tiếp từ không gian đời thường vào chốn thâm nghiêm, tách biệt sự ồn ào của phố thị hiện đại để đưa du khách bước vào khuôn viên thanh tịnh, thâm nghiêm của một di tích cổ.",
@@ -159,18 +162,31 @@ const scenes: TourScene[] = [
     ],
   },
   {
-    id: "scene-3",
-    order: "03",
-    title: "Tả Hồ",
-    location: "Đình Làng Định Công Thượng",
-    image: panoramaPath("3 Tả Hồ.jpg"),
-    initialYaw: 0,
-    mapPosition: { x: 35, y: 65 },
-    hotspots: [
-      { targetId: "scene-2", label: "Tiền Đình", yaw: -40, pitch: -18, rotation: 2 },
-      { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: -220, pitch: -15, nextYaw: -180 },
-    ],
-  },
+  id: "scene-3",
+  order: "03",
+  title: "Tả Hồ",
+  location: "Đình Làng Định Công Thượng",
+  image: panoramaPath("3 Tả Hồ.jpg"),
+  initialYaw: 0,
+  mapPosition: { x: 35, y: 65 },
+  hotspots: [
+    { targetId: "scene-2", label: "Tiền Đình", yaw: -40, pitch: -18, rotation: 2 },
+    { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: -220, pitch: -15, nextYaw: -180 },
+  ],
+  infoMarkers: [
+    {
+      id: "ta-ho-info",
+      title: "Tả Hồ",
+      eyebrow: "Hồ nước phong thủy",
+      yaw: -130,
+      pitch: -8,
+      rotation: 0,
+      content: [
+        "Nằm ngay trước sân Đền Định Công Thượng là một chiếc hồ sâu cổ kính. Trong mạch đất \"Long chầu hổ phục\", chiếc hồ đóng vai trò là điểm \"tụ thủy\" phong thủy vô cùng quan trọng, giúp gom tụ tài lộc, sinh khí và sự thịnh vượng cho làng nghề kim hoàn suốt hàng trăm năm qua, đồng thời điều hòa không khí mang lại sự thoáng đãng cho toàn di tích. ",
+      ],
+    },
+  ],
+},
   {
     id: "scene-4",
     order: "04",
@@ -213,32 +229,60 @@ const scenes: TourScene[] = [
     ],
   },
   {
-    id: "scene-7",
-    order: "07",
-    title: "Tả đình làng",
-    location: "Đình Làng Định Công Thượng",
-    image: panoramaPath("7 Tả đình làng.jpg"),
-    initialYaw: 0,
-    mapPosition: { x: 44, y: 49 },
-    hotspots: [
-      { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: 159, pitch: -15, rotation: 0 },
-      { targetId: "scene-6", label: "Trung Đình", yaw: 49, pitch: -17, rotation: 0 },
-    ],
-  },
-  {
-    id: "scene-8",
-    order: "08",
-    title: "Tiền sảnh Đình làng",
-    location: "Đình Làng Định Công Thượng",
-    image: panoramaPath("8 Tiền sảnh Đình làng.jpg"),
-    initialYaw: 0,
-    mapPosition: { x: 38, y: 43 },
-    hotspots: [
-      { targetId: "scene-9", label: "Chính điện Đình làng", yaw: -87, pitch: -14 },
-      { targetId: "scene-3", label: "Tả Hồ", yaw: -166, pitch: -17, rotation: -20 },
-      { targetId: "scene-7", label: "Tả đình làng", yaw: -37, pitch: -15, rotation: 10 },
-    ],
-  },
+  id: "scene-7",
+  order: "07",
+  title: "Tả đình làng",
+  location: "Đình Làng Định Công Thượng",
+  image: panoramaPath("7 Tả đình làng.jpg"),
+  initialYaw: 0,
+  mapPosition: { x: 44, y: 49 },
+  hotspots: [
+    { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: 159, pitch: -15, rotation: 0 },
+    { targetId: "scene-6", label: "Trung Đình", yaw: 49, pitch: -17, rotation: 0 },
+  ],
+  infoMarkers: [
+    {
+      id: "ta-dinh-info",
+      title: "Ban Thờ Thần Nông",
+      eyebrow: "Tả Đình Làng",
+      yaw: -80,
+      pitch: 5,
+      rotation: 0,
+      content: [
+       "Ban thờ Thần Nông được bố trí trang trọng ở không gian lộ thiên ngoài sân đình, phản ánh sâu sắc cội nguồn lịch sử nông nghiệp trù phú lâu đời của làng cổ Định Công trước khi phát triển nghề thủ công. Đây là nơi thờ phụng vị thần cai quản nông nghiệp, gắn liền với ước vọng cầu xin Thần Nông Đại Đế ban cho mưa thuận gió hòa, thiên thời địa lợi, mùa màng luôn tốt tươi, vạn vật hanh thông và đời sống nhân dân được no ấm.",
+      ],
+    },
+  ],
+},
+ {
+  id: "scene-8",
+  order: "08",
+  title: "Tiền sảnh Đình làng",
+  location: "Đình Làng Định Công Thượng",
+  image: panoramaPath("8 Tiền sảnh Đình làng.jpg"),
+  initialYaw: 0,
+  mapPosition: { x: 38, y: 43 },
+  hotspots: [
+    { targetId: "scene-9", label: "Chính điện Đình làng", yaw: -87, pitch: -14 },
+    { targetId: "scene-3", label: "Tả Hồ", yaw: -166, pitch: -17, rotation: -20 },
+    { targetId: "scene-7", label: "Tả đình làng", yaw: -37, pitch: -15, rotation: 10 },
+  ],
+  infoMarkers: [
+    {
+      id: "tien-sanh-info",
+      title: "Tòa Đại Bái",
+      eyebrow: "Tiền Sảnh Đình Làng",
+      yaw: -78,
+      pitch: 15,
+      rotation: 0,
+
+      content: [
+        "Toà Đại Bái là không gian kiến trúc trung tâm nằm ngay sau sân đình. Ngôi đình cổ này mang đậm dáng dấp của nghệ thuật kiến trúc thời Lê với kết cấu xây thấp, phần mái trầm mặc rất dài so với chiều cao và được lợp ngói ta truyền thống. Toà Đại Bái nổi bật với kiểu tường hồi bít đốc, bờ nóc hai đầu đắp đầu kìm vững chãi, bờ dải xây vuông cạnh nhô cao. Bên trong là bộ khung gồm 6 bộ vì kèo bằng gỗ lim tròn vững chãi, liên kết theo kiểu chồng rường bẩy hiên và trụ trốn kẻ suốt.",
+        "Nơi đây không chỉ là không gian hành lễ, thực hiện các nghi thức tế ca trang trọng trong các kỳ lễ hội, mà còn là một kho tàng lịch sử thu nhỏ lưu giữ các bức hoành phi, câu đối sơn son thếp vàng, bộ bát bửu, chấp kích chạm khắc tinh vi, thể hiện đỉnh cao của nghệ thuật điêu khắc gỗ cổ truyền và tấm lòng tri ân sâu sắc của các thế hệ hậu sinh đối với công lao của bậc tiền nhân.",
+      ],
+    },
+  ],
+},
   {
     id: "scene-9",
     order: "09",
@@ -286,17 +330,32 @@ const scenes: TourScene[] = [
     ],
   },
   {
-    id: "scene-13",
-    order: "13",
-    title: "Chính điện Đền thờ Tổ",
-    location: "Đền thờ Tổ nghề Kim hoàn",
-    image: panoramaPath("13 Chính điện Đền thờ Tổ nghề.jpg"),
-    initialYaw: 0,
-    mapPosition: { x: 80, y: 10 },
-    hotspots: [
-      { targetId: "scene-12", label: "Quay lại", yaw: -68, pitch: -14 },
-    ],
-  },
+  id: "scene-13",
+  order: "13",
+  title: "Nhà Thờ Kim Hoàn",
+  location: "Chính điện Đình làng",
+  image: panoramaPath("13 Chính điện Đền thờ Tổ nghề.jpg"),
+  initialYaw: 0,
+  mapPosition: { x: 80, y: 10 },
+  hotspots: [
+    { targetId: "scene-12", label: "Quay lại", yaw: -68, pitch: -14 },
+  ],
+  infoMarkers: [
+    {
+      id: "chinh-dien-den-to-info",
+      title: "Chính Điện Đền Thờ Tổ",
+      eyebrow: "Đền thờ Tổ nghề Kim hoàn",
+      yaw: 145,
+      pitch: 15,
+      rotation: 0,
+      
+      content: [
+        "Chính Điện Đền Thờ Tổ là nơi thờ phụng ba vị Tổ nghề kim hoàn: Trần Hòa, Trần Điện, Trần Điền — những người đã khai sinh nghề vàng bạc truyền thống Việt Nam vào thế kỷ XVII.",
+        "Hàng năm vào ngày 12 tháng 2 âm lịch, các nghệ nhân kim hoàn khắp nơi tề tựu về đây dâng hương tưởng nhớ công đức tổ nghề, gìn giữ mạch nguồn văn hóa làng nghề kim hoàn Định Công Thượng.",
+      ],
+    },
+  ],
+},
 ];
 
 const sceneNarration = new Map<SceneId, string[]>([
@@ -2213,17 +2272,44 @@ function TourExperience({
               aria-label={`Mở thư ${marker.title}`}
               title={marker.title}
             >
-              {!isRead && (
-                <>
-                  <span className="tour-envelope-glow absolute inset-[-1.5rem] rounded-[42%]" />
-                  <span className="tour-envelope-aura absolute bottom-5 left-1/2 h-7 w-[72%] -translate-x-1/2 rounded-full" />
-                </>
-              )}
-              <EnvelopeLottie isOpening={isOpening} isRead={isRead} isHovered={isHovered} rotation={marker.rotation ?? 0} />
-              <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.42rem)] max-w-[11rem] -translate-x-1/2 whitespace-nowrap rounded-[7px] border border-[rgb(232_207_170_/_0.24)] bg-[rgb(45_38_33_/_0.72)] px-3 py-1.5 text-[0.72rem] font-bold text-white opacity-0 shadow-[0_12px_28px_rgba(0,0,0,0.34)] backdrop-blur-xl transition group-hover:opacity-100 group-focus-visible:opacity-100">
-                {isRead ? marker.title : `Mở thư: ${marker.title}`}
-              </span>
-            </button>
+             {/* TÌM ĐOẠN NÀY VÀ THAY TOÀN BỘ */}
+{marker.iconType === "envelope" ? (
+  <>
+    {!isRead && (
+      <>
+        <span className="tour-envelope-glow absolute inset-[-1.5rem] rounded-[42%]" />
+        <span className="tour-envelope-aura absolute bottom-5 left-1/2 h-7 w-[72%] -translate-x-1/2 rounded-full" />
+      </>
+    )}
+    <EnvelopeLottie
+      isOpening={isOpening}
+      isRead={isRead}
+      isHovered={isHovered}
+      rotation={marker.rotation ?? 0}
+    />
+  </>
+) : (
+  <div
+    className={`
+      grid h-14 w-14 place-items-center rounded-full
+      border-2 border-[var(--tour-gold)]
+      bg-[linear-gradient(135deg,rgb(45_38_33_/_0.92),rgb(23_63_45_/_0.88))]
+      shadow-[0_0_16px_rgba(255,216,132,0.35),0_8px_24px_rgba(0,0,0,0.45)]
+      backdrop-blur-sm transition-all duration-300
+      ${isHovered ? "scale-125 border-white shadow-[0_0_28px_rgba(255,216,132,0.75)]" : "scale-100"}
+      ${isRead ? "opacity-60" : "opacity-100"}
+    `}
+  >
+    <Landmark
+      className={`h-7 w-7 transition-colors duration-300 ${isHovered ? "text-white" : "text-[var(--tour-gold-light)]"}`}
+      strokeWidth={1.8}
+    />
+  </div>
+)}
+<span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.42rem)] max-w-[11rem] -translate-x-1/2 whitespace-nowrap rounded-[7px] border border-[rgb(232_207_170_/_0.24)] bg-[rgb(45_38_33_/_0.72)] px-3 py-1.5 text-[0.72rem] font-bold text-white opacity-0 shadow-[0_12px_28px_rgba(0,0,0,0.34)] backdrop-blur-xl transition group-hover:opacity-100 group-focus-visible:opacity-100">
+  {marker.title}
+</span>
+</button>
           );
         })}
       </div>
