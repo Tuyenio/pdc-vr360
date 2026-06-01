@@ -761,14 +761,14 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
     >
       <canvas
         ref={canvasRef}
-        className={`absolute inset-0 h-full w-full sepia-[0.24] contrast-[1.24] saturate-[0.92] brightness-[0.58] transition-opacity duration-500 ${
+        className={`absolute inset-0 h-full w-full sepia-[0.24] contrast-[1.24] saturate-[0.92] brightness-[0.68] transition-opacity duration-500 ${
           isPanoramaReady ? "opacity-100" : "opacity-0"
         }`}
       />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(16,25,19,0.58),rgba(36,28,19,0.12)_48%,rgba(12,18,14,0.62))]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,232,180,0.12)_0%,rgba(65,48,31,0.12)_45%,rgba(5,8,6,0.56)_100%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,226,176,0.15)_0%,rgba(40,31,22,0.02)_38%,rgba(10,10,8,0.46)_100%)]" />
-      <div className="pointer-events-none absolute inset-0 opacity-[0.14] [background-image:linear-gradient(0deg,rgba(255,252,245,0.18)_1px,transparent_1px)] [background-size:100%_3px]" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(16,25,19,0.42),rgba(36,28,19,0.08)_48%,rgba(12,18,14,0.48))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,232,180,0.08)_0%,rgba(65,48,31,0.08)_45%,rgba(5,8,6,0.38)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,226,176,0.1)_0%,rgba(40,31,22,0.02)_38%,rgba(10,10,8,0.32)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(0deg,rgba(255,252,245,0.12)_1px,transparent_1px)] [background-size:100%_4px]" />
 
       <div
         className={`absolute inset-0 z-20 grid place-items-center bg-[var(--background)] text-[var(--tour-ink)] transition-opacity duration-500 ${
@@ -786,21 +786,21 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
         }`}
       >
         <div className="flex w-full max-w-5xl flex-col items-center text-center">
-          <div className="relative w-[min(94vw,860px)] px-5 pb-7 pt-8 sm:px-10 sm:pb-8 sm:pt-10 lg:w-[min(94vw,940px)]">
+          <div className="relative w-[min(88vw,780px)] px-4  pt-9 sm:px-9 sm:pb-7 sm:pt-9 lg:w-[min(90vw,840px)]">
             <Image
               src={welcomeTitleBackground}
               alt=""
               fill
               priority
-              sizes="1120px"
-              className="pointer-events-none scale-[1.24] select-none object-contain sm:scale-[1.1] lg:scale-[1.26]"
+              sizes="1000px"
+              className="pointer-events-none scale-x-[1.32] scale-y-[1.72] select-none object-contain sm:scale-x-[1.05] sm:scale-y-[1.35] lg:scale-x-[1.16] lg:scale-y-[1.26]"
               draggable={false}
             />
-            <h1 className="font-display-vn relative text-balance text-[1.85rem] font-bold uppercase leading-[1.08] text-[var(--tour-ink)] drop-shadow-[0_2px_0_rgba(255,252,245,0.92),0_3px_8px_rgba(45,38,33,0.28)] sm:text-[3rem] sm:leading-[1] lg:text-[3.72rem]">
+            <h1 className="font-display-vn relative text-balance text-[1.85rem] font-bold uppercase leading-[1.18] text-[var(--tour-ink)] drop-shadow-[0_2px_0_rgba(255,252,245,0.92),0_3px_8px_rgba(45,38,33,0.28)] sm:text-[3rem] sm:leading-[1.12] lg:text-[3.72rem]">
               Số hóa di tích
-              <span className="mt-1 block text-[var(--primary)] sm:mt-0">lịch sử văn hóa</span>
+              <span className="mt-1.5 block text-[var(--primary)] sm:mt-1">lịch sử văn hóa</span>
             </h1>
-            <p className="relative mt-3 text-[0.78rem] font-extrabold text-[rgb(58_50_44_/_0.94)] drop-shadow-[0_1px_0_rgba(255,252,245,0.76)] sm:text-[1rem]">
+            <p className="relative mt-3.5 text-[0.76rem] font-bold text-[rgb(58_50_44_/_0.88)] drop-shadow-[0_1px_0_rgba(255,252,245,0.76)] sm:mt-4 sm:text-[0.95rem]">
               Đình Làng Định Công Thượng · Đền thờ Tổ nghề Kim hoàn
             </p>
           </div>
@@ -2288,16 +2288,16 @@ function TourExperience({
               </button>
             </div>
 
-            <div className="grid min-h-0 gap-3 overflow-y-auto p-3 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin] sm:p-4 lg:grid-cols-[minmax(0,7fr)_minmax(260px,3fr)] lg:overflow-hidden">
+            <div className="flex min-h-0 flex-col gap-3 overflow-y-auto p-3 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin] sm:p-4 lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(260px,3fr)] lg:overflow-hidden">
               <MiniMap
                 activeScene={activeScene}
                 onSceneSelect={(sceneId) => goToScene(sceneId, true)}
                 cameraYaw={cameraYaw}
                 mode="overview"
-                className="min-h-[320px] lg:h-full"
+                className="min-h-[280px] shrink-0 lg:h-full lg:min-h-0"
                 mapClassName="lg:min-h-[430px]"
               />
-              <aside className="flex min-h-0 min-w-0 flex-col rounded-[7px] border border-[rgb(255_252_245_/_0.14)] bg-[rgb(255_252_245_/_0.06)] p-3 sm:p-4">
+              <aside className="flex min-h-0 min-w-0 shrink-0 flex-col rounded-[7px] border border-[rgb(255_252_245_/_0.14)] bg-[rgb(255_252_245_/_0.06)] p-3 sm:p-4">
                 <div className="shrink-0">
                   <p className="text-[0.7rem] font-black uppercase tracking-[0.14em] text-[var(--tour-gold-light)]">
                     Bạn đang ở đây
@@ -2976,7 +2976,7 @@ function MiniMap({
 
       <div
         className={`relative overflow-hidden rounded-[5px] border border-white/[0.07] bg-[radial-gradient(circle_at_50%_76%,rgb(232_207_170_/_0.055),transparent_24%),linear-gradient(180deg,rgb(255_252_245_/_0.026),rgb(0_0_0_/_0.025))] ${
-          compact ? "aspect-[4/3]" : "aspect-[16/10] min-h-[240px]"
+          compact ? "aspect-[4/3]" : "aspect-[4/3] min-h-[240px] sm:aspect-[16/10]"
         } ${mapClassName}`}
       >
         <svg
