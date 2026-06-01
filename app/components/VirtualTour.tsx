@@ -298,7 +298,7 @@ const scenes: TourScene[] = [
       title: "Chính Điện Đình Làng",
       eyebrow: "Nhà Thờ Tổ Kim Hoàn",
       yaw: -85,
-      pitch: -30,
+      pitch: -20,
       rotation: 0,
       iconType: "landmark",
       content: [
