@@ -533,6 +533,7 @@ function directionFromYawPitch(yaw: number, pitch: number) {
 export default function VirtualTour() {
   const [hasEntered, setHasEntered] = useState(false);
   const [isEntering, setIsEntering] = useState(false);
+  const [initialSceneId, setInitialSceneId] = useState<SceneId>("scene-1");
   const [soundEnabled, setSoundEnabled] = useState(true);
   const enterTimerRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -623,11 +624,12 @@ export default function VirtualTour() {
     setSoundEnabled((value) => !value);
   }, []);
 
-  const handleEnter = useCallback(() => {
+  const handleEnter = useCallback((sceneId: SceneId = "scene-1") => {
     if (isEntering) {
       return;
     }
 
+    setInitialSceneId(sceneId);
     setIsEntering(true);
     if (soundEnabled) {
       void playAudio();
@@ -693,6 +695,7 @@ export default function VirtualTour() {
         <WelcomeScreen isEntering={isEntering} onEnter={handleEnter} />
       ) : (
         <TourExperience
+          initialSceneId={initialSceneId}
           soundEnabled={soundEnabled}
           onToggleSound={toggleSound}
           onNarrationStateChange={handleNarrationStateChange}
@@ -745,7 +748,13 @@ function useDeviceOrientation() {
   return { orientation, isSupported, requestPermission, startListening };
 }
 
-function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: () => void }) {
+function WelcomeScreen({
+  isEntering,
+  onEnter,
+}: {
+  isEntering: boolean;
+  onEnter: (sceneId?: SceneId) => void;
+}) {
   const [isPanoramaReady, setIsPanoramaReady] = useState(false);
   const [isFirstSceneReady, setIsFirstSceneReady] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -896,7 +905,7 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
 
           <button
             type="button"
-            onClick={onEnter}
+            onClick={() => onEnter("scene-1")}
             disabled={isEntering || !canEnterTour}
             className="group relative mt-5 inline-flex min-w-[15.5rem] items-center justify-between gap-4 overflow-hidden rounded-full border border-[rgb(232_207_170_/_0.72)] bg-[linear-gradient(90deg,#173f2d_0%,#315f50_52%,#b98b56_100%)] px-5 py-2.5 text-[0.95rem] font-extrabold text-white shadow-[0_16px_48px_rgb(8_10_7_/_0.44),0_0_0_3px_rgb(185_139_86_/_0.22),inset_0_1px_0_rgb(255_255_255_/_0.26),inset_0_-1px_0_rgb(45_38_33_/_0.3)] transition-[transform,box-shadow,filter] duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_22px_62px_rgb(8_10_7_/_0.52),0_0_0_3px_rgb(232_207_170_/_0.28),inset_0_1px_0_rgb(255_255_255_/_0.34)] active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70 sm:mt-6 sm:min-w-[17rem] sm:px-6 sm:py-3 sm:text-[1.04rem]"
           >
@@ -908,8 +917,20 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
           </button>
 
           <div className="relative mt-6 grid w-full max-w-[480px] grid-cols-2 gap-4 px-4 sm:mt-7 sm:gap-6">
-            <WelcomeCard image={dinhCardImage} label="Đình Làng" rotate="-rotate-6" />
-            <WelcomeCard image={shrineCardImage} label="Đền thờ Tổ nghề" rotate="rotate-5" />
+            <WelcomeCard
+              image={dinhCardImage}
+              label="Đình Làng Định Công Thượng"
+              rotate="-rotate-6"
+              disabled={isEntering || !canEnterTour}
+              onClick={() => onEnter("scene-8")}
+            />
+            <WelcomeCard
+              image={shrineCardImage}
+              label="Đền thờ Tổ nghề Kim hoàn"
+              rotate="rotate-5"
+              disabled={isEntering || !canEnterTour}
+              onClick={() => onEnter("scene-13")}
+            />
           </div>
         </div>
       </section>
@@ -1066,13 +1087,24 @@ function WelcomeCard({
   image,
   label,
   rotate,
+  disabled,
+  onClick,
 }: {
   image: string;
   label: string;
   rotate: string;
+  disabled?: boolean;
+  onClick?: () => void;
 }) {
   return (
-    <div className={`group relative ${rotate}`}>
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={`group relative block w-full text-left focus:outline-none disabled:cursor-not-allowed disabled:opacity-70 ${rotate}`}
+      title={label}
+      aria-label={label}
+    >
       <div className="absolute inset-0 rounded-[18px] bg-[conic-gradient(from_140deg,#f6ead4,#c8a27a,#315f50,#c8a27a,#f6ead4)] opacity-55 blur-[14px]" />
       <div className="relative rounded-[18px] bg-[linear-gradient(150deg,rgba(255,252,245,0.9),rgba(255,252,245,0.55)_46%,rgba(255,252,245,0.2))] p-[2px] shadow-[0_26px_70px_rgb(74_63_53_/_0.26)]">
         <div className="rounded-[16px] border border-[rgb(166_124_82_/_0.18)] bg-[linear-gradient(160deg,rgba(255,252,245,0.85),rgba(236,229,216,0.6))] p-2">
@@ -1089,7 +1121,7 @@ function WelcomeCard({
             <span className="absolute inset-0 ring-1 ring-white/40" />
           </div>
           <div className="mt-2 flex items-center justify-between px-1">
-            <p className="font-display-vn text-[0.8rem] font-bold text-[var(--foreground)] sm:text-[0.9rem]">
+            <p className="font-display-vn max-w-[10.6rem] truncate text-[0.8rem] font-bold text-[var(--foreground)] sm:max-w-[11.8rem] sm:text-[0.9rem]" title={label}>
               {label}
             </p>
             <span className="text-[0.58rem] font-black uppercase tracking-[0.22em] text-[var(--tour-gold)]">
@@ -1098,20 +1130,22 @@ function WelcomeCard({
           </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
 function TourExperience({
+  initialSceneId,
   soundEnabled,
   onToggleSound,
   onNarrationStateChange,
 }: {
+  initialSceneId: SceneId;
   soundEnabled: boolean;
   onToggleSound: () => void;
   onNarrationStateChange?: (isPlaying: boolean) => void;
 }) {
-  const [currentSceneId, setCurrentSceneId] = useState<SceneId>("scene-1");
+  const [currentSceneId, setCurrentSceneId] = useState<SceneId>(initialSceneId);
   const [activePanel, setActivePanel] = useState<Panel>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);
@@ -1314,6 +1348,8 @@ function TourExperience({
   }, [activeInfoMarker, closeInfoMarker]);
 
   useEffect(() => {
+    const narrationAudio = narrationRef.current;
+
     return () => {
       if (openingInfoTimerRef.current) {
         window.clearTimeout(openingInfoTimerRef.current);
@@ -1321,8 +1357,8 @@ function TourExperience({
       if (closingInfoTimerRef.current) {
         window.clearTimeout(closingInfoTimerRef.current);
       }
-      if (narrationRef.current) {
-        narrationRef.current.onended = null;
+      if (narrationAudio) {
+        narrationAudio.onended = null;
       }
     };
   }, []);
