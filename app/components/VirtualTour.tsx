@@ -7,8 +7,11 @@ import {
   MapPin,
   Maximize2,
   Minimize2,
+  Eye,
+  EyeOff,
   Pause,
   Play,
+  MoveRight,
   Scan,
   Settings,
   Volume2,
@@ -19,6 +22,8 @@ import Image from "next/image";
 import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import Lottie, { type LottieRefCurrentProps } from "lottie-react";
+import letterAnimation from "@/letter.json";
 
 type SceneId =
   | "scene-1"
@@ -44,6 +49,16 @@ type Hotspot = {
   nextYaw?: number;
 };
 
+type InfoMarker = {
+  id: string;
+  title: string;
+  eyebrow: string;
+  yaw: number;
+  pitch: number;
+  rotation?: number;
+  content: string[];
+};
+
 type TourScene = {
   id: SceneId;
   order: string;
@@ -56,18 +71,26 @@ type TourScene = {
     y: number;
   };
   hotspots: Hotspot[];
+  infoMarkers?: InfoMarker[];
 };
 
 type Panel = "scenes" | "info" | "map" | "settings" | null;
+type MapRoute = {
+  from: SceneId;
+  to: SceneId;
+  via?: { x: number; y: number }[];
+};
 
 const basePath = "/images-tour/Đình Làng-Đền Thờ";
+const panoramaPath = (fileName: string) => encodeURI(`${basePath}/${fileName}`);
 const hotspotIcon = encodeURI("/icon/hotspotelement.png");
+const infoModalBackground = encodeURI("/modal/modal-2.png");
+const welcomeTitleBackground = encodeURI("/modal/background-1.png");
 const heroImage = encodeURI(`${basePath}/6 Trung Đình.jpg`);
+const welcomeBackgroundImage = panoramaPath("3 Tả Hồ.jpg");
 const dinhCardImage = encodeURI(`${basePath}/1 Cổng Đình.jpg`);
 const shrineCardImage = encodeURI(`${basePath}/13 Chính điện Đền thờ Tổ nghề.jpg`);
 const backgroundAudio = encodeURI("/media/Nhạc Phật Giáo sâu lắng.mp3");
-
-const panoramaPath = (fileName: string) => encodeURI(`${basePath}/${fileName}`);
 
 const PANORAMA_CAMERA_DISTANCE = 0.12;
 const DEFAULT_FOV = 76;
@@ -97,8 +120,23 @@ const scenes: TourScene[] = [
     location: "Đình Làng Định Công Thượng",
     image: panoramaPath("1 Cổng Đình.jpg"),
     initialYaw: 113,
-    mapPosition: { x: 50, y: 88 },
+    mapPosition: { x: 50, y: 91 },
     hotspots: [{ targetId: "scene-2", label: "Tiền Đình", yaw: 115, pitch: -20 }],
+    infoMarkers: [
+      {
+        id: "tam-quan",
+        title: "Tam quan",
+        eyebrow: "Cổng Đại Môn",
+        // Sửa vị trí icon tại đây: yaw xoay ngang, pitch nâng/hạ theo chiều dọc.
+        yaw: 98,
+        pitch: -8,
+        rotation: -3,
+        content: [
+          "Tam Quan là lối vào chính dẫn bách gia trăm họ vào không gian linh thiêng của Đình Định Công Thượng, được xây dựng theo phong cách kiến trúc nghi môn truyền thống dưới dạng các cột trụ biểu cao vút gồm 4 trụ: hai trụ lớn ở giữa đỉnh chạm hình bốn chim phượng, hai trụ nhỏ hai bên đỉnh đắp đôi nghê chầu uốn mình uy nghiêm nhằm soi xét tâm linh con người trước khi bước vào nơi điện thờ.",
+          "Trải qua bao thăng trầm thời gian và các đợt trùng tu lớn dưới thời nhà Nguyễn (thế kỷ XIX), cổng Đại Môn không chỉ là ranh giới kiến trúc chuyển tiếp từ không gian đời thường vào chốn thâm nghiêm, tách biệt sự ồn ào của phố thị hiện đại để đưa du khách bước vào khuôn viên thanh tịnh, thâm nghiêm của một di tích cổ.",
+        ],
+      },
+    ],
   },
   {
     id: "scene-2",
@@ -122,7 +160,7 @@ const scenes: TourScene[] = [
     location: "Đình Làng Định Công Thượng",
     image: panoramaPath("3 Tả Hồ.jpg"),
     initialYaw: 0,
-    mapPosition: { x: 30, y: 65 },
+    mapPosition: { x: 35, y: 65 },
     hotspots: [
       { targetId: "scene-2", label: "Tiền Đình", yaw: -40, pitch: -18, rotation: 2 },
       { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: -220, pitch: -15, nextYaw: -180 },
@@ -257,11 +295,32 @@ const scenes: TourScene[] = [
 ];
 
 const sceneById = new Map(scenes.map((scene) => [scene.id, scene]));
-const mapEdges = scenes.flatMap((scene) =>
-  scene.hotspots.map((hotspot) => ({
-    from: scene.id,
-    to: hotspot.targetId,
-  })),
+const mapRoutes: MapRoute[] = [
+  { from: "scene-1", to: "scene-2" },
+  { from: "scene-2", to: "scene-3" },
+  { from: "scene-2", to: "scene-4" },
+  { from: "scene-2", to: "scene-6" },
+  { from: "scene-3", to: "scene-8" },
+  { from: "scene-4", to: "scene-5" },
+  { from: "scene-5", to: "scene-6" },
+  { from: "scene-6", to: "scene-7" },
+  { from: "scene-6", to: "scene-10" },
+  { from: "scene-6", to: "scene-11" },
+  { from: "scene-7", to: "scene-8" },
+  { from: "scene-8", to: "scene-9" },
+  { from: "scene-11", to: "scene-12" },
+  { from: "scene-12", to: "scene-13" },
+];
+const locationGroups = Array.from(
+  scenes
+    .reduce((groups, scene) => {
+      if (!groups.has(scene.location)) {
+        groups.set(scene.location, scene);
+      }
+
+      return groups;
+    }, new Map<string, TourScene>())
+    .values(),
 );
 const panoramaTextureCache = new Map<string, THREE.Texture>();
 const panoramaTexturePromises = new Map<string, Promise<THREE.Texture>>();
@@ -566,8 +625,10 @@ function useDeviceOrientation() {
 
 function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: () => void }) {
   const [isPanoramaReady, setIsPanoramaReady] = useState(false);
+  const [isFirstSceneReady, setIsFirstSceneReady] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
+  const canEnterTour = isPanoramaReady && isFirstSceneReady;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -599,9 +660,23 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
     scene.add(sphere);
 
     let isDisposed = false;
-    preloadSceneAndHotspots(sceneById.get("scene-1")!);
+    const firstScene = sceneById.get("scene-1")!;
+    
+    preloadSceneAndHotspots(firstScene);
 
-    loadPanoramaTexture(heroImage)
+    loadPanoramaTexture(firstScene.image)
+      .then(() => {
+        if (!isDisposed) {
+          setIsFirstSceneReady(true);
+        }
+      })
+      .catch(() => {
+        if (!isDisposed) {
+          setIsFirstSceneReady(true);
+        }
+      });
+
+    loadPanoramaTexture(welcomeBackgroundImage)
       .then((texture) => {
         if (isDisposed) {
           return;
@@ -653,38 +728,46 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
     >
       <canvas
         ref={canvasRef}
-        className={`absolute inset-0 h-full w-full transition-opacity duration-500 ${
+        className={`absolute inset-0 h-full w-full sepia-[0.24] contrast-[1.24] saturate-[0.92] brightness-[0.58] transition-opacity duration-500 ${
           isPanoramaReady ? "opacity-100" : "opacity-0"
         }`}
       />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,252,245,0.9)_0%,rgba(245,241,230,0.64)_36%,rgba(45,38,33,0.34)_100%)]" />
-      <div className="absolute inset-x-0 top-0 h-[46dvh] bg-[radial-gradient(ellipse_at_center,rgba(255,252,245,0.96)_0%,rgba(255,252,245,0.78)_45%,rgba(255,252,245,0)_76%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_86%,rgba(166,124,82,0.26),transparent_36%),radial-gradient(circle_at_84%_12%,rgba(49,95,80,0.18),transparent_28%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(74,63,53,0.08)_0_1px,transparent_1px)] bg-[length:92px_100%] opacity-60" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(16,25,19,0.58),rgba(36,28,19,0.12)_48%,rgba(12,18,14,0.62))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,232,180,0.12)_0%,rgba(65,48,31,0.12)_45%,rgba(5,8,6,0.56)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,226,176,0.15)_0%,rgba(40,31,22,0.02)_38%,rgba(10,10,8,0.46)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.14] [background-image:linear-gradient(0deg,rgba(255,252,245,0.18)_1px,transparent_1px)] [background-size:100%_3px]" />
 
       <div
         className={`absolute inset-0 z-20 grid place-items-center bg-[var(--background)] text-[var(--tour-ink)] transition-opacity duration-500 ${
-          isPanoramaReady ? "pointer-events-none opacity-0" : "opacity-100"
+          canEnterTour ? "pointer-events-none opacity-0" : "opacity-100"
         }`}
       >
         <div className="rounded-full border border-[rgb(166_124_82_/_0.22)] bg-[rgb(255_252_245_/_0.72)] px-5 py-2 text-[0.82rem] font-black uppercase tracking-[0.18em] shadow-[0_18px_52px_rgb(74_63_53_/_0.16)]">
-          Đang tải không gian 360°
+          Đang tải không gian 360°...
         </div>
       </div>
 
       <section
         className={`relative z-10 grid min-h-[100dvh] place-items-center px-4 py-8 transition-[opacity,transform] duration-500 ${
-          isPanoramaReady ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+          canEnterTour ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
         }`}
       >
         <div className="flex w-full max-w-5xl flex-col items-center text-center">
-          <div className="max-w-4xl">
-
-            <h1 className="font-display-vn mt-4 text-balance text-[2.05rem] font-bold uppercase leading-[1.12] text-[var(--tour-ink)] drop-shadow-[0_2px_0_rgba(255,252,245,0.86)] sm:text-[3.6rem] sm:leading-[1.02] lg:text-[4.8rem]">
+          <div className="relative w-[min(94vw,860px)] px-5 pb-7 pt-8 sm:px-10 sm:pb-8 sm:pt-10 lg:w-[min(94vw,940px)]">
+            <Image
+              src={welcomeTitleBackground}
+              alt=""
+              fill
+              priority
+              sizes="1120px"
+              className="pointer-events-none scale-[1.24] select-none object-contain sm:scale-[1.1] lg:scale-[1.26]"
+              draggable={false}
+            />
+            <h1 className="font-display-vn relative text-balance text-[1.85rem] font-bold uppercase leading-[1.08] text-[var(--tour-ink)] drop-shadow-[0_2px_0_rgba(255,252,245,0.92),0_3px_8px_rgba(45,38,33,0.28)] sm:text-[3rem] sm:leading-[1] lg:text-[3.72rem]">
               Số hóa di tích
               <span className="mt-1 block text-[var(--primary)] sm:mt-0">lịch sử văn hóa</span>
             </h1>
-            <p className="mt-4 text-[0.85rem] font-extrabold text-[rgb(74_63_53_/_0.9)] sm:text-[1.2rem]">
+            <p className="relative mt-3 text-[0.78rem] font-extrabold text-[rgb(58_50_44_/_0.94)] drop-shadow-[0_1px_0_rgba(255,252,245,0.76)] sm:text-[1rem]">
               Đình Làng Định Công Thượng · Đền thờ Tổ nghề Kim hoàn
             </p>
           </div>
@@ -692,19 +775,167 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
           <button
             type="button"
             onClick={onEnter}
-            disabled={isEntering || !isPanoramaReady}
-            className="mt-[8dvh] rounded-full border border-[rgb(255_252_245_/_0.48)] bg-[linear-gradient(135deg,#315f50,#a67c52_58%,#735a3a)] px-7 py-3 text-[0.95rem] font-extrabold text-white shadow-[0_22px_58px_rgb(74_63_53_/_0.34),inset_0_1px_0_rgb(255_255_255_/_0.28)] transition hover:scale-[1.03] hover:shadow-[0_28px_70px_rgb(74_63_53_/_0.42)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70 sm:px-9 sm:text-[1.25rem]"
+            disabled={isEntering || !canEnterTour}
+            className="group relative mt-5 inline-flex min-w-[15.5rem] items-center justify-between gap-4 overflow-hidden rounded-full border border-[rgb(232_207_170_/_0.72)] bg-[linear-gradient(90deg,#173f2d_0%,#315f50_52%,#b98b56_100%)] px-5 py-2.5 text-[0.95rem] font-extrabold text-white shadow-[0_16px_48px_rgb(8_10_7_/_0.44),0_0_0_3px_rgb(185_139_86_/_0.22),inset_0_1px_0_rgb(255_255_255_/_0.26),inset_0_-1px_0_rgb(45_38_33_/_0.3)] transition-[transform,box-shadow,filter] duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_22px_62px_rgb(8_10_7_/_0.52),0_0_0_3px_rgb(232_207_170_/_0.28),inset_0_1px_0_rgb(255_255_255_/_0.34)] active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70 sm:mt-6 sm:min-w-[17rem] sm:px-6 sm:py-3 sm:text-[1.04rem]"
           >
-            Khám phá ngay
+            <span className="welcome-cta-sheen pointer-events-none absolute inset-0" />
+            <span className="relative">Bắt đầu tham quan</span>
+            <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[rgb(255_252_245_/_0.56)] bg-[linear-gradient(135deg,#8e6533,#c89a55)] text-white shadow-[0_6px_14px_rgb(45_38_33_/_0.28),inset_0_1px_0_rgb(255_255_255_/_0.34)] transition duration-300 group-hover:translate-x-0.5 group-hover:brightness-110">
+              <MoveRight className="h-4 w-4" strokeWidth={2.4} />
+            </span>
           </button>
 
-          <div className="relative mt-[6dvh] grid w-full max-w-[520px] grid-cols-2 gap-4 px-4 sm:gap-7">
-            <span className="pointer-events-none absolute -left-8 -right-8 top-1/2 h-px bg-[linear-gradient(90deg,transparent,rgba(185,139,86,0.55),transparent)]" />
+          <div className="relative mt-6 grid w-full max-w-[480px] grid-cols-2 gap-4 px-4 sm:mt-7 sm:gap-6">
             <WelcomeCard image={dinhCardImage} label="Đình Làng" rotate="-rotate-6" />
             <WelcomeCard image={shrineCardImage} label="Đền thờ Tổ nghề" rotate="rotate-5" />
           </div>
         </div>
       </section>
+      <style jsx global>{`
+        @keyframes welcomeCtaSheen {
+          from {
+            transform: translateX(-120%) skewX(-18deg);
+          }
+          to {
+            transform: translateX(180%) skewX(-18deg);
+          }
+        }
+
+        .welcome-cta-sheen {
+          background: linear-gradient(90deg, transparent, rgba(255, 252, 245, 0.28), transparent);
+          animation: welcomeCtaSheen 3.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        .welcome-title-plaque {
+          isolation: isolate;
+          border-radius: 56px 56px 48px 48px / 42px 42px 36px 36px;
+        }
+
+        .welcome-title-plaque::before,
+        .welcome-title-plaque::after {
+          content: "";
+          position: absolute;
+          top: 30%;
+          z-index: -1;
+          width: 5.25rem;
+          height: 6.1rem;
+          border: 2px solid rgba(185, 139, 86, 0.55);
+          background: linear-gradient(180deg, rgba(255, 252, 245, 0.96), rgba(246, 234, 210, 0.96));
+          box-shadow:
+            0 0 0 5px rgba(255, 252, 245, 0.62),
+            0 0 0 7px rgba(166, 124, 82, 0.34),
+            0 22px 54px rgba(8, 10, 7, 0.28);
+        }
+
+        .welcome-title-plaque::before {
+          left: -2.6rem;
+          border-radius: 999px 0 0 999px;
+          border-right: 0;
+        }
+
+        .welcome-title-plaque::after {
+          right: -2.6rem;
+          border-left: 0;
+          border-radius: 0 999px 999px 0;
+        }
+
+        .welcome-plaque-crown {
+          position: absolute;
+          left: 50%;
+          top: -3.05rem;
+          z-index: -1;
+          width: 9.5rem;
+          height: 5.8rem;
+          transform: translateX(-50%);
+          border: 2px solid rgba(185, 139, 86, 0.58);
+          border-bottom: 0;
+          border-radius: 999px 999px 0 0;
+          background:
+            radial-gradient(circle at 50% 52%, rgba(185, 139, 86, 0.28) 0 0.34rem, transparent 0.36rem),
+            linear-gradient(180deg, rgba(255, 252, 245, 0.96), rgba(246, 234, 210, 0.96));
+          box-shadow:
+            0 0 0 5px rgba(255, 252, 245, 0.62),
+            0 0 0 7px rgba(166, 124, 82, 0.34);
+        }
+
+        .welcome-plaque-crown::before,
+        .welcome-plaque-crown::after {
+          content: "";
+          position: absolute;
+          left: 50%;
+          background: rgba(185, 139, 86, 0.72);
+          transform: translateX(-50%) rotate(45deg);
+        }
+
+        .welcome-plaque-crown::before {
+          top: 1.45rem;
+          width: 1.15rem;
+          height: 1.15rem;
+          border-radius: 0.16rem;
+        }
+
+        .welcome-plaque-crown::after {
+          top: 2.72rem;
+          width: 4.4rem;
+          height: 1px;
+          border-radius: 999px;
+          transform: translateX(-50%);
+        }
+
+        .welcome-plaque-ornament {
+          position: absolute;
+          top: 50%;
+          width: 5.8rem;
+          height: 2.8rem;
+          transform: translateY(-8%);
+          opacity: 0.34;
+          background:
+            radial-gradient(ellipse at 24% 54%, transparent 0 0.65rem, rgba(185, 139, 86, 0.76) 0.68rem 0.76rem, transparent 0.8rem),
+            radial-gradient(ellipse at 44% 54%, transparent 0 0.44rem, rgba(185, 139, 86, 0.62) 0.47rem 0.54rem, transparent 0.58rem),
+            linear-gradient(90deg, transparent 0%, rgba(185, 139, 86, 0.74) 52%, transparent 100%);
+          background-size: 100% 100%, 100% 100%, 100% 1px;
+          background-position: center, center, center;
+          background-repeat: no-repeat;
+        }
+
+        .welcome-plaque-ornament--left {
+          left: 2.4rem;
+        }
+
+        .welcome-plaque-ornament--right {
+          right: 2.4rem;
+          transform: translateY(-8%) scaleX(-1);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .welcome-cta-sheen,
+          .tour-envelope-glow {
+            animation: none;
+          }
+
+          .welcome-cta-sheen {
+            opacity: 0;
+          }
+
+          .tour-envelope-glow {
+            opacity: 0.32;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .welcome-title-plaque::before,
+          .welcome-title-plaque::after,
+          .welcome-plaque-ornament {
+            display: none;
+          }
+
+          .welcome-plaque-crown {
+            top: -2.4rem;
+            width: 7rem;
+            height: 4.4rem;
+          }
+        }
+      `}</style>
     </main>
   );
 }
@@ -767,6 +998,9 @@ function TourExperience({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMiniMapExpanded, setIsMiniMapExpanded] = useState(true);
+  const [isMiniMapOverviewOpen, setIsMiniMapOverviewOpen] = useState(false);
+  const [cameraYaw, setCameraYaw] = useState(0);
+  const [showItems, setShowItems] = useState(true);
 
   const rootRef = useRef<HTMLElement | null>(null);
   const canvasWrapRef = useRef<HTMLDivElement | null>(null);
@@ -792,6 +1026,14 @@ function TourExperience({
   const currentFovRef = useRef(DEFAULT_FOV);
   const targetFovRef = useRef(DEFAULT_FOV);
   const lastPinchDistanceRef = useRef<number | null>(null);
+  const infoMarkerRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const [activeInfoMarker, setActiveInfoMarker] = useState<InfoMarker | null>(null);
+  const [isInfoMarkerClosing, setIsInfoMarkerClosing] = useState(false);
+  const [openingInfoMarkerId, setOpeningInfoMarkerId] = useState<string | null>(null);
+  const [readMarkers, setReadMarkers] = useState<Set<string>>(new Set());
+  const [hoveredMarkerId, setHoveredMarkerId] = useState<string | null>(null);
+  const openingInfoTimerRef = useRef<number | null>(null);
+  const closingInfoTimerRef = useRef<number | null>(null);
 
   const { orientation, isSupported, requestPermission, startListening } = useDeviceOrientation();
 
@@ -803,6 +1045,49 @@ function TourExperience({
     () => sceneById.get(currentSceneId) ?? sceneById.get("scene-1")!,
     [currentSceneId],
   );
+
+  const closeInfoMarker = useCallback(() => {
+    if (!activeInfoMarker || isInfoMarkerClosing) {
+      return;
+    }
+
+    if (closingInfoTimerRef.current) {
+      window.clearTimeout(closingInfoTimerRef.current);
+    }
+
+    setIsInfoMarkerClosing(true);
+    closingInfoTimerRef.current = window.setTimeout(() => {
+      setActiveInfoMarker(null);
+      setIsInfoMarkerClosing(false);
+      closingInfoTimerRef.current = null;
+    }, 240);
+  }, [activeInfoMarker, isInfoMarkerClosing]);
+
+  useEffect(() => {
+    if (!activeInfoMarker) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeInfoMarker();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeInfoMarker, closeInfoMarker]);
+
+  useEffect(() => {
+    return () => {
+      if (openingInfoTimerRef.current) {
+        window.clearTimeout(openingInfoTimerRef.current);
+      }
+      if (closingInfoTimerRef.current) {
+        window.clearTimeout(closingInfoTimerRef.current);
+      }
+    };
+  }, []);
 
   const positionCamera = useCallback((scene: TourScene, distance = PANORAMA_CAMERA_DISTANCE, yaw = scene.initialYaw) => {
     const camera = cameraRef.current;
@@ -854,6 +1139,35 @@ function TourExperience({
       }
 
       const worldPosition = directionFromYawPitch(hotspot.yaw, hotspot.pitch)
+        .normalize()
+        .multiplyScalar(240);
+      const isVisible = worldPosition.clone().normalize().dot(cameraDirection) > 0.08;
+      const projected = worldPosition.clone().project(camera);
+      const x = (projected.x * 0.5 + 0.5) * clientWidth;
+      const y = (-projected.y * 0.5 + 0.5) * clientHeight;
+      const isOnScreen =
+        isVisible &&
+        projected.z < 1 &&
+        x > -80 &&
+        x < clientWidth + 80 &&
+        y > -80 &&
+        y < clientHeight + 80;
+
+      element.style.opacity = isOnScreen ? "1" : "0";
+      element.style.pointerEvents = isOnScreen ? "auto" : "none";
+      element.style.left = `${x}px`;
+      element.style.top = `${y}px`;
+      element.style.transform = `translate(-50%, -50%) scale(${isOnScreen ? 1 : 0.88})`;
+    });
+
+    scene.infoMarkers?.forEach((marker) => {
+      const element = infoMarkerRefs.current.get(`${scene.id}-${marker.id}`);
+
+      if (!element) {
+        return;
+      }
+
+      const worldPosition = directionFromYawPitch(marker.yaw, marker.pitch)
         .normalize()
         .multiplyScalar(240);
       const isVisible = worldPosition.clone().normalize().dot(cameraDirection) > 0.08;
@@ -1102,6 +1416,13 @@ function TourExperience({
       if (!vrModeRef.current) {
         controls.update();
       }
+      
+      // Update camera yaw for mini-map rotation
+      const direction = new THREE.Vector3();
+      camera.getWorldDirection(direction);
+      const yaw = yawFromDirection(direction);
+      setCameraYaw(yaw);
+      
       updateHotspots();
 
       renderer.render(threeScene, camera);
@@ -1326,7 +1647,7 @@ function TourExperience({
             }
           });
 
-      setIsLoading(true);
+      setIsLoading(!initialCachedTexture);
       setLoadProgress(initialCachedTexture ? 100 : 0);
       loadTexture
         .then((texture) => {
@@ -1494,6 +1815,8 @@ function TourExperience({
 
     setLoadError(null);
     setCurrentSceneId(sceneId);
+    setActiveInfoMarker(null);
+    setIsInfoMarkerClosing(false);
     if (!keepPanel) {
       setActivePanel(null);
     }
@@ -1520,16 +1843,33 @@ function TourExperience({
       >
         {isMiniMapExpanded ? (
           <div className="relative">
-            <MiniMap activeScene={activeScene} onSceneSelect={(sceneId) => goToScene(sceneId, true)} compact />
-            <button
-              type="button"
-              onClick={() => setIsMiniMapExpanded(false)}
-              className="absolute right-2 top-2 rounded-[5px] border border-white/14 bg-[rgb(45_38_33_/_0.72)] px-2 py-1 text-[0.62rem] font-bold text-white/86 shadow-[0_8px_22px_rgba(0,0,0,0.22)] backdrop-blur-xl transition hover:bg-[rgb(45_38_33_/_0.86)] active:scale-95"
-              aria-label="Thu gọn mini-map"
-              title="Thu gọn mini-map"
-            >
-              Thu gọn
-            </button>
+            <div className="absolute right-2 top-2 z-30 flex gap-1.5">
+              <button
+                type="button"
+                onClick={() => setIsMiniMapOverviewOpen(true)}
+                className="grid h-8 w-8 place-items-center rounded-[5px] border border-[rgb(232_207_170_/_0.28)] bg-[rgb(45_38_33_/_0.72)] text-white/90 shadow-[0_8px_22px_rgba(0,0,0,0.22)] backdrop-blur-xl transition hover:border-[var(--tour-gold-light)] hover:bg-[rgb(45_38_33_/_0.9)] active:scale-95"
+                aria-label="Phóng to bản đồ"
+                title="Toàn bản đồ"
+              >
+                <Maximize2 className="h-3.5 w-3.5" strokeWidth={2.4} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsMiniMapExpanded(false)}
+                className="h-8 rounded-[5px] border border-white/14 bg-[rgb(45_38_33_/_0.72)] px-2 text-[0.62rem] font-bold text-white/86 shadow-[0_8px_22px_rgba(0,0,0,0.22)] backdrop-blur-xl transition hover:bg-[rgb(45_38_33_/_0.86)] active:scale-95"
+                aria-label="Thu gọn mini-map"
+                title="Thu gọn mini-map"
+              >
+                Thu gọn
+              </button>
+            </div>
+            <MiniMap
+              activeScene={activeScene}
+              onSceneSelect={(sceneId) => goToScene(sceneId, true)}
+              compact
+              cameraYaw={cameraYaw}
+              mode="overview"
+            />
           </div>
         ) : (
           <button
@@ -1551,6 +1891,50 @@ function TourExperience({
           </button>
         )}
       </div>
+
+      {isMiniMapOverviewOpen ? (
+        <div className="fixed inset-0 z-40 grid place-items-center bg-[rgb(22_18_15_/_0.54)] px-3 py-4 backdrop-blur-[4px] sm:px-5 sm:py-6">
+          <button
+            type="button"
+            className="absolute inset-0 cursor-default"
+            onClick={() => setIsMiniMapOverviewOpen(false)}
+            aria-label="Đóng bản đồ phóng to"
+          />
+          <section className="relative max-h-[88dvh] w-[min(92vw,760px)] overflow-y-auto rounded-[14px] border border-[rgb(232_207_170_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.13),rgb(255_252_245_/_0.045)_40%,transparent_72%),rgb(45_38_33_/_0.78)] p-3 text-white shadow-[0_38px_120px_rgb(0_0_0_/_0.48),inset_0_1px_0_rgb(255_255_255_/_0.16)] backdrop-blur-2xl [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin] sm:p-4">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[0.7rem] font-black uppercase tracking-[0.16em] text-[var(--tour-gold-light)]">
+                  Toàn bộ tuyến tham quan
+                </p>
+                <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-white sm:text-2xl">
+                  Bản đồ điểm đến
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMiniMapOverviewOpen(false)}
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-[8px] border border-white/12 bg-white/[0.06] text-white transition hover:bg-white/[0.12] active:scale-95"
+                aria-label="Đóng bản đồ phóng to"
+                title="Đóng"
+              >
+                <X className="h-4 w-4" strokeWidth={2.4} />
+              </button>
+            </div>
+            <MiniMap
+              activeScene={activeScene}
+              onSceneSelect={(sceneId) => {
+                goToScene(sceneId, true);
+                setIsMiniMapOverviewOpen(false);
+              }}
+              cameraYaw={cameraYaw}
+              mode="overview"
+              showLegend
+              compact
+            />
+          </section>
+        </div>
+      ) : null}
+
       {isLoading ? (
         <div className="fixed left-1/2 top-4 z-20 w-[min(84vw,280px)] -translate-x-1/2 rounded-[7px] border border-white/16 bg-[rgb(45_38_33_/_0.68)] px-3 py-2 text-white shadow-[0_12px_34px_rgba(0,0,0,0.28)] backdrop-blur-xl">
           <div className="flex items-center justify-between gap-3 text-[0.68rem] font-black uppercase tracking-[0.12em] text-white/88">
@@ -1611,14 +1995,233 @@ function TourExperience({
             </span>
           </button>
         ))}
+        {showItems && activeScene.infoMarkers?.map((marker) => {
+          const markerKey = `${activeScene.id}-${marker.id}`;
+          const isRead = readMarkers.has(markerKey);
+          const isOpening = openingInfoMarkerId === marker.id;
+          const isHovered = hoveredMarkerId === markerKey;
+
+          return (
+            <button
+              key={markerKey}
+              ref={(node) => {
+                if (node) {
+                  infoMarkerRefs.current.set(markerKey, node);
+                } else {
+                  infoMarkerRefs.current.delete(markerKey);
+                }
+              }}
+              type="button"
+              className="group absolute left-1/2 top-1/2 grid h-[7.35rem] w-[10rem] -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_16px_30px_rgba(0,0,0,0.4)] transition-[opacity,transform,filter] duration-300 ease-[cubic-bezier(.2,.9,.2,1)] hover:scale-[1.045] hover:drop-shadow-[0_20px_38px_rgba(0,0,0,0.48)] active:scale-[0.97] sm:h-[8.15rem] sm:w-[11rem]"
+              data-opening={isOpening ? "true" : undefined}
+              data-read={isRead ? "true" : undefined}
+              style={
+                {
+                  "--marker-angle": `${marker.rotation ?? 0}deg`,
+                } as CSSProperties
+              }
+              onMouseEnter={() => setHoveredMarkerId(markerKey)}
+              onMouseLeave={() => setHoveredMarkerId(null)}
+              onClick={() => {
+                if (openingInfoTimerRef.current) {
+                  window.clearTimeout(openingInfoTimerRef.current);
+                }
+
+                setActivePanel(null);
+                setIsInfoMarkerClosing(false);
+
+                if (isRead) {
+                  setActiveInfoMarker(marker);
+                  setOpeningInfoMarkerId(null);
+                  return;
+                }
+
+                setOpeningInfoMarkerId(marker.id);
+                openingInfoTimerRef.current = window.setTimeout(() => {
+                  setReadMarkers((prev) => new Set(prev).add(markerKey));
+                  setActiveInfoMarker(marker);
+                  setOpeningInfoMarkerId(null);
+                  openingInfoTimerRef.current = null;
+                }, 520);
+              }}
+              aria-label={`Mở thư ${marker.title}`}
+              title={marker.title}
+            >
+              {!isRead && (
+                <>
+                  <span className="tour-envelope-glow absolute inset-[-1.5rem] rounded-[42%]" />
+                  <span className="tour-envelope-aura absolute bottom-5 left-1/2 h-7 w-[72%] -translate-x-1/2 rounded-full" />
+                </>
+              )}
+              <EnvelopeLottie isOpening={isOpening} isRead={isRead} isHovered={isHovered} rotation={marker.rotation ?? 0} />
+              <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.42rem)] max-w-[11rem] -translate-x-1/2 whitespace-nowrap rounded-[7px] border border-[rgb(232_207_170_/_0.24)] bg-[rgb(45_38_33_/_0.72)] px-3 py-1.5 text-[0.72rem] font-bold text-white opacity-0 shadow-[0_12px_28px_rgba(0,0,0,0.34)] backdrop-blur-xl transition group-hover:opacity-100 group-focus-visible:opacity-100">
+                {isRead ? marker.title : `Mở thư: ${marker.title}`}
+              </span>
+            </button>
+          );
+        })}
       </div>
+
+      {activeInfoMarker ? (
+        <div
+          className={`fixed inset-0 z-40 grid place-items-center bg-[rgb(22_18_15_/_0.44)] px-3 py-4 backdrop-blur-[3px] sm:px-5 sm:py-6 ${
+            isInfoMarkerClosing
+              ? "animate-[tourModalBackdropOut_240ms_ease-in_both]"
+              : "animate-[tourModalBackdrop_320ms_ease-out_both]"
+          }`}
+        >
+          <button
+            type="button"
+            className="absolute inset-0 cursor-default"
+            onClick={closeInfoMarker}
+            aria-label="Đóng thư"
+          />
+          <article
+            className={`tour-letter-shell relative h-[min(90dvh,820px)] w-[min(90vw,560px)] overflow-hidden rounded-[13px] text-[var(--foreground)] shadow-[0_38px_120px_rgb(0_0_0_/_0.46)] sm:w-[min(82vw,590px)] ${
+              isInfoMarkerClosing ? "tour-letter-shell--closing" : ""
+            }`}
+          >
+            <Image
+              src={infoModalBackground}
+              alt=""
+              fill
+              sizes="760px"
+              className="pointer-events-none select-none object-fill"
+              draggable={false}
+            />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(255_252_245_/_0.1),rgb(245_238_220_/_0.08))]" />
+            <button
+              type="button"
+              onClick={closeInfoMarker}
+              className="absolute right-[7.6%] top-[5.8%] z-10 grid h-8 w-8 place-items-center rounded-full border border-[rgb(58_47_35_/_0.18)] bg-[rgb(255_252_245_/_0.76)] text-[var(--tour-wood)] shadow-[0_8px_24px_rgb(74_63_53_/_0.12)] backdrop-blur-sm transition hover:bg-white active:scale-95 sm:h-9 sm:w-9"
+              aria-label="Đóng thư"
+              title="Đóng"
+            >
+              <X className="h-4 w-4 sm:h-[1.1rem] sm:w-[1.1rem]" strokeWidth={2.2} />
+            </button>
+            <div className="tour-letter-content relative h-full overflow-y-auto px-[9%] pb-[11%] pt-[11%] sm:px-[10.5%] sm:pb-[10%] sm:pt-[10%]">
+              <div className="mb-4 pr-10 animate-[tourTextFadeIn_420ms_ease-out_80ms_both] sm:mb-5">
+                <div className="min-w-0">
+                  <p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-[var(--tour-gold)] sm:text-[0.66rem]">
+                    {activeInfoMarker.eyebrow}
+                  </p>
+                  <h2 className="font-display-vn mt-0.5 text-[1.85rem] font-bold leading-tight text-[var(--tour-ink)] sm:text-[2.55rem]">
+                    {activeInfoMarker.title}
+                  </h2>
+                </div>
+              </div>
+              <div className="space-y-3.5 border-y border-[rgb(166_124_82_/_0.2)] py-4 font-display-vn text-[0.92rem] leading-7 text-[rgb(74_63_53_/_0.92)] animate-[tourTextFadeIn_480ms_ease-out_180ms_both] sm:space-y-4 sm:py-5 sm:text-[0.98rem] sm:leading-8">
+                {activeInfoMarker.content.map((paragraph, index) => (
+                  <p
+                    key={paragraph}
+                    className="text-justify animate-[tourTextSlideIn_420ms_ease-out_both]"
+                    style={{ animationDelay: `${280 + index * 60}ms` }}
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+              <div className="mt-4 flex items-center justify-between gap-4 text-[0.62rem] font-black uppercase tracking-[0.16em] text-[rgb(115_90_58_/_0.62)] animate-[tourTextFadeIn_380ms_ease-out_420ms_both] sm:mt-5 sm:text-[0.66rem]">
+                <span>Đình Định Công Thượng</span>
+                <span className="h-px flex-1 bg-[linear-gradient(90deg,rgb(166_124_82_/_0.3),transparent)]" />
+              </div>
+            </div>
+          </article>
+        </div>
+      ) : null}
+
+      {activePanel === "map" ? (
+        <div className="fixed inset-0 z-[25] grid place-items-center bg-[rgb(22_18_15_/_0.44)] px-3 pb-[6.8rem] pt-4 backdrop-blur-[3px] sm:px-5 sm:pb-[7.8rem] sm:pt-6">
+          <button
+            type="button"
+            className="absolute inset-0 cursor-default"
+            onClick={() => setActivePanel(null)}
+            aria-label="Đóng vị trí"
+          />
+          <section className="relative grid max-h-[calc(100dvh-8.5rem)] w-[calc(100vw-1.5rem)] max-w-[980px] grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-[14px] border border-[rgb(232_207_170_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.13),rgb(255_252_245_/_0.045)_40%,transparent_72%),rgb(58_50_44_/_0.82)] text-white shadow-[0_38px_120px_rgb(0_0_0_/_0.46),inset_0_1px_0_rgb(255_255_255_/_0.16)] backdrop-blur-2xl sm:w-[calc(100vw-2.5rem)] sm:max-h-[calc(100dvh-9.5rem)] lg:max-w-[1080px]">
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-5 sm:py-4">
+              <h2 className="text-xl font-black tracking-[-0.02em] sm:text-2xl">Vị trí</h2>
+              <button
+                type="button"
+                onClick={() => setActivePanel(null)}
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-[8px] border border-white/12 bg-white/[0.06] text-white transition hover:bg-white/[0.12] active:scale-95"
+                aria-label="Đóng vị trí"
+                title="Đóng"
+              >
+                <X className="h-4 w-4" strokeWidth={2.4} />
+              </button>
+            </div>
+
+            <div className="grid min-h-0 gap-3 overflow-y-auto p-3 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin] sm:p-4 lg:grid-cols-[minmax(0,7fr)_minmax(260px,3fr)] lg:overflow-hidden">
+              <MiniMap
+                activeScene={activeScene}
+                onSceneSelect={(sceneId) => goToScene(sceneId, true)}
+                cameraYaw={cameraYaw}
+                mode="overview"
+                className="min-h-[320px] lg:h-full"
+                mapClassName="lg:min-h-[430px]"
+              />
+              <aside className="flex min-h-0 min-w-0 flex-col rounded-[7px] border border-[rgb(255_252_245_/_0.14)] bg-[rgb(255_252_245_/_0.06)] p-3 sm:p-4">
+                <div className="shrink-0">
+                  <p className="text-[0.7rem] font-black uppercase tracking-[0.14em] text-[var(--tour-gold-light)]">
+                    Bạn đang ở đây
+                  </p>
+                  <h3 className="mt-1 text-xl font-black tracking-[-0.02em] text-white sm:text-2xl">
+                    {activeScene.title}
+                  </h3>
+                  <p className="mt-1 text-[0.9rem] font-semibold text-white/62">{activeScene.location}</p>
+                </div>
+
+                <div className="mt-4 grid min-h-0 gap-2 overflow-y-auto pr-1 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin]">
+                  {locationGroups.map((scene) => {
+                    const isActiveLocation = scene.location === activeScene.location;
+
+                    return (
+                      <button
+                        key={`location-${scene.location}`}
+                        type="button"
+                        onClick={() => goToScene(scene.id, true)}
+                        aria-current={isActiveLocation ? "true" : undefined}
+                        className={`group relative h-[5.8rem] overflow-hidden rounded-[7px] border text-left transition-[border-color,box-shadow,filter] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tour-gold-light)] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(45_38_33_/_0.62)] active:scale-[0.99] ${
+                          isActiveLocation
+                            ? "border-[var(--tour-gold-light)] bg-[rgb(192_160_128_/_0.16)] shadow-[0_0_0_2px_rgb(232_207_170_/_0.22),0_16px_40px_rgb(0_0_0_/_0.24)]"
+                            : "border-white/12 bg-white/[0.04] shadow-[0_12px_30px_rgb(0_0_0_/_0.16)] hover:border-[rgb(232_207_170_/_0.42)]"
+                        }`}
+                      >
+                        <Image
+                          src={scene.image}
+                          alt={scene.location}
+                          fill
+                          sizes="340px"
+                          className="object-cover transition duration-500 group-hover:scale-[1.03] group-hover:saturate-[1.06]"
+                        />
+                        <span className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.7)_0%,rgba(0,0,0,0.48)_48%,rgba(0,0,0,0.18)_100%)]" />
+                        <span className="absolute inset-x-3 bottom-3 min-w-0">
+                          <span className="block truncate text-[1rem] font-black text-white">
+                            {scene.location}
+                          </span>
+                        </span>
+                        {isActiveLocation ? (
+                          <span className="absolute right-2.5 top-2.5 rounded-full border border-[rgb(255_252_245_/_0.42)] bg-[rgb(232_48_48_/_0.86)] px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] text-white shadow-[0_8px_24px_rgb(0_0_0_/_0.24)]">
+                            Hiện tại
+                          </span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              </aside>
+            </div>
+          </section>
+        </div>
+      ) : null}
 
       <div
         className={`absolute left-1/2 z-30 -translate-x-1/2 transition-[bottom,width,max-width,transform] duration-300 ease-out ${
           activePanel === "scenes" ? "w-[calc(100vw-32px)] max-w-[1180px]" : "w-[min(92vw,448px)]"
         } ${activePanel === "scenes" ? "bottom-1 sm:bottom-2" : "bottom-2 sm:bottom-5"}`}
       >
-        {activePanel ? (
+        {activePanel && activePanel !== "map" ? (
           <section className="mb-1.5 max-h-[46dvh] animate-[tourPanelIn_260ms_cubic-bezier(.2,.9,.2,1)_both] overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.18)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.12),rgb(255_252_245_/_0.04)_38%,transparent_70%),rgb(45_38_33_/_0.48)] shadow-[0_24px_86px_rgb(0_0_0_/_0.28),inset_0_1px_0_rgb(255_255_255_/_0.18),inset_0_-1px_0_rgb(0_0_0_/_0.16)] backdrop-blur-xl backdrop-saturate-150 sm:mb-2.5">
             <div className="flex items-center justify-between border-b border-[rgb(255_252_245_/_0.1)] bg-[rgb(255_252_245_/_0.035)] px-3 py-2">
               <div className="flex items-center gap-1.5 text-[0.8rem] font-semibold text-white">
@@ -1640,7 +2243,7 @@ function TourExperience({
                   <button
                     key={scene.id}
                     type="button"
-                    onClick={() => goToScene(scene.id, true)}
+                    onClick={() => goToScene(scene.id, false)}
                     aria-current={scene.id === activeScene.id ? "true" : undefined}
                     className={`group relative h-20 w-[60vw] shrink-0 overflow-hidden rounded-[6px] border text-left transition-[border-color,box-shadow,filter] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tour-gold-light)] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(45_38_33_/_0.62)] active:scale-[0.99] sm:h-24 sm:w-48 lg:w-56 ${
                       scene.id === activeScene.id
@@ -1686,37 +2289,6 @@ function TourExperience({
               </div>
             ) : null}
 
-            {activePanel === "map" ? (
-              <div className="grid gap-3 p-3 text-[0.82rem] text-white/76 sm:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-                <MiniMap activeScene={activeScene} onSceneSelect={(sceneId) => goToScene(sceneId, true)} />
-                <div className="min-w-0 rounded-[6px] border border-[rgb(255_252_245_/_0.14)] bg-[rgb(255_252_245_/_0.06)] p-3">
-                  <p className="text-[0.72rem] font-black uppercase tracking-[0.12em] text-[var(--tour-gold-light)]">
-                    Bạn đang ở đây
-                  </p>
-                  <p className="mt-1 text-base font-bold text-white">{activeScene.title}</p>
-                  <p className="mt-0.5 text-[0.76rem] text-white/58">{activeScene.location}</p>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {activeScene.hotspots.length > 0 ? (
-                      activeScene.hotspots.map((hotspot) => (
-                        <button
-                          key={`${activeScene.id}-map-${hotspot.targetId}`}
-                          type="button"
-                          onClick={() => goToScene(hotspot.targetId, true, hotspot.nextYaw ?? hotspot.yaw)}
-                          className="rounded-[6px] border border-white/12 bg-white/[0.06] px-2.5 py-1.5 text-[0.76rem] font-semibold text-white transition hover:border-[var(--tour-gold-light)] hover:bg-white/[0.12] active:scale-95"
-                        >
-                          {hotspot.label}
-                        </button>
-                      ))
-                    ) : (
-                      <span className="rounded-[6px] border border-white/12 bg-white/[0.06] px-2.5 py-1.5 text-[0.76rem] text-white/68">
-                        Điểm cuối tuyến tham quan
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ) : null}
-
             {activePanel === "settings" ? (
               <div className="grid gap-2 p-2.5 sm:grid-cols-2">
                 <ToggleButton
@@ -1732,11 +2304,10 @@ function TourExperience({
                   onClick={() => setWideAngle((value) => !value)}
                 />
                 <ToggleButton
-                  active={vrMode}
-                  disabled={!isSupported}
-                  icon={Scan}
-                  label={isSupported ? "VR" : "Không hỗ trợ VR"}
-                  onClick={() => void toggleVrMode()}
+                  active={!showItems}
+                  icon={showItems ? Eye : EyeOff}
+                  label={showItems ? "Ẩn vật phẩm" : "Hiện vật phẩm"}
+                  onClick={() => setShowItems((value) => !value)}
                 />
               </div>
             ) : null}
@@ -1781,6 +2352,24 @@ function TourExperience({
 
       <button
         type="button"
+        onClick={() => void toggleVrMode()}
+        disabled={!isSupported}
+        className={`fixed right-3 top-1/2 z-20 inline-flex h-12 min-w-14 -translate-y-1/2 items-center justify-center gap-1.5 rounded-full border px-3 shadow-[0_18px_54px_rgba(0,0,0,0.34)] backdrop-blur-xl transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-45 sm:right-4 sm:h-14 sm:min-w-16 ${
+          vrMode
+            ? "border-[var(--tour-gold-light)] bg-[rgb(232_207_170_/_0.24)] text-white"
+            : "border-white/20 bg-[rgb(45_38_33_/_0.58)] text-white/88 hover:bg-[rgb(45_38_33_/_0.72)]"
+        }`}
+        aria-label={isSupported ? (vrMode ? "Tắt VR" : "Bật VR") : "Thiết bị không hỗ trợ VR"}
+        title={isSupported ? (vrMode ? "Tắt VR" : "Bật VR") : "Thiết bị không hỗ trợ VR"}
+      >
+        <Scan className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2.2} />
+        <span className="text-[0.72rem] font-black uppercase tracking-[0.04em] sm:text-[0.78rem]">
+          VR
+        </span>
+      </button>
+
+      <button
+        type="button"
         onClick={toggleFullscreen}
         className={`fixed right-4 top-4 z-20 hidden rounded-full border p-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-all active:scale-95 sm:p-3 lg:inline-flex lg:items-center lg:justify-center ${
           isFullscreen
@@ -1817,6 +2406,289 @@ function TourExperience({
           }
         }
 
+        @keyframes welcomeCtaSheen {
+          from {
+            transform: translateX(-120%) skewX(-18deg);
+          }
+          to {
+            transform: translateX(180%) skewX(-18deg);
+          }
+        }
+
+        .welcome-cta-sheen {
+          background: linear-gradient(90deg, transparent, rgba(255, 252, 245, 0.28), transparent);
+          animation: welcomeCtaSheen 3.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        .welcome-title-plaque {
+          isolation: isolate;
+          border: 2px solid rgba(185, 139, 86, 0.62);
+          border-radius: 56px 56px 48px 48px / 42px 42px 36px 36px;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(255, 252, 245, 0.94), transparent 24%),
+            linear-gradient(180deg, rgba(255, 252, 245, 0.96), rgba(246, 234, 210, 0.96));
+          box-shadow:
+            0 28px 74px rgba(8, 10, 7, 0.42),
+            0 0 0 5px rgba(255, 252, 245, 0.66),
+            0 0 0 7px rgba(166, 124, 82, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9),
+            inset 0 -14px 28px rgba(166, 124, 82, 0.12);
+        }
+
+        .welcome-title-plaque::before,
+        .welcome-title-plaque::after {
+          content: "";
+          position: absolute;
+          top: 30%;
+          z-index: -1;
+          width: 5.25rem;
+          height: 6.1rem;
+          border: 2px solid rgba(185, 139, 86, 0.55);
+          background:
+            linear-gradient(180deg, rgba(255, 252, 245, 0.96), rgba(246, 234, 210, 0.96));
+          box-shadow:
+            0 0 0 5px rgba(255, 252, 245, 0.62),
+            0 0 0 7px rgba(166, 124, 82, 0.34),
+            0 22px 54px rgba(8, 10, 7, 0.28);
+        }
+
+        .welcome-title-plaque::before {
+          left: -2.6rem;
+          border-radius: 999px 0 0 999px;
+          border-right: 0;
+        }
+
+        .welcome-title-plaque::after {
+          right: -2.6rem;
+          border-left: 0;
+          border-radius: 0 999px 999px 0;
+        }
+
+        .welcome-plaque-crown {
+          position: absolute;
+          left: 50%;
+          top: -3.05rem;
+          z-index: -1;
+          width: 9.5rem;
+          height: 5.8rem;
+          transform: translateX(-50%);
+          border: 2px solid rgba(185, 139, 86, 0.58);
+          border-bottom: 0;
+          border-radius: 999px 999px 0 0;
+          background:
+            radial-gradient(circle at 50% 52%, rgba(185, 139, 86, 0.28) 0 0.34rem, transparent 0.36rem),
+            linear-gradient(180deg, rgba(255, 252, 245, 0.96), rgba(246, 234, 210, 0.96));
+          box-shadow:
+            0 0 0 5px rgba(255, 252, 245, 0.62),
+            0 0 0 7px rgba(166, 124, 82, 0.34);
+        }
+
+        .welcome-plaque-crown::before,
+        .welcome-plaque-crown::after {
+          content: "";
+          position: absolute;
+          left: 50%;
+          background: rgba(185, 139, 86, 0.72);
+          transform: translateX(-50%) rotate(45deg);
+        }
+
+        .welcome-plaque-crown::before {
+          top: 1.45rem;
+          width: 1.15rem;
+          height: 1.15rem;
+          border-radius: 0.16rem;
+        }
+
+        .welcome-plaque-crown::after {
+          top: 2.72rem;
+          width: 4.4rem;
+          height: 1px;
+          border-radius: 999px;
+          transform: translateX(-50%);
+        }
+
+        .welcome-plaque-ornament {
+          position: absolute;
+          top: 50%;
+          width: 5.8rem;
+          height: 2.8rem;
+          transform: translateY(-8%);
+          opacity: 0.34;
+          background:
+            radial-gradient(ellipse at 24% 54%, transparent 0 0.65rem, rgba(185, 139, 86, 0.76) 0.68rem 0.76rem, transparent 0.8rem),
+            radial-gradient(ellipse at 44% 54%, transparent 0 0.44rem, rgba(185, 139, 86, 0.62) 0.47rem 0.54rem, transparent 0.58rem),
+            linear-gradient(90deg, transparent 0%, rgba(185, 139, 86, 0.74) 52%, transparent 100%);
+          background-size: 100% 100%, 100% 100%, 100% 1px;
+          background-position: center, center, center;
+          background-repeat: no-repeat;
+        }
+
+        .welcome-plaque-ornament--left {
+          left: 2.4rem;
+        }
+
+        .welcome-plaque-ornament--right {
+          right: 2.4rem;
+          transform: translateY(-8%) scaleX(-1);
+        }
+
+        @keyframes tourLetterIn {
+          from {
+            opacity: 0;
+            clip-path: inset(42% 12% 42% 12% round 14px);
+            transform: translateY(22px) rotateX(72deg) scale(0.86);
+            filter: brightness(1.14) saturate(0.92);
+          }
+          58% {
+            opacity: 1;
+            clip-path: inset(8% 4% 8% 4% round 14px);
+            transform: translateY(0) rotateX(-5deg) scale(1.015);
+            filter: brightness(1.05) saturate(1);
+          }
+          to {
+            opacity: 1;
+            clip-path: inset(0 0 0 0 round 14px);
+            transform: translateY(0) rotateX(0deg) scale(1);
+            filter: brightness(1) saturate(1);
+          }
+        }
+
+        @keyframes tourLetterOut {
+          from {
+            opacity: 1;
+            clip-path: inset(0 0 0 0 round 14px);
+            transform: translateY(0) rotateX(0deg) scale(1);
+            filter: brightness(1) saturate(1);
+          }
+          to {
+            opacity: 0;
+            clip-path: inset(38% 10% 38% 10% round 14px);
+            transform: translateY(18px) rotateX(52deg) scale(0.9);
+            filter: brightness(1.08) saturate(0.92);
+          }
+        }
+
+        @keyframes tourModalBackdrop {
+          from {
+            opacity: 0;
+            backdrop-filter: blur(0px);
+          }
+          to {
+            opacity: 1;
+            backdrop-filter: blur(3px);
+          }
+        }
+
+        @keyframes tourModalBackdropOut {
+          from {
+            opacity: 1;
+            backdrop-filter: blur(3px);
+          }
+          to {
+            opacity: 0;
+            backdrop-filter: blur(0px);
+          }
+        }
+
+        @keyframes tourTextFadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes tourTextSlideIn {
+          from {
+            opacity: 0;
+            transform: translateX(-12px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes tourEnvelopeGlow {
+          0%,
+          100% {
+            opacity: 0.34;
+            transform: translate3d(0, 1px, 0) scale(0.98);
+          }
+          50% {
+            opacity: 0.58;
+            transform: translate3d(0, -1px, 0) scale(1.025);
+          }
+        }
+
+        @keyframes tourEnvelopeOpenFlash {
+          0% {
+            opacity: 0.3;
+            transform: scale(0.96);
+          }
+          36% {
+            opacity: 0.72;
+            transform: scale(1.06);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(1.12);
+          }
+        }
+
+        .tour-envelope-glow {
+          background:
+            radial-gradient(ellipse at 52% 58%, rgba(255, 225, 145, 0.42), rgba(217, 161, 86, 0.16) 38%, transparent 72%),
+            linear-gradient(115deg, transparent 12%, rgba(255, 252, 245, 0.09) 42%, transparent 68%);
+          filter: blur(14px);
+          animation: tourEnvelopeGlow 4.4s cubic-bezier(0.34, 1, 0.64, 1) infinite;
+        }
+
+        .tour-envelope-aura {
+          background: linear-gradient(90deg, transparent, rgba(255, 216, 132, 0.34), transparent);
+          filter: blur(10px);
+          opacity: 0.72;
+        }
+
+        [data-opening="true"] .tour-envelope-glow {
+          animation: tourEnvelopeOpenFlash 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        [data-read="true"] .tour-envelope-glow,
+        [data-read="true"] .tour-envelope-aura {
+          opacity: 0;
+          animation-play-state: paused;
+        }
+
+        .tour-letter-shell {
+          animation: tourLetterIn 520ms cubic-bezier(0.16, 0.9, 0.22, 1) both;
+          transform-origin: 50% 72%;
+          transform-style: preserve-3d;
+        }
+
+        .tour-letter-shell--closing {
+          animation: tourLetterOut 240ms cubic-bezier(0.4, 0, 0.8, 0.2) both;
+          pointer-events: none;
+        }
+
+        .tour-letter-shell::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: 2;
+          pointer-events: none;
+          background: linear-gradient(130deg, rgba(255, 255, 255, 0.26), transparent 34%, rgba(96, 70, 38, 0.09) 100%);
+          mix-blend-mode: soft-light;
+        }
+
+        .tour-letter-content {
+          scrollbar-color: rgba(166, 124, 82, 0.52) transparent;
+          scrollbar-width: thin;
+        }
+
         .tour-canvas {
           --tour-blur: 0px;
           --tour-scale: 1;
@@ -1849,6 +2721,35 @@ function TourExperience({
           backface-visibility: hidden;
           -webkit-backface-visibility: hidden;
         }
+
+        @media (prefers-reduced-motion: reduce) {
+          .welcome-cta-sheen {
+            animation: none;
+            opacity: 0;
+          }
+        }
+
+        @media (prefers-reduced-transparency: reduce) {
+          .welcome-title-plaque {
+            background: rgb(255 252 245 / 0.94);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .welcome-title-plaque::before,
+          .welcome-title-plaque::after,
+          .welcome-plaque-ornament {
+            display: none;
+          }
+
+          .welcome-plaque-crown {
+            top: -2.4rem;
+            width: 7rem;
+            height: 4.4rem;
+          }
+        }
       `}</style>
     </main>
   );
@@ -1872,24 +2773,96 @@ function panelTitle(panel: Exclude<Panel, null>) {
 
 function MiniMap({
   activeScene,
+  className = "",
   compact = false,
   onSceneSelect,
+  cameraYaw = 0,
+  mapClassName = "",
+  mode = "radar",
+  showLegend = false,
+  showNames = false,
 }: {
   activeScene: TourScene;
+  className?: string;
   compact?: boolean;
   onSceneSelect: (sceneId: SceneId) => void;
+  cameraYaw?: number;
+  mapClassName?: string;
+  mode?: "radar" | "overview";
+  showLegend?: boolean;
+  showNames?: boolean;
 }) {
+  const isOverview = mode === "overview";
+  const nodeSize = compact ? 5.2 : 5.2;
+  const edgeInset = nodeSize / 2;
+  const clampMapPoint = (value: number) => THREE.MathUtils.clamp(value, edgeInset, 100 - edgeInset);
+  const getNodeLineInset = (isActive: boolean) => {
+    if (compact) {
+      return isActive ? 3.6 : 2.9;
+    }
+
+    return isActive ? 3.4 : 2.7;
+  };
+  const getMapPosition = (scene: TourScene) => {
+    if (!scene.mapPosition || (!isOverview && !activeScene.mapPosition)) return null;
+
+    if (isOverview) {
+      return {
+        x: clampMapPoint(scene.mapPosition.x),
+        y: clampMapPoint(scene.mapPosition.y),
+      };
+    }
+
+    const dx = scene.mapPosition.x - activeScene.mapPosition.x;
+    const dy = scene.mapPosition.y - activeScene.mapPosition.y;
+    const relativeYaw = cameraYaw - activeScene.initialYaw;
+    const angleRad = (-relativeYaw * Math.PI) / 180;
+    const cos = Math.cos(angleRad);
+    const sin = Math.sin(angleRad);
+    const rotatedX = dx * cos - dy * sin;
+    const rotatedY = dx * sin + dy * cos;
+
+    return {
+      x: clampMapPoint(50 + rotatedX),
+      y: clampMapPoint(50 + rotatedY),
+    };
+  };
+  const getLineEndpoint = (
+    from: { x: number; y: number },
+    to: { x: number; y: number },
+    startInset: number,
+    endInset: number,
+  ) => {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const length = Math.hypot(dx, dy);
+
+    if (length <= startInset + endInset) {
+      return { start: from, end: to };
+    }
+
+    const startOffsetX = (dx / length) * startInset;
+    const startOffsetY = (dy / length) * startInset;
+    const endOffsetX = (dx / length) * endInset;
+    const endOffsetY = (dy / length) * endInset;
+
+    return {
+      start: { x: from.x + startOffsetX, y: from.y + startOffsetY },
+      end: { x: to.x - endOffsetX, y: to.y - endOffsetY },
+    };
+  };
+
   return (
     <section
-      className={`relative overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.18)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.07),rgb(255_252_245_/_0.018)_45%,transparent),rgb(45_38_33_/_0.36)] shadow-[0_18px_70px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.12)] backdrop-blur-xl backdrop-saturate-150 ${
+      className={`relative overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.18)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.07),rgb(255_252_245_/_0.018)_45%,transparent),rgb(45_38_33_/_0.18)] shadow-[0_18px_70px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.12)] backdrop-blur-xl backdrop-saturate-150 ${
         compact ? "p-2.5" : "min-h-[260px] p-3"
-      }`}
+      } ${className}`}
       aria-label="Mini-map vị trí tham quan"
     >
-      <div className="mb-2 flex items-center justify-between gap-2">
+      <div className={`mb-2 flex items-center justify-between gap-2 ${compact ? "pr-24" : ""}`}>
         <div className="min-w-0">
           <p className="truncate text-[0.68rem] font-black uppercase tracking-[0.12em] text-[var(--tour-gold-light)]">
-            Mini-map
+            {isOverview ? "Sơ đồ tuyến" : "Mini-map"}
           </p>
           <p className="truncate text-[0.74rem] font-semibold text-white sm:text-[0.8rem]">
             {activeScene.title}
@@ -1898,12 +2871,16 @@ function MiniMap({
       </div>
 
       <div
-        className={`relative rounded-[5px] border border-white/[0.07] bg-[radial-gradient(circle_at_50%_76%,rgb(232_207_170_/_0.055),transparent_24%),linear-gradient(180deg,rgb(255_252_245_/_0.026),rgb(0_0_0_/_0.025))] ${
-          compact ? "aspect-[4/3]" : "aspect-[5/4]"
-        }`}
+        className={`relative overflow-hidden rounded-[5px] border border-white/[0.07] bg-[radial-gradient(circle_at_50%_76%,rgb(232_207_170_/_0.055),transparent_24%),linear-gradient(180deg,rgb(255_252_245_/_0.026),rgb(0_0_0_/_0.025))] ${
+          compact ? "aspect-[4/3]" : "aspect-[16/10] min-h-[240px]"
+        } ${mapClassName}`}
       >
-        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" aria-hidden="true">
-          {mapEdges.map((edge, index) => {
+        <svg
+          className="absolute inset-0 h-full w-full transition-opacity duration-200 ease-out"
+          viewBox="0 0 100 100"
+          aria-hidden="true"
+        >
+          {mapRoutes.map((edge, index) => {
             const fromScene = sceneById.get(edge.from);
             const toScene = sceneById.get(edge.to);
 
@@ -1911,16 +2888,32 @@ function MiniMap({
               return null;
             }
 
+            const fromPos = !isOverview && fromScene.id === activeScene.id
+              ? { x: 50, y: 50 }
+              : getMapPosition(fromScene);
+            const toPos = !isOverview && toScene.id === activeScene.id
+              ? { x: 50, y: 50 }
+              : getMapPosition(toScene);
+
+            if (!fromPos || !toPos) return null;
+            const endpoint = getLineEndpoint(
+              fromPos,
+              toPos,
+              getNodeLineInset(fromScene.id === activeScene.id),
+              getNodeLineInset(toScene.id === activeScene.id),
+            );
+
             return (
               <line
                 key={`${edge.from}-${edge.to}-${index}`}
-                x1={fromScene.mapPosition.x}
-                y1={fromScene.mapPosition.y}
-                x2={toScene.mapPosition.x}
-                y2={toScene.mapPosition.y}
-                stroke="rgba(232,207,170,0.38)"
-                strokeWidth={compact ? 1.2 : 1.5}
+                x1={endpoint.start.x}
+                y1={endpoint.start.y}
+                x2={endpoint.end.x}
+                y2={endpoint.end.y}
+                stroke="rgba(232,207,170,0.42)"
+                strokeWidth={compact ? 0.9 : 1.05}
                 strokeLinecap="round"
+                className="transition-all duration-200"
               />
             );
           })}
@@ -1931,31 +2924,129 @@ function MiniMap({
             return null;
           }
           const isActive = scene.id === activeScene.id;
+          const mapPos = !isOverview && isActive ? { x: 50, y: 50 } : getMapPosition(scene);
+          if (!mapPos) return null;
 
           return (
-            <button
-              key={`map-point-${scene.id}`}
-              type="button"
-              onClick={() => onSceneSelect(scene.id)}
-              aria-current={isActive ? "true" : undefined}
-              aria-label={scene.title}
-              title={scene.title}
-              className={`group absolute grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border text-[0.58rem] font-black transition active:scale-95 ${
-                isActive
-                  ? "h-5 w-5 border-white bg-[#e83030] text-white shadow-[0_0_0_4px_rgb(232_48_48_/_0.22),0_10px_24px_rgb(0_0_0_/_0.38)]"
-                  : "h-5 w-5 border-[rgb(232_207_170_/_0.68)] bg-[rgb(45_38_33_/_0.82)] text-[var(--tour-gold-light)] hover:border-white hover:bg-[var(--tour-jade)]"
-              } ${compact ? "sm:h-5 sm:w-5" : "sm:h-6 sm:w-6"}`}
-              style={{ left: `${scene.mapPosition.x}%`, top: `${scene.mapPosition.y}%` }}
+            <div
+              key={`map-point-wrap-${scene.id}`}
+              className="absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1"
+              style={{ left: `${mapPos.x}%`, top: `${mapPos.y}%` }}
             >
-              {scene.order}
-              <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.32rem)] z-10 max-w-[8rem] -translate-x-1/2 truncate rounded-[5px] border border-white/12 bg-[rgb(45_38_33_/_0.82)] px-2 py-1 text-[0.65rem] font-bold text-white opacity-0 shadow-[0_10px_24px_rgba(0,0,0,0.36)] backdrop-blur-xl transition group-hover:opacity-100 group-focus-visible:opacity-100">
-                {scene.title}
-              </span>
-            </button>
+              <button
+                type="button"
+                onClick={() => onSceneSelect(scene.id)}
+                aria-current={isActive ? "true" : undefined}
+                aria-label={`${scene.order} - ${scene.title}`}
+                title={scene.title}
+                className={`group relative grid place-items-center rounded-full border text-[0.58rem] font-black transition-[transform,background-color,border-color,box-shadow] duration-200 active:scale-95 ${isActive ? "h-6 w-6 border-white bg-[#e83030] text-white shadow-[0_0_0_4px_rgb(232_48_48_/_0.22),0_10px_24px_rgb(0_0_0_/_0.38)]" : "h-5 w-5 border-[rgb(232_207_170_/_0.68)] bg-[rgb(45_38_33_/_0.82)] text-[var(--tour-gold-light)] hover:border-white hover:bg-[var(--tour-jade)]"} ${compact && !isActive ? "sm:h-5 sm:w-5" : "sm:h-6 sm:w-6"}`}
+              >
+                {scene.order}
+              </button>
+              {showNames ? (
+                <span className={`max-w-[8.5rem] truncate rounded-[5px] border px-1.5 py-0.5 text-center text-[0.58rem] font-bold leading-none shadow-[0_8px_20px_rgba(0,0,0,0.22)] backdrop-blur-xl ${isActive ? "border-[rgb(232_48_48_/_0.3)] bg-[rgb(232_48_48_/_0.22)] text-white" : "border-white/10 bg-[rgb(45_38_33_/_0.62)] text-white/82"}`}>
+                  {scene.title}
+                </span>
+              ) : null}
+            </div>
           );
         })}
       </div>
+      {showLegend ? (
+        <div className="mt-3 grid max-h-[30dvh] gap-1.5 overflow-y-auto pr-1 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin] sm:grid-cols-2 lg:grid-cols-3">
+          {scenes.map((scene) => (
+            <button
+              key={`map-note-${scene.id}`}
+              type="button"
+              onClick={() => onSceneSelect(scene.id)}
+              aria-current={scene.id === activeScene.id ? "true" : undefined}
+              className={`flex items-center gap-2 rounded-[7px] border px-2.5 py-2 text-left transition hover:border-[var(--tour-gold-light)] hover:bg-white/[0.08] active:scale-[0.99] ${scene.id === activeScene.id ? "border-[rgb(232_48_48_/_0.42)] bg-[rgb(232_48_48_/_0.16)]" : "border-white/10 bg-white/[0.04]"}`}
+            >
+              <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[0.62rem] font-black ${scene.id === activeScene.id ? "bg-[#e83030] text-white" : "bg-[rgb(45_38_33_/_0.86)] text-[var(--tour-gold-light)]"}`}>
+                {scene.order}
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-[0.78rem] font-bold text-white">{scene.title}</span>
+                <span className="block truncate text-[0.64rem] text-white/52">{scene.location}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : null}
     </section>
+  );
+}
+
+function EnvelopeLottie({
+  isOpening,
+  isRead,
+  isHovered,
+  rotation,
+}: {
+  isOpening: boolean;
+  isRead: boolean;
+  isHovered: boolean;
+  rotation: number;
+}) {
+  const lottieRef = useRef<LottieRefCurrentProps | null>(null);
+  const wasHoveredRef = useRef(false);
+
+  useEffect(() => {
+    const player = lottieRef.current;
+    if (!player) return;
+
+    if (isOpening) {
+      player.setSpeed(1);
+      player.setDirection(1);
+      player.playSegments([0, 65], true);
+      wasHoveredRef.current = false;
+      return;
+    }
+
+    if (isRead) {
+      player.setSpeed(1);
+      player.setDirection(1);
+      player.goToAndStop(65, true);
+      wasHoveredRef.current = false;
+      return;
+    }
+
+    if (isHovered) {
+      player.setSpeed(1);
+      player.setDirection(1);
+      player.playSegments([0, 42], true);
+      wasHoveredRef.current = true;
+      return;
+    }
+
+    if (wasHoveredRef.current) {
+      player.setSpeed(1);
+      player.setDirection(1);
+      player.playSegments([42, 0], true);
+      wasHoveredRef.current = false;
+      return;
+    }
+
+    player.setSpeed(1);
+    player.setDirection(1);
+    player.goToAndStop(0, true);
+  }, [isOpening, isRead, isHovered]);
+
+  return (
+    <span className="relative h-[6.75rem] w-[9.15rem] [transform:rotate(var(--marker-angle))] sm:h-[7.55rem] sm:w-[10.15rem]" style={{ "--marker-angle": `${rotation}deg` } as CSSProperties}>
+      <Lottie
+        lottieRef={lottieRef}
+        animationData={letterAnimation}
+        loop={false}
+        autoplay={false}
+        className="h-full w-full"
+        style={{
+          filter: isRead
+            ? "brightness(0.9) saturate(0.86) sepia(0.2) hue-rotate(-12deg) drop-shadow(0 6px 12px rgba(0,0,0,0.28))"
+            : "brightness(1.05) saturate(1.08) sepia(0.08) hue-rotate(-6deg) drop-shadow(0 0 12px rgba(255,224,150,0.2)) drop-shadow(0 9px 18px rgba(0,0,0,0.32))",
+        }}
+      />
+    </span>
   );
 }
 
