@@ -187,19 +187,33 @@ const scenes: TourScene[] = [
     },
   ],
 },
-  {
-    id: "scene-4",
-    order: "04",
-    title: "Hữu Hồ",
-    location: "Đình Làng Định Công Thượng",
-    image: panoramaPath("4 Hữu Hồ.jpg"),
-    initialYaw: 0,
-    mapPosition: { x: 70, y: 65 },
-    hotspots: [
-      { targetId: "scene-2", label: "Tiền Đình", yaw: 72  , pitch: -18, rotation: -12 },
-      { targetId: "scene-5", label: "Vườn cảnh phía Đông", yaw: 222, pitch: -15, rotation: -2 },
-    ],
-  },
+ {
+  id: "scene-4",
+  order: "04",
+  title: "Hữu Hồ",
+  location: "Đình Làng Định Công Thượng",
+  image: panoramaPath("4 Hữu Hồ.jpg"),
+  initialYaw: 0,
+  mapPosition: { x: 70, y: 65 },
+  hotspots: [
+    { targetId: "scene-2", label: "Tiền Đình", yaw: 72, pitch: -18, rotation: -12 },
+    { targetId: "scene-5", label: "Vườn cảnh phía Đông", yaw: 222, pitch: -15, rotation: -2 },
+  ],
+  infoMarkers: [
+    {
+      id: "huu-ho-info",
+      title: "Hữu Hồ",
+      eyebrow: "Hồ nước phong thủy",
+      yaw: 160,
+      pitch: 5,
+      rotation: 0,
+      iconType: "landmark",
+      content: [
+       "Nằm ngay trước sân Đền Định Công Thượng là một chiếc hồ sâu cổ kính. Trong mạch đất \"Long chầu hổ phục\", chiếc hồ đóng vai trò là điểm \"tụ thủy\" phong thủy vô cùng quan trọng, giúp gom tụ tài lộc, sinh khí và sự thịnh vượng cho làng nghề kim hoàn suốt hàng trăm năm qua, đồng thời điều hòa không khí mang lại sự thoáng đãng cho toàn di tích.",
+      ],
+    },
+  ],
+},
   {
     id: "scene-5",
     order: "05",
@@ -2340,21 +2354,22 @@ function TourExperience({
   </>
 ) : (
   <div
-    className={`
-      grid h-14 w-14 place-items-center rounded-full
-      border-2 border-[var(--tour-gold)]
-      bg-[linear-gradient(135deg,rgb(45_38_33_/_0.92),rgb(23_63_45_/_0.88))]
-      shadow-[0_0_16px_rgba(255,216,132,0.35),0_8px_24px_rgba(0,0,0,0.45)]
-      backdrop-blur-sm transition-all duration-300
-      ${isHovered ? "scale-125 border-white shadow-[0_0_28px_rgba(255,216,132,0.75)]" : "scale-100"}
-      ${isRead ? "opacity-60" : "opacity-100"}
-    `}
-  >
-    <Landmark
-      className={`h-7 w-7 transition-colors duration-300 ${isHovered ? "text-white" : "text-[var(--tour-gold-light)]"}`}
-      strokeWidth={1.8}
-    />
-  </div>
+  className={`
+    grid h-14 w-14 place-items-center rounded-full
+    border border-[rgba(255,255,255,0.3)]
+    bg-[rgba(255,255,255,0.08)]
+    shadow-[0_0_16px_rgba(255,255,255,0.15),0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.4)]
+    backdrop-blur-md
+    transition-all duration-300
+    ${isHovered ? "scale-125 bg-[rgba(255,255,255,0.18)] border-[rgba(255,255,255,0.6)] shadow-[0_0_28px_rgba(255,255,255,0.35),inset_0_1px_0_rgba(255,255,255,0.6)]" : "scale-100"}
+    ${isRead ? "opacity-50" : "opacity-100"}
+  `}
+>
+  <Landmark
+    className={`h-7 w-7 transition-colors duration-300 ${isHovered ? "text-white" : "text-[rgba(255,255,255,0.82)]"}`}
+    strokeWidth={1.6}
+  />
+</div>
 )}
 <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.42rem)] max-w-[11rem] -translate-x-1/2 whitespace-nowrap rounded-[7px] border border-[rgb(232_207_170_/_0.24)] bg-[rgb(45_38_33_/_0.72)] px-3 py-1.5 text-[0.72rem] font-bold text-white opacity-0 shadow-[0_12px_28px_rgba(0,0,0,0.34)] backdrop-blur-xl transition group-hover:opacity-100 group-focus-visible:opacity-100">
   {marker.title}
