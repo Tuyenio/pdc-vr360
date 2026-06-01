@@ -133,8 +133,8 @@ const scenes: TourScene[] = [
         title: "Tam quan",
         eyebrow: "Cổng Đại Môn",
         // Sửa vị trí icon tại đây: yaw xoay ngang, pitch nâng/hạ theo chiều dọc.
-        yaw: 98,
-        pitch: -8,
+        yaw: 120,
+        pitch: -6,
         rotation: -3,
         content: [
           "Tam Quan là lối vào chính dẫn bách gia trăm họ vào không gian linh thiêng của Đình Định Công Thượng, được xây dựng theo phong cách kiến trúc nghi môn truyền thống dưới dạng các cột trụ biểu cao vút gồm 4 trụ: hai trụ lớn ở giữa đỉnh chạm hình bốn chim phượng, hai trụ nhỏ hai bên đỉnh đắp đôi nghê chầu uốn mình uy nghiêm nhằm soi xét tâm linh con người trước khi bước vào nơi điện thờ.",
