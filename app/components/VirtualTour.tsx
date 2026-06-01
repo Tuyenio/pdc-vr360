@@ -99,9 +99,10 @@ const DEFAULT_FOV = 76;
 const WIDE_FOV = 88;
 const MIN_ZOOM_FOV = 36;
 const MAX_ZOOM_FOV = 96;
-const AUDIO_TARGET_VOLUME = 0.2;
-const BACKGROUND_DUCK_VOLUME = 0.08;
-const NARRATION_TARGET_VOLUME = 0.78;
+const AUDIO_TARGET_VOLUME = 0.24;
+const BACKGROUND_DUCK_VOLUME = 0.12;
+const NARRATION_TARGET_VOLUME = 0.7;
+const NARRATION_PLAYBACK_RATE = 1.08;
 const AUDIO_FADE_DURATION = 650;
 
 const clampFov = (fov: number) => THREE.MathUtils.clamp(fov, MIN_ZOOM_FOV, MAX_ZOOM_FOV);
@@ -304,9 +305,11 @@ const sceneNarration = new Map<SceneId, string[]>([
   ["scene-3", [narrationPath("HỒ SÂU.mp3")]],
   ["scene-4", [narrationPath("HỒ SÂU.mp3")]],
   ["scene-5", [narrationPath("HỒ SÂU.mp3")]],
+  ["scene-6", [narrationPath("SÂN ĐÌNH.mp3")]],
   ["scene-7", [narrationPath("BAN THỜ THẦN NÔNG.mp3")]],
   ["scene-8", [narrationPath("TOÀ ĐẠI BÁI.mp3")]],
   ["scene-9", [narrationPath("CÔNG ĐỒNG.mp3")]],
+  ["scene-10", [narrationPath("SÂN ĐÌNH.mp3")]],
   ["scene-11", [narrationPath("NHÀ THỜ TỔ NGHỀ KIM HOÀN.mp3")]],
   ["scene-12", [narrationPath("NHÀ THỜ TỔ NGHỀ KIM HOÀN.mp3")]],
   ["scene-13", [narrationPath("NHÀ THỜ TỔ NGHỀ KIM HOÀN.mp3")]],
@@ -1122,6 +1125,7 @@ function TourExperience({
         }
 
         audio.currentTime = 0;
+        audio.playbackRate = NARRATION_PLAYBACK_RATE;
         audio.volume = NARRATION_TARGET_VOLUME;
         activeNarrationSrcRef.current = nextSource;
 
