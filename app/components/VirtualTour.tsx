@@ -858,7 +858,7 @@ function WelcomeScreen({ isEntering, onEnter }: { isEntering: boolean; onEnter: 
 
   return (
     <main
-      className={`fixed inset-0 min-h-[100dvh] overflow-hidden bg-[var(--background)] text-[var(--foreground)] transition-[opacity,transform,filter] duration-[720ms] ease-[cubic-bezier(.2,.8,.2,1)] ${
+      className={`tour-welcome fixed inset-0 min-h-[100dvh] overflow-hidden bg-[var(--background)] text-[var(--foreground)] transition-[opacity,transform,filter,scale] duration-500 ease-[cubic-bezier(.2,.8,.2,1)] ${
         isEntering ? "pointer-events-none scale-[1.02] opacity-0 blur-[2px]" : "opacity-100"
       }`}
     >
@@ -2223,7 +2223,7 @@ function TourExperience({
               }
             }}
             type="button"
-            className="group absolute left-1/2 top-1/2 grid h-[3.2rem] w-[3.2rem] -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_10px_18px_rgba(0,0,0,0.46)] transition-[opacity,transform,filter] duration-200 hover:scale-105 hover:drop-shadow-[0_14px_24px_rgba(0,0,0,0.58)] active:scale-96 sm:h-16 sm:w-16"
+            className="group absolute left-1/2 top-1/2 grid h-[3.2rem] w-[3.2rem] -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_10px_18px_rgba(0,0,0,0.46)] transition-[opacity,transform,filter,scale] duration-500 hover:scale-105 hover:drop-shadow-[0_14px_24px_rgba(0,0,0,0.58)] active:scale-96 sm:h-16 sm:w-16"
             style={
               {
                 "--hotspot-angle": `${hotspot.rotation ?? 0}deg`,
@@ -2265,7 +2265,7 @@ function TourExperience({
                 }
               }}
               type="button"
-              className="group absolute left-1/2 top-1/2 grid h-[7.35rem] w-[10rem] -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_16px_30px_rgba(0,0,0,0.4)] transition-[opacity,transform,filter] duration-300 ease-[cubic-bezier(.2,.9,.2,1)] hover:scale-[1.045] hover:drop-shadow-[0_20px_38px_rgba(0,0,0,0.48)] active:scale-[0.97] sm:h-[8.15rem] sm:w-[11rem]"
+              className="group absolute left-1/2 top-1/2 grid h-[7.35rem] w-[10rem] -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_16px_30px_rgba(0,0,0,0.4)] transition-[opacity,transform,filter,scale] duration-500 ease-[cubic-bezier(.2,.9,.2,1)] hover:scale-[1.045] hover:drop-shadow-[0_20px_38px_rgba(0,0,0,0.48)] active:scale-[0.97] sm:h-[8.15rem] sm:w-[11rem]"
               data-opening={isOpening ? "true" : undefined}
               data-read={isRead ? "true" : undefined}
               style={
