@@ -315,6 +315,16 @@ const sceneNarration = new Map<SceneId, string[]>([
   ["scene-13", [narrationPath("NHÀ THỜ TỔ NGHỀ KIM HOÀN.mp3")]],
 ]);
 
+const continuousNarrationGroups: SceneId[][] = [["scene-3", "scene-4", "scene-5"]];
+
+const isContinuousNarrationTransition = (from: SceneId | null, to: SceneId) => {
+  if (!from) {
+    return false;
+  }
+
+  return continuousNarrationGroups.some((group) => group.includes(from) && group.includes(to));
+};
+
 const sceneById = new Map(scenes.map((scene) => [scene.id, scene]));
 const mapRoutes: MapRoute[] = [
   { from: "scene-1", to: "scene-2" },
@@ -1076,6 +1086,7 @@ function TourExperience({
   const narrationQueueRef = useRef<string[]>([]);
   const narrationTokenRef = useRef(0);
   const activeNarrationSrcRef = useRef<string | null>(null);
+  const lastNarrationSceneRef = useRef<SceneId | null>(null);
 
   const { orientation, isSupported, requestPermission, startListening } = useDeviceOrientation();
 
@@ -1154,6 +1165,7 @@ function TourExperience({
   useEffect(() => {
     if (!soundEnabled) {
       stopNarration();
+      lastNarrationSceneRef.current = null;
       return;
     }
 
@@ -1161,20 +1173,32 @@ function TourExperience({
 
     if (!narrationSources || narrationSources.length === 0) {
       stopNarration();
+      lastNarrationSceneRef.current = currentSceneId;
       return;
     }
 
     const audio = narrationRef.current;
+    const shouldKeepPlaying = isContinuousNarrationTransition(
+      lastNarrationSceneRef.current,
+      currentSceneId,
+    );
 
     if (
       audio &&
+      shouldKeepPlaying &&
       activeNarrationSrcRef.current === narrationSources[0] &&
       !audio.paused
     ) {
+      lastNarrationSceneRef.current = currentSceneId;
       return;
     }
 
+    if (audio && activeNarrationSrcRef.current === narrationSources[0] && !audio.paused) {
+      stopNarration();
+    }
+
     void playNarrationSequence(narrationSources);
+    lastNarrationSceneRef.current = currentSceneId;
   }, [currentSceneId, playNarrationSequence, soundEnabled, stopNarration]);
 
   const activeScene = useMemo(
