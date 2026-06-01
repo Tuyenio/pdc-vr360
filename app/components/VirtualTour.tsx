@@ -315,7 +315,10 @@ const sceneNarration = new Map<SceneId, string[]>([
   ["scene-13", [narrationPath("NHÀ THỜ TỔ NGHỀ KIM HOÀN.mp3")]],
 ]);
 
-const continuousNarrationGroups: SceneId[][] = [["scene-3", "scene-4", "scene-5"]];
+const continuousNarrationGroups: SceneId[][] = [
+  ["scene-3", "scene-4", "scene-5"],
+  ["scene-2", "scene-6", "scene-10"],
+];
 
 const isContinuousNarrationTransition = (from: SceneId | null, to: SceneId) => {
   if (!from) {
