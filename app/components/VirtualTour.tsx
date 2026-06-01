@@ -246,7 +246,7 @@ const scenes: TourScene[] = [
       title: "Ban Thờ Thần Nông",
       eyebrow: "Tả Đình Làng",
       yaw: -80,
-      pitch: 5,
+      pitch: -18,
       rotation: 0,
       content: [
        "Ban thờ Thần Nông được bố trí trang trọng ở không gian lộ thiên ngoài sân đình, phản ánh sâu sắc cội nguồn lịch sử nông nghiệp trù phú lâu đời của làng cổ Định Công trước khi phát triển nghề thủ công. Đây là nơi thờ phụng vị thần cai quản nông nghiệp, gắn liền với ước vọng cầu xin Thần Nông Đại Đế ban cho mưa thuận gió hòa, thiên thời địa lợi, mùa màng luôn tốt tươi, vạn vật hanh thông và đời sống nhân dân được no ấm.",
@@ -272,8 +272,8 @@ const scenes: TourScene[] = [
       id: "tien-sanh-info",
       title: "Tòa Đại Bái",
       eyebrow: "Tiền Sảnh Đình Làng",
-      yaw: -78,
-      pitch: 15,
+      yaw: -80,
+      pitch: 2,
       rotation: 0,
 
       content: [
