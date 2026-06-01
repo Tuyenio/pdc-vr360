@@ -58,7 +58,7 @@ type InfoMarker = {
   pitch: number;
   rotation?: number;
   content: string[];
-   iconType?: "envelope" | "landmark";
+   iconType?: "envelope" | "landmark" | "info";
 };
 
 type TourScene = {
@@ -130,6 +130,20 @@ const scenes: TourScene[] = [
     mapPosition: { x: 50, y: 91 },
     hotspots: [{ targetId: "scene-2", label: "Tiền Đình", yaw: 115, pitch: -20 }],
     infoMarkers: [
+      {
+        id: "gioi-thieu-cum-di-tich",
+        title: "Giới thiệu",
+        eyebrow: "Cụm di tích",
+        yaw: 42,
+        pitch: -4,
+        rotation: -0,
+        iconType: "info",
+        content: [
+          "Đình Định Công Thượng và Đền thờ Ba vị Tổ nghề Kim hoàn tọa lạc tại làng cổ Định Công Thượng (nay thuộc phường Định Công, quận Hoàng Mai, Hà Nội) là cụm di tích Lịch sử - kiến trúc nghệ thuật đặc sắc tồn tại lâu đời. Cụm di tích đã tạo nên giá trị gắn bó khăng khít trên tất cả mọi phương diện lịch sử, kiến trúc nghệ thuật và tôn giáo.",
+          "Đình thờ hai vị Thành hoàng: Chàng Sơ Đông Hỷ Đại Vương thời Hùng Vương và Đoàn Thượng thời Lý; kiến trúc chữ Đinh gồm 5 gian Đại đình và 3 gian Hậu cung.",
+          "Đền tôn vinh ba anh em Trần Đình Điền, Trần Đình Điện, Trần Đình Hòa - Tổ nghề kim hoàn, những người khai sáng nghề chạm khắc vàng bạc và góp phần hình thành phố Hàng Bạc Thăng Long.",
+        ],
+      },
       {
         id: "tam-quan",
         title: "Tam quan",
@@ -405,6 +419,7 @@ const sceneNarration = new Map<SceneId, string[]>([
 const continuousNarrationGroups: SceneId[][] = [
   ["scene-3", "scene-4", "scene-5"],
   ["scene-2", "scene-6", "scene-10"],
+  ["scene-11", "scene-12", "scene-13"],
 ];
 
 const isContinuousNarrationTransition = (from: SceneId | null, to: SceneId) => {
@@ -2333,7 +2348,7 @@ function TourExperience({
                   openingInfoTimerRef.current = null;
                 }, 520);
               }}
-              aria-label={`Mở thư ${marker.title}`}
+              aria-label={`Mở thông tin ${marker.title}`}
               title={marker.title}
             >
              {/* TÌM ĐOẠN NÀY VÀ THAY TOÀN BỘ */}
@@ -2355,20 +2370,37 @@ function TourExperience({
 ) : (
   <div
   className={`
-    grid h-14 w-14 place-items-center rounded-full
-    border border-[rgba(255,255,255,0.3)]
-    bg-[rgba(255,255,255,0.08)]
-    shadow-[0_0_16px_rgba(255,255,255,0.15),0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.4)]
+    relative grid place-items-center overflow-visible rounded-full border
     backdrop-blur-md
     transition-all duration-300
-    ${isHovered ? "scale-125 bg-[rgba(255,255,255,0.18)] border-[rgba(255,255,255,0.6)] shadow-[0_0_28px_rgba(255,255,255,0.35),inset_0_1px_0_rgba(255,255,255,0.6)]" : "scale-100"}
+    ${marker.iconType === "info"
+      ? "h-16 w-16 border-[rgba(232,207,170,0.9)] bg-[radial-gradient(circle_at_50%_34%,rgba(255,246,206,0.34),rgba(184,45,34,0.86)_58%,rgba(82,28,22,0.94))] shadow-[0_0_0_4px_rgba(232,207,170,0.18),0_0_30px_rgba(232,207,170,0.48),0_12px_30px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,248,220,0.55)]"
+      : "h-14 w-14 border-[rgba(255,255,255,0.3)] bg-[rgba(255,255,255,0.08)] shadow-[0_0_16px_rgba(255,255,255,0.15),0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.4)]"}
+    ${isHovered
+      ? marker.iconType === "info"
+        ? "scale-125 border-[rgba(255,234,176,1)] shadow-[0_0_0_7px_rgba(232,207,170,0.22),0_0_44px_rgba(255,210,115,0.72),0_16px_36px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,250,230,0.7)]"
+        : "scale-125 bg-[rgba(255,255,255,0.18)] border-[rgba(255,255,255,0.6)] shadow-[0_0_28px_rgba(255,255,255,0.35),inset_0_1px_0_rgba(255,255,255,0.6)]"
+      : "scale-100"}
     ${isRead ? "opacity-50" : "opacity-100"}
   `}
 >
-  <Landmark
-    className={`h-7 w-7 transition-colors duration-300 ${isHovered ? "text-white" : "text-[rgba(255,255,255,0.82)]"}`}
-    strokeWidth={1.6}
-  />
+  {marker.iconType === "info" ? (
+    <>
+      {!isRead ? (
+        <span className="tour-temple-icon-pulse absolute inset-[-0.7rem] -z-10 rounded-full" />
+      ) : null}
+      <span className="absolute inset-[0.38rem] rounded-full border border-[rgba(255,238,184,0.34)]" />
+      <Info
+        className={`relative h-8 w-8 transition-colors duration-300 ${isHovered ? "text-white" : "text-[rgb(255,238,184)]"}`}
+        strokeWidth={2.1}
+      />
+    </>
+  ) : (
+    <Landmark
+      className={`h-7 w-7 transition-colors duration-300 ${isHovered ? "text-white" : "text-[rgba(255,255,255,0.82)]"}`}
+      strokeWidth={1.6}
+    />
+  )}
 </div>
 )}
 <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.42rem)] max-w-[11rem] -translate-x-1/2 whitespace-nowrap rounded-[7px] border border-[rgb(232_207_170_/_0.24)] bg-[rgb(45_38_33_/_0.72)] px-3 py-1.5 text-[0.72rem] font-bold text-white opacity-0 shadow-[0_12px_28px_rgba(0,0,0,0.34)] backdrop-blur-xl transition group-hover:opacity-100 group-focus-visible:opacity-100">
@@ -2956,6 +2988,24 @@ function TourExperience({
           }
         }
 
+        @keyframes tourTempleIconPulse {
+          0%,
+          100% {
+            opacity: 0.34;
+            transform: scale(0.92);
+            box-shadow:
+              0 0 0 0 rgba(232, 207, 170, 0.24),
+              0 0 22px rgba(232, 207, 170, 0.34);
+          }
+          50% {
+            opacity: 0.78;
+            transform: scale(1.12);
+            box-shadow:
+              0 0 0 10px rgba(232, 207, 170, 0.08),
+              0 0 42px rgba(255, 216, 132, 0.62);
+          }
+        }
+
         .tour-envelope-glow {
           background:
             radial-gradient(ellipse at 52% 58%, rgba(255, 225, 145, 0.42), rgba(217, 161, 86, 0.16) 38%, transparent 72%),
@@ -2968,6 +3018,12 @@ function TourExperience({
           background: linear-gradient(90deg, transparent, rgba(255, 216, 132, 0.34), transparent);
           filter: blur(10px);
           opacity: 0.72;
+        }
+
+        .tour-temple-icon-pulse {
+          background:
+            radial-gradient(circle, rgba(255, 226, 150, 0.34), rgba(184, 45, 34, 0.16) 46%, transparent 72%);
+          animation: tourTempleIconPulse 2.4s ease-in-out infinite;
         }
 
         [data-opening="true"] .tour-envelope-glow {
