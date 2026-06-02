@@ -1154,9 +1154,6 @@ function WelcomeCard({
             <p className="font-display-vn max-w-[10.6rem] truncate text-[0.8rem] font-bold text-[var(--foreground)] sm:max-w-[11.8rem] sm:text-[0.9rem]" title={label}>
               {label}
             </p>
-            <span className="text-[0.58rem] font-black uppercase tracking-[0.22em] text-[var(--tour-gold)]">
-              Di sản
-            </span>
           </div>
         </div>
       </div>
