@@ -16,56 +16,47 @@ export default function Home() {
     <main className="public-page landing-page min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <SiteHeader />
 
-      <section className="relative isolate overflow-hidden">
+      <section className="relative isolate overflow-hidden border-b border-[var(--surface-border)]">
         <Image
           src={activeTour.coverImage}
           alt=""
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-[0.16] blur-[2px]"
+          className="object-cover opacity-[0.18] blur-[1px]"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(100deg,rgb(23_16_12_/_0.94)_0%,rgb(34_23_15_/_0.82)_42%,rgb(12_8_6_/_0.42)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(100deg,rgb(22_15_11_/_0.96)_0%,rgb(31_20_13_/_0.86)_48%,rgb(18_12_8_/_0.58)_100%)]" />
 
-        <div className="relative mx-auto grid min-h-[calc(100dvh-4rem)] max-w-7xl grid-cols-[minmax(0,1fr)] gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.74fr_1.26fr] lg:items-center lg:py-16">
-          <div className="min-w-0 max-w-2xl lg:-translate-y-8">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">
-              Con đường di sản
-            </p>
-            <h1 className="mt-4 text-[clamp(2.35rem,10vw,5.3rem)] font-black leading-[0.98] text-[var(--tour-ink)]">
-              <span className="block">Định Công</span>
-              <span className="block">qua VR360</span>
+        <div className="relative mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-8 px-4 py-10 sm:px-6 lg:min-h-[760px] lg:grid-cols-[0.78fr_1.22fr] lg:items-center lg:py-12">
+          <div className="public-rise min-w-0">
+            <p className="public-kicker">Con đường di sản Định Công</p>
+            <h1 className="mt-4 max-w-[14ch] text-[clamp(2.75rem,5.6vw,5.5rem)] font-black leading-[0.92] text-[var(--tour-ink)]">
+              Di sản Định Công qua VR360.
             </h1>
-            <p className="mt-5 max-w-[54ch] text-base font-medium leading-7 text-[var(--foreground)]/78 sm:text-lg">
-              Cổng tham quan số giúp Phường Định Công bảo tồn, giới thiệu và mở rộng dữ liệu di tích.
+            <p className="mt-5 max-w-[52ch] text-base font-medium leading-7 text-[var(--foreground)]/78 sm:text-lg">
+              Một cổng tham quan số để lưu giữ, kể chuyện và mở rộng dữ liệu di tích của Phường Định Công.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link
-                href={activeTour.href}
-                className="rounded-[8px] bg-[var(--primary)] px-5 py-3 text-sm font-extrabold text-[#17100c] shadow-[0_18px_48px_rgb(199_154_98_/_0.2)] transition-transform hover:-translate-y-0.5 active:translate-y-0"
-              >
-                Bắt đầu tham quan
+            <div className="mt-7 flex flex-wrap items-center gap-3">
+              <Link href={activeTour.href} className="public-cta">
+                Tham quan
               </Link>
-              <Link
-                href="/ke-hoach"
-                className="rounded-[8px] border border-[var(--surface-border)] bg-[var(--surface-glass)] px-5 py-3 text-sm font-extrabold text-[var(--tour-ink)] transition-colors hover:bg-[var(--surface-glass-strong)]"
-              >
-                Xem kế hoạch
+              <Link href="/tuyen-vr" className="public-cta-secondary">
+                Xem tuyến VR
               </Link>
             </div>
 
-            <dl className="public-panel mt-9 grid w-full max-w-xl grid-cols-1 overflow-hidden rounded-[8px] text-[var(--tour-ink)] sm:grid-cols-3">
+            <dl className="mt-8 grid max-w-xl grid-cols-3 border-y border-[var(--surface-border)] py-4 text-[var(--tour-ink)]">
               <Metric value={activeTour.sceneCount} label="Điểm quét" />
-              <Metric value="VR360" label="Công nghệ lõi" />
-              <Metric value="ICS" label="Triển khai" />
+              <Metric value="VR360" label="Công nghệ" />
+              <Metric value="ICS" label="Đơn vị" />
             </dl>
           </div>
 
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end lg:translate-x-8">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-end">
             <Link
               href={activeTour.href}
-              className="public-media public-float group relative min-h-[22rem] overflow-hidden rounded-[8px] bg-[var(--tour-wood)] lg:min-h-[34rem]"
+              className="public-media group relative min-h-[24rem] overflow-hidden rounded-[8px] bg-[var(--tour-wood)] lg:min-h-[36rem]"
             >
               <Image
                 src={activeTour.heroImage}
@@ -75,90 +66,111 @@ export default function Home() {
                 sizes="(max-width: 1024px) 100vw, 56vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-[1.025]"
               />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_42%,rgb(0_0_0_/_0.72)_100%)]" />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_40%,rgb(0_0_0_/_0.74)_100%)]" />
               <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-7">
-                <h2 className="max-w-xl text-3xl font-black leading-tight sm:text-4xl">
+                <p className="text-sm font-bold text-[var(--tour-gold-light)]">Tour đang mở</p>
+                <h2 className="mt-2 max-w-xl text-3xl font-black leading-tight sm:text-4xl">
                   {activeTour.title}
                 </h2>
                 <p className="mt-2 text-sm font-semibold text-white/78">{activeTour.subtitle}</p>
               </div>
             </Link>
 
-            <aside className="grid gap-4 lg:translate-y-10">
-              <div className="public-media public-drift relative min-h-48 overflow-hidden rounded-[8px] lg:min-h-64">
+            <aside className="grid gap-4 lg:translate-y-8">
+              <div className="public-panel rounded-[8px] p-5">
+                <p className="text-sm font-black leading-5 text-[var(--tour-ink)]">Mục tiêu</p>
+                <p className="mt-3 text-sm font-semibold leading-6 text-[var(--foreground)]/78">
+                  Kết nối người dân với di sản qua ảnh 360 độ, tuyến tham quan và lớp thuyết minh.
+                </p>
+              </div>
+              <div className="public-media relative min-h-52 overflow-hidden rounded-[8px] lg:min-h-64">
                 <Image
                   src={activeTour.gateImage}
                   alt="Cổng Đình Làng Định Công Thượng"
                   fill
-                  sizes="(max-width: 1024px) 100vw, 18rem"
+                  sizes="(max-width: 1024px) 100vw, 17rem"
                   className="object-cover"
                 />
-              </div>
-              <div className="public-panel rounded-[8px] p-5">
-                <p className="text-sm font-black leading-5 text-[var(--tour-ink)]">Mục tiêu dự án</p>
-                <p className="mt-3 text-sm font-semibold leading-6 text-[var(--foreground)]/78">
-                  Kết nối người dân với di sản qua trải nghiệm thực tế ảo và một nền dữ liệu có thể mở rộng.
-                </p>
               </div>
             </aside>
           </div>
         </div>
       </section>
 
-      <section id="routes" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
-        <div className="min-w-0 max-w-3xl">
-          <h2 className="text-[2.25rem] font-black leading-tight text-[var(--tour-ink)] sm:text-5xl">
-            Một trang chủ cho toàn bộ tuyến di sản.
-          </h2>
-          <p className="mt-4 max-w-[62ch] text-base leading-7 text-[var(--foreground)]/76">
-            Tour đang vận hành được đặt cạnh các tuyến mở rộng để dự án có thể lớn lên theo từng đợt khảo sát và phê duyệt nội dung.
-          </p>
-        </div>
+      <section id="routes" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
+        <div className="grid gap-8 lg:grid-cols-[0.45fr_1.55fr] lg:items-start">
+          <div className="min-w-0 lg:sticky lg:top-28">
+            <h2 className="text-[2.25rem] font-black leading-tight text-[var(--tour-ink)] sm:text-5xl">
+              Atlas tuyến di sản.
+            </h2>
+            <p className="mt-4 max-w-[45ch] text-base leading-7 text-[var(--foreground)]/76">
+              Trang chủ gom tour đang vận hành và các tuyến có thể mở rộng khi hoàn tất khảo sát.
+            </p>
+            <Link href="/ke-hoach" className="mt-6 inline-flex border-b border-[var(--primary)] pb-1 text-sm font-extrabold text-[var(--tour-ink)] transition-colors hover:text-[var(--primary)]">
+              Xem kế hoạch triển khai
+            </Link>
+          </div>
 
-        <div className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
-          {routeCards.map((route, index) => {
-            const className =
-              "public-card group overflow-hidden rounded-[8px] transition-transform hover:-translate-y-1";
-            const content = (
-              <>
-                <div className={`relative overflow-hidden ${index === 0 ? "aspect-[16/11] lg:aspect-[4/3]" : "aspect-[16/10]"}`}>
-                  <Image
-                    src={route.image}
-                    alt={route.title}
-                    fill
-                    sizes={index === 0 ? "(max-width: 1024px) 100vw, 46vw" : "(max-width: 1024px) 100vw, 27vw"}
-                    className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                  />
-                </div>
-                <div className="p-5">
-                  <p className="text-sm font-black text-[var(--primary)]">{route.status}</p>
-                  <h3 className="mt-2 text-2xl font-black leading-tight text-[var(--tour-ink)]">{route.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{route.description}</p>
-                </div>
-              </>
-            );
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {routeCards.map((route, index) => {
+              const content = (
+                <>
+                  <div className={`relative overflow-hidden ${index === 0 ? "aspect-[4/3] md:aspect-auto md:min-h-[25rem]" : "aspect-[16/10]"}`}>
+                    <Image
+                      src={route.image}
+                      alt={route.title}
+                      fill
+                      sizes={index === 0 ? "(max-width: 768px) 100vw, 36vw" : "(max-width: 768px) 100vw, 24vw"}
+                      className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                    />
+                  </div>
+                  <div className="p-5">
+                    <p className="text-sm font-black text-[var(--primary)]">{route.status}</p>
+                    <h3 className="mt-2 text-2xl font-black leading-tight text-[var(--tour-ink)]">{route.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{route.description}</p>
+                  </div>
+                </>
+              );
 
-            if (route.href) {
-              return (
-                <Link key={route.title} href={route.href} className={`${className} ${index === 0 ? "lg:row-span-2" : ""}`}>
+              const className = `public-card group rounded-[8px] transition-transform hover:-translate-y-1 ${
+                index === 0 ? "md:row-span-2" : ""
+              }`;
+
+              return route.href ? (
+                <Link key={route.title} href={route.href} className={className}>
                   {content}
                 </Link>
+              ) : (
+                <article key={route.title} className={className}>
+                  {content}
+                </article>
               );
-            }
+            })}
+          </div>
+        </div>
+      </section>
 
-            return (
-              <article key={route.title} className={`${className} ${index === 0 ? "lg:row-span-2" : ""}`}>
-                {content}
-              </article>
-            );
-          })}
+      <section className="border-y border-[var(--surface-border)] bg-[var(--surface-band)]">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:py-20">
+          <div className="public-media relative min-h-[24rem] rounded-[8px] lg:min-h-[34rem]">
+            <Image
+              src="/images-tour/Đình Làng-Đền Thờ/12 Không gian kết nối di tích.jpg"
+              alt="Không gian kết nối di tích Định Công"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
+          </div>
 
-          <div className="public-panel rounded-[8px] p-5 lg:col-span-2">
-            <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="min-w-0">
+            <h2 className="text-[2.15rem] font-black leading-tight text-[var(--tour-ink)] sm:text-5xl">
+              Nền tảng vừa kể chuyện, vừa bàn giao được.
+            </h2>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {capabilities.map((capability) => (
                 <p
                   key={capability}
-                  className="border-t border-[var(--surface-border)] pt-3 text-sm font-bold leading-5 text-[var(--tour-ink)]"
+                  className="public-panel rounded-[8px] px-4 py-4 text-sm font-bold leading-5 text-[var(--tour-ink)]"
                 >
                   {capability}
                 </p>
@@ -168,57 +180,40 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="delivery" className="border-y border-[var(--surface-border)] bg-[var(--surface-band)]">
-        <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:py-24">
-          <div className="public-media public-drift relative min-h-[24rem] overflow-hidden rounded-[8px] lg:min-h-[36rem] lg:-translate-x-8">
-            <Image
-              src="/images-tour/Đình Làng-Đền Thờ/12 Không gian kết nối di tích.jpg"
-              alt="Không gian kết nối di tích Định Công"
-              fill
-              sizes="(max-width: 1024px) 100vw, 42vw"
-              className="object-cover"
-            />
+      <section id="delivery" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
+        <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+          <div className="min-w-0">
+            <h2 className="text-[2.15rem] font-black leading-tight text-[var(--tour-ink)] sm:text-5xl">
+              Từ khảo sát đến vận hành.
+            </h2>
+            <p className="mt-4 max-w-[54ch] text-base leading-7 text-[var(--foreground)]/76">
+              Quy trình giữ được tính kiểm soát cho địa phương, nhưng vẫn đủ linh hoạt để thêm tuyến mới.
+            </p>
           </div>
 
-          <div className="min-w-0">
-            <h2 className="text-[2.25rem] font-black leading-tight text-[var(--tour-ink)] sm:text-5xl">
-              Từ khảo sát thực địa đến bảo tàng số.
-            </h2>
-            <p className="mt-5 max-w-[62ch] text-base leading-7 text-[var(--foreground)]/78">
-              Kế hoạch được tổ chức theo các bước rõ ràng để UBND Phường dễ kiểm soát phạm vi, nội dung và kinh phí từng hạng mục.
-            </p>
-
-            <div className="mt-8 border-l border-[var(--surface-border)] pl-5">
-              {deliverySteps.map((step, index) => (
-                <article
-                  key={step.title}
-                  className={`relative py-5 ${index % 2 === 1 ? "lg:translate-x-8" : ""}`}
-                >
-                  <span className="absolute -left-[1.62rem] top-7 h-3 w-3 rounded-full border border-[var(--primary)] bg-[var(--background)] shadow-[0_0_0_6px_rgb(199_154_98_/_0.08)]" />
-                  <h3 className="text-xl font-black text-[var(--tour-ink)]">{step.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">{step.detail}</p>
-                </article>
-              ))}
-            </div>
+          <div className="grid gap-4">
+            {deliverySteps.map((step) => (
+              <article key={step.title} className="grid gap-3 border-t border-[var(--surface-border)] pt-4 sm:grid-cols-[9rem_1fr]">
+                <h3 className="text-xl font-black text-[var(--tour-ink)]">{step.title}</h3>
+                <p className="text-sm leading-6 text-[var(--muted-foreground)]">{step.detail}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
-        <div className="public-panel grid gap-6 rounded-[8px] p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8">
+      <section className="px-4 pb-16 sm:px-6 lg:pb-24">
+        <div className="public-panel mx-auto grid max-w-7xl gap-5 rounded-[8px] p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8">
           <div>
             <h2 className="text-3xl font-black leading-tight text-[var(--tour-ink)] sm:text-4xl">
-              Trải nghiệm thử tuyến đầu tiên.
+              Mở tour mẫu trên dữ liệu thật.
             </h2>
             <p className="mt-3 max-w-[62ch] text-sm leading-6 text-[var(--foreground)]/76 sm:text-base">
-              Dữ liệu hiện có đã đủ để trình diễn cấu trúc nền tảng, cách chuyển cảnh và lớp thuyết minh trong không gian VR360.
+              Trải nghiệm cấu trúc ảnh 360 độ, điểm chuyển cảnh và thuyết minh trước khi mở rộng thêm tuyến.
             </p>
           </div>
-          <Link
-            href={activeTour.href}
-            className="w-fit rounded-[8px] bg-[var(--primary)] px-5 py-3 text-sm font-extrabold text-[#17100c] shadow-[0_18px_48px_rgb(199_154_98_/_0.2)] transition-transform hover:-translate-y-0.5 active:translate-y-0"
-          >
-            Bắt đầu tham quan
+          <Link href={activeTour.href} className="public-cta w-fit">
+            Tham quan
           </Link>
         </div>
       </section>
@@ -230,9 +225,9 @@ export default function Home() {
 
 function Metric({ value, label }: { value: string; label: string }) {
   return (
-    <div className="min-w-0 border-[rgb(199_154_98_/_0.18)] p-4 not-last:border-b sm:not-last:border-r sm:not-last:border-b-0">
-      <dt className="text-2xl font-black leading-none">{value}</dt>
-      <dd className="mt-2 break-words text-[0.62rem] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)] sm:text-[0.68rem] sm:tracking-[0.11em]">
+    <div className="min-w-0 px-3 first:pl-0 not-last:border-r not-last:border-[rgb(208_161_95_/_0.22)]">
+      <dt className="text-2xl font-black leading-none sm:text-3xl">{value}</dt>
+      <dd className="mt-2 text-[0.68rem] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
         {label}
       </dd>
     </div>

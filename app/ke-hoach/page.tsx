@@ -17,7 +17,7 @@ export default function PlanPage() {
 
       <section className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-center lg:py-20">
         <div className="min-w-0 lg:-translate-y-8">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">Kế hoạch dự án</p>
+          <p className="public-kicker">Kế hoạch dự án</p>
           <h1 className="mt-4 text-[clamp(2.25rem,10vw,4.8rem)] font-black leading-[0.98] text-[var(--tour-ink)]">
             <span className="block">Triển khai</span>
             <span className="block">đồng bộ,</span>
@@ -29,7 +29,7 @@ export default function PlanPage() {
           <div className="mt-8">
             <Link
               href={activeTour.href}
-              className="inline-flex rounded-[8px] bg-[var(--primary)] px-5 py-3 text-sm font-extrabold text-[#17100c] shadow-[0_18px_48px_rgb(199_154_98_/_0.2)] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+              className="public-cta"
             >
               Xem tour mẫu
             </Link>
@@ -51,7 +51,7 @@ export default function PlanPage() {
       <section className="border-y border-[var(--surface-border)] bg-[var(--surface-band)]">
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.72fr_1.28fr] lg:py-24">
           <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">
+            <p className="public-kicker">
               Luồng triển khai
             </p>
             <h2 className="mt-4 max-w-2xl text-[2.25rem] font-black leading-tight text-[var(--tour-ink)] sm:text-5xl">
@@ -77,10 +77,7 @@ export default function PlanPage() {
                         : "lg:col-span-3 lg:translate-y-8"
                 }`}
               >
-                <p className="text-sm font-black text-[var(--primary)]">
-                  {String(index + 1).padStart(2, "0")}
-                </p>
-                <h3 className="mt-6 text-2xl font-black text-[var(--tour-ink)]">{step.title}</h3>
+                <h3 className="text-2xl font-black text-[var(--tour-ink)]">{step.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{step.detail}</p>
               </article>
             ))}
@@ -134,7 +131,7 @@ export default function PlanPage() {
       <section className="border-y border-[var(--surface-border)] bg-[var(--surface-band)]">
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-6 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_auto] lg:items-end lg:py-16">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--primary)]">
+            <p className="public-kicker">
               Nguyên tắc bàn giao
             </p>
             <h2 className="mt-4 max-w-3xl text-3xl font-black leading-tight text-[var(--tour-ink)] sm:text-4xl">
