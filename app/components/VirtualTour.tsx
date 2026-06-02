@@ -2,6 +2,7 @@
 
 import {
   Info,
+  BookOpenText,
   Layers3,
   LucideIcon,
   MapPin,
@@ -134,8 +135,8 @@ const scenes: TourScene[] = [
         id: "gioi-thieu-cum-di-tich",
         title: "Giới thiệu",
         eyebrow: "Cụm di tích",
-        yaw: 42,
-        pitch: -4,
+        yaw: 38,
+        pitch: -2,
         rotation: -0,
         iconType: "info",
         content: [
@@ -2304,6 +2305,7 @@ function TourExperience({
           const isRead = readMarkers.has(markerKey);
           const isOpening = openingInfoMarkerId === marker.id;
           const isHovered = hoveredMarkerId === markerKey;
+          const isIntroMarker = marker.id === "gioi-thieu-cum-di-tich";
 
           return (
             <button
@@ -2316,7 +2318,9 @@ function TourExperience({
                 }
               }}
               type="button"
-              className="group absolute left-1/2 top-1/2 grid h-[7.35rem] w-[10rem] -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_16px_30px_rgba(0,0,0,0.4)] transition-[opacity,transform,filter] duration-300 ease-[cubic-bezier(.2,.9,.2,1)] hover:scale-[1.045] hover:drop-shadow-[0_20px_38px_rgba(0,0,0,0.48)] active:scale-[0.97] sm:h-[8.15rem] sm:w-[11rem]"
+              className={`group absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_16px_30px_rgba(0,0,0,0.4)] transition-[opacity,transform,filter] duration-300 ease-[cubic-bezier(.2,.9,.2,1)] hover:scale-[1.045] hover:drop-shadow-[0_20px_38px_rgba(0,0,0,0.48)] active:scale-[0.97] ${
+                isIntroMarker ? "h-[5.25rem] w-[6.25rem] sm:h-[5.75rem] sm:w-[6.75rem]" : "h-[7.35rem] w-[10rem] sm:h-[8.15rem] sm:w-[11rem]"
+              }`}
               data-opening={isOpening ? "true" : undefined}
               data-read={isRead ? "true" : undefined}
               style={
@@ -2374,11 +2378,11 @@ function TourExperience({
     backdrop-blur-md
     transition-all duration-300
     ${marker.iconType === "info"
-      ? "h-16 w-16 border-[rgba(232,207,170,0.9)] bg-[radial-gradient(circle_at_50%_34%,rgba(255,246,206,0.34),rgba(184,45,34,0.86)_58%,rgba(82,28,22,0.94))] shadow-[0_0_0_4px_rgba(232,207,170,0.18),0_0_30px_rgba(232,207,170,0.48),0_12px_30px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,248,220,0.55)]"
+      ? "h-12 w-12 border-[rgba(232,207,170,0.86)] bg-[radial-gradient(circle_at_50%_34%,rgba(255,246,206,0.3),rgba(143,57,45,0.88)_62%,rgba(72,31,25,0.94))] shadow-[0_0_0_3px_rgba(232,207,170,0.14),0_0_22px_rgba(232,207,170,0.34),0_10px_24px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,248,220,0.5)] sm:h-14 sm:w-14"
       : "h-14 w-14 border-[rgba(255,255,255,0.3)] bg-[rgba(255,255,255,0.08)] shadow-[0_0_16px_rgba(255,255,255,0.15),0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.4)]"}
     ${isHovered
       ? marker.iconType === "info"
-        ? "scale-125 border-[rgba(255,234,176,1)] shadow-[0_0_0_7px_rgba(232,207,170,0.22),0_0_44px_rgba(255,210,115,0.72),0_16px_36px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,250,230,0.7)]"
+        ? "scale-110 border-[rgba(255,234,176,1)] shadow-[0_0_0_5px_rgba(232,207,170,0.18),0_0_30px_rgba(255,210,115,0.52),0_14px_30px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,250,230,0.66)]"
         : "scale-125 bg-[rgba(255,255,255,0.18)] border-[rgba(255,255,255,0.6)] shadow-[0_0_28px_rgba(255,255,255,0.35),inset_0_1px_0_rgba(255,255,255,0.6)]"
       : "scale-100"}
     ${isRead ? "opacity-50" : "opacity-100"}
@@ -2387,12 +2391,12 @@ function TourExperience({
   {marker.iconType === "info" ? (
     <>
       {!isRead ? (
-        <span className="tour-temple-icon-pulse absolute inset-[-0.7rem] -z-10 rounded-full" />
+        <span className="tour-temple-icon-pulse absolute inset-[-0.45rem] -z-10 rounded-full" />
       ) : null}
-      <span className="absolute inset-[0.38rem] rounded-full border border-[rgba(255,238,184,0.34)]" />
-      <Info
-        className={`relative h-8 w-8 transition-colors duration-300 ${isHovered ? "text-white" : "text-[rgb(255,238,184)]"}`}
-        strokeWidth={2.1}
+      <span className="absolute inset-[0.32rem] rounded-full border border-[rgba(255,238,184,0.3)]" />
+      <BookOpenText
+        className={`relative h-6 w-6 transition-colors duration-300 sm:h-7 sm:w-7 ${isHovered ? "text-white" : "text-[rgb(255,238,184)]"}`}
+        strokeWidth={1.95}
       />
     </>
   ) : (
