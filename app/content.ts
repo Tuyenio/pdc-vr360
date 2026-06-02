@@ -11,9 +11,9 @@ export const activeTour = {
 };
 
 export const navigation = [
-  { href: "/tuyen-vr", label: "Tuyến VR" },
-  { href: "/ke-hoach", label: "Kế hoạch" },
-  { href: "/giai-phap", label: "Giải pháp" },
+  { href: "/", label: "Trang chủ" },
+  { href: "/gioi-thieu", label: "Giới thiệu" },
+  { href: "/di-tich", label: "Di tích" },
   { href: "/lien-he", label: "Liên hệ" },
 ];
 
@@ -65,7 +65,7 @@ export const deliverySteps = [
 ];
 
 export const capabilities = [
-  "Ảnh VR360 độ phân giải cao",
+  "Ảnh không gian độ phân giải cao",
   "Điểm chuyển cảnh theo tuyến tham quan",
   "Thuyết minh âm thanh tiếng Việt",
   "Tối ưu truy cập trên điện thoại",

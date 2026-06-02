@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
-import { Be_Vietnam_Pro, Lora } from "next/font/google";
+import { Noto_Sans } from "next/font/google";
 import "./globals.css";
 
-const beVietnam = Be_Vietnam_Pro({
+const notoSans = Noto_Sans({
   subsets: ["latin", "vietnamese"],
-  variable: "--font-be-vietnam",
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
-
-const lora = Lora({
-  subsets: ["latin", "vietnamese"],
-  variable: "--font-lora",
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-noto-sans",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -26,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className={`${beVietnam.variable} ${lora.variable} h-full antialiased`}>
+    <html lang="vi" className={`${notoSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
