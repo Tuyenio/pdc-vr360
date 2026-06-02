@@ -92,8 +92,8 @@ const infoModalBackground = encodeURI("/modal/modal-2.png");
 const welcomeTitleBackground = encodeURI("/modal/background-1.png");
 const heroImage = encodeURI(`${basePath}/6 Trung Đình.jpg`);
 const welcomeBackgroundImage = panoramaPath("3 Tả Hồ.jpg");
-const dinhCardImage = encodeURI(`${basePath}/1 Cổng Đình.jpg`);
-const shrineCardImage = encodeURI(`${basePath}/13 Chính điện Đền thờ Tổ nghề.jpg`);
+const dinhCardImage = encodeURI(`${basePath}/Toa_Dai_Bai.png`);
+const shrineCardImage = encodeURI(`${basePath}/DenThoKimHoan.jpg`);
 const backgroundAudio = encodeURI("/media/Nhạc Phật Giáo sâu lắng.mp3");
 
 const PANORAMA_CAMERA_DISTANCE = 0.12;
@@ -948,14 +948,14 @@ function WelcomeScreen({
           <div className="relative mt-6 grid w-full max-w-[480px] grid-cols-2 gap-4 px-4 sm:mt-7 sm:gap-6">
             <WelcomeCard
               image={dinhCardImage}
-              label="Đình Làng Định Công Thượng"
+              label={"Đình Làng Định\n Công Thượng"}
               rotate="-rotate-6"
               disabled={isEntering || !canEnterTour}
               onClick={() => onEnter("scene-8")}
             />
             <WelcomeCard
               image={shrineCardImage}
-              label="Đền thờ Tổ nghề Kim hoàn"
+              label={"Đền Tổ Nghề\nKim Hoàn"}
               rotate="rotate-5"
               disabled={isEntering || !canEnterTour}
               onClick={() => onEnter("scene-13")}
@@ -1150,7 +1150,7 @@ function WelcomeCard({
             <span className="absolute inset-0 ring-1 ring-white/40" />
           </div>
           <div className="mt-2 flex items-center justify-between px-1">
-            <p className="font-display-vn max-w-[10.6rem] truncate text-[0.8rem] font-bold text-[var(--foreground)] sm:max-w-[11.8rem] sm:text-[0.9rem]" title={label}>
+            <p className="font-display-vn mx-auto max-w-[10.6rem] break-words whitespace-pre-line text-center text-[0.8rem] font-bold text-[var(--foreground)] sm:max-w-[11.8rem] sm:text-[0.9rem]" title={label}>
               {label}
             </p>
             <span className="text-[0.58rem] font-black uppercase tracking-[0.22em] text-[var(--tour-gold)]">
