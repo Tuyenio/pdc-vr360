@@ -491,11 +491,11 @@ const chuaScenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 50, y: 90 },
     hotspots: [
-      { targetId: "scene-2", label: "Tiền Đường", yaw: 50, pitch: -16, rotation: 0 },
+      { targetId: "scene-2", label: "Tiền Đường", yaw: 115, pitch: -20, rotation: 0 },
     ],
   },
   {
-    id: "scene-2",
+    id: "scene-2",  
     order: "02",
     title: "Tiền Đường",
     location: "Tiền Đường",
@@ -503,10 +503,10 @@ const chuaScenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 50, y: 72 },
     hotspots: [
-      { targetId: "scene-1", label: "Cổng Tam Quan", yaw: 180, pitch: -16, rotation: 180 },
-      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: 0, pitch: -16, rotation: 0 },
-      { targetId: "scene-7", label: "Đài Quan Âm", yaw: 72, pitch: -15, rotation: 20 },
-      { targetId: "scene-4", label: "Bên trái", yaw: -74, pitch: -15, rotation: -20 },
+      { targetId: "scene-1", label: "Cổng Tam Quan", yaw: -45, pitch: -16, rotation: 0 },
+      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: 120, pitch: -16, rotation: 0 },
+      { targetId: "scene-7", label: "Đài Quan Âm", yaw: 172, pitch: -15, rotation: 20 },
+      { targetId: "scene-4", label: "Bên trái", yaw: 64, pitch: -15, rotation: -20 },
     ],
   },
   {
@@ -518,9 +518,10 @@ const chuaScenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 50, y: 54 },
     hotspots: [
-      { targetId: "scene-2", label: "Tiền Đường", yaw: 180, pitch: -18, rotation: 180 },
-      { targetId: "scene-4", label: "Bên trái", yaw: -82, pitch: -15, rotation: -24 },
-      { targetId: "scene-7", label: "Đài Quan Âm", yaw: 82, pitch: -15, rotation: 24 },
+      { targetId: "scene-2", label: "Tiền Đường", yaw: 320, pitch: -22, rotation: 0 },
+      { targetId: "scene-4", label: "Bên trái", yaw: 68, pitch: -39, rotation: -24 },
+      { targetId: "scene-7", label: "Đài Quan Âm", yaw: 192, pitch: -39, rotation: 24 },
+      { targetId: "scene-8", label: "Sảnh trung tâm", yaw: 110, pitch: -39, rotation: 0 },
     ],
   },
   {
@@ -532,9 +533,9 @@ const chuaScenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 29, y: 62 },
     hotspots: [
-      { targetId: "scene-2", label: "Tiền Đường", yaw: 52, pitch: -16, rotation: 18 },
-      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: 18, pitch: -15, rotation: 0 },
-      { targetId: "scene-5", label: "Chi tiết bên trái", yaw: -82, pitch: -15, rotation: -22 },
+      { targetId: "scene-2", label: "Tiền Đường", yaw: 242, pitch: -26, rotation: 0 },
+      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: 168, pitch: -30, rotation: 0 },
+      { targetId: "scene-5", label: "Chi tiết bên trái", yaw: 99, pitch: -25, rotation: 0 },
     ],
   },
   {
@@ -546,9 +547,8 @@ const chuaScenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 20, y: 49 },
     hotspots: [
-      { targetId: "scene-4", label: "Bên trái", yaw: 164, pitch: -15, rotation: 180 },
-      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: 48, pitch: -15, rotation: 16 },
-      { targetId: "scene-8", label: "Sảnh trung tâm", yaw: -18, pitch: -15, rotation: -8 },
+      { targetId: "scene-4", label: "Bên trái", yaw: -39, pitch: -25, rotation: 0 },
+      { targetId: "scene-8", label: "Sảnh trung tâm", yaw: -180 , pitch: -25, rotation: -8 },
     ],
   },
   {
@@ -560,9 +560,9 @@ const chuaScenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 42, y: 42 },
     hotspots: [
-      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: 16, pitch: -15, rotation: 0 },
-      { targetId: "scene-6", label: "Vườn Tháp Tổ", yaw: 92, pitch: -15, rotation: 22 },
-      { targetId: "scene-5", label: "Chi tiết bên trái", yaw: -118, pitch: -15, rotation: -28 },
+      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: -66, pitch: -25, rotation: 0 },
+      { targetId: "scene-6", label: "Vườn Tháp Tổ", yaw: 205, pitch: -15, rotation: 0 },
+      { targetId: "scene-5", label: "Chi tiết bên trái", yaw: 5, pitch: -15, rotation: -28 },
     ],
   },
   {
@@ -574,8 +574,8 @@ const chuaScenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 70, y: 34 },
     hotspots: [
-      { targetId: "scene-7", label: "Đài Quan Âm", yaw: 52, pitch: -15, rotation: 18 },
-      { targetId: "scene-8", label: "Sảnh trung tâm", yaw: -126, pitch: -15, rotation: -28 },
+      { targetId: "scene-7", label: "Đài Quan Âm", yaw: -80, pitch: -12, rotation: -28 },
+      { targetId: "scene-8", label: "Sảnh trung tâm", yaw: -59, pitch: -12, rotation: 38 },
     ],
   },
   {
@@ -587,9 +587,9 @@ const chuaScenes: TourScene[] = [
     initialYaw: 0,
     mapPosition: { x: 75, y: 58 },
     hotspots: [
-      { targetId: "scene-2", label: "Tiền Đường", yaw: -116, pitch: -15, rotation: -24 },
-      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: -74, pitch: -15, rotation: -18 },
-      { targetId: "scene-6", label: "Vườn Tháp Tổ", yaw: 36, pitch: -15, rotation: 12 },
+      { targetId: "scene-2", label: "Tiền Đường", yaw: -72, pitch: -15, rotation: -5 },
+      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: -60, pitch: -15, rotation: 29 },
+      { targetId: "scene-6", label: "Vườn Tháp Tổ", yaw: 8, pitch: -25, rotation: 22 },
     ],
   },
 ];
