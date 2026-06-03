@@ -159,12 +159,15 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <div className="public-panel grid min-h-[22rem] place-items-center rounded-[8px] p-6 text-center">
-            <div>
-              <MapPin className="mx-auto h-10 w-10 text-[var(--primary)]" strokeWidth={1.8} />
-              <p className="mt-4 text-lg font-bold text-[var(--tour-ink)]">Bản đồ khu vực phường Định Công</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">Placeholder bản đồ số</p>
-            </div>
+          <div className="public-map-frame public-panel rounded-[8px] p-2">
+            <iframe
+              title="Bản đồ khu vực phường Định Công"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d16221.373933751474!2d105.81476381553804!3d20.975519950799196!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135acf7140205b7%3A0xf0c855e17637e8c4!2zxJDhu4tuaCBDw7RuZywgSMOgIE7hu5lpLCBWaeG7h3QgTmFt!5e1!3m2!1svi!2s!4v1780474484599!5m2!1svi!2s"
+              className="h-[28rem] w-full rounded-[6px] border-0"
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
           </div>
         </div>
       </section>

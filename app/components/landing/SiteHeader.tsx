@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Menu, PlayCircle, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { navigation } from "@/app/content";
+import { activeTour, navigation } from "@/app/content";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -53,7 +53,7 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-3">
           <Link
-            href="/di-tich"
+            href={activeTour.href}
             className="public-header-cta hidden min-h-10 items-center gap-2 rounded-full border border-[rgb(214_180_104_/_0.42)] bg-[rgb(16_57_43_/_0.94)] px-4 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_10px_28px_rgb(37_75_54_/_0.12)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgb(37_75_54_/_0.18)] sm:inline-flex"
           >
             <PlayCircle className="h-4 w-4 text-[var(--tour-gold-light)]" strokeWidth={1.8} />
@@ -95,7 +95,7 @@ export function SiteHeader() {
             );
           })}
           <Link
-            href="/di-tich"
+            href={activeTour.href}
             onClick={() => setMobileMenuOpen(false)}
             className="inline-flex items-center justify-center gap-2 rounded-full border border-[rgb(214_180_104_/_0.42)] bg-[rgb(16_57_43_/_0.94)] px-4 py-3 text-sm font-bold text-[var(--primary-foreground)]"
           >
