@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -9,9 +9,14 @@ const notoSans = Noto_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "VR360 Đình làng Định Công Thượng & Đền thờ Tổ nghề Kim hoàn",
+  title: "Con đường di sản Định Công",
   description:
-    "Trải nghiệm số hóa VR360 di tích Đình làng Định Công Thượng và Đền thờ Tổ nghề Kim hoàn tại phường Định Công.",
+    "Nền tảng VR360 giới thiệu di tích Phường Định Công, bắt đầu với Đình Làng Định Công Thượng, Đền thờ Tổ nghề Kim hoàn và tuyến Chùa Liên Hoa đang chuẩn bị.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

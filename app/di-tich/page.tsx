@@ -1,274 +1,240 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight, Building2, Gem, Landmark, MapPinned, Trees, Waves } from "lucide-react";
 import { SiteFooter } from "@/app/components/landing/SiteFooter";
 import { SiteHeader } from "@/app/components/landing/SiteHeader";
-import { activeTour, routeCards } from "@/app/content";
+import { activeTour, heritageValues, routeCards, upcomingTour } from "@/app/content";
 
 export const metadata: Metadata = {
-  title: "Di tích - Con đường di sản Định Công",
+  title: "Di tích | Con đường di sản Định Công",
   description:
-    "Khám phá các di tích văn hóa và lịch sử tại Phường Định Công qua tour tham quan VR360.",
+    "Danh mục di tích trong dự án VR360 Phường Định Công, gồm tour Đình Làng Định Công Thượng, Đền thờ Tổ nghề Kim hoàn và tuyến Chùa Liên Hoa đang chuẩn bị.",
 };
 
-const heritageIntro = {
-  title: "Di tích văn hóa Định Công",
-  description:
-    "Phường Định Công lưu giữ nhiều di tích văn hóa quan trọng, từ đình làng, đền thờ đến các không gian nghề truyền thống. Mỗi di tích đều mang trong mình câu chuyện riêng về lịch sử hình thành và phát triển của cộng đồng.",
-};
-
-const heritageHighlights = [
+const currentHighlights = [
   {
     title: "Đình Làng Định Công Thượng",
-    period: "Thế kỷ 17-18",
-    description:
-      "Trung tâm sinh hoạt cộng đồng và tín ngưỡng của làng xưa, nơi thờ Thành hoàng bổn cảnh và tổ chức các lễ hội truyền thống.",
-    features: ["Kiến trúc Bắc Bộ truyền thống", "Hệ thống hồ nước", "Không gian lễ nghi"],
-    image: "/images-tour/Đình Làng-Đền Thờ/6 Trung Đình.jpg",
+    detail: "Không gian đình làng, sân lễ, chính điện và các điểm quan sát được tổ chức thành tuyến tham quan 360 độ.",
+    image: activeTour.heroImage,
+    icon: Landmark,
   },
   {
     title: "Đền thờ Tổ nghề Kim hoàn",
-    period: "Thế kỷ 19",
-    description:
-      "Nơi thờ phụng tổ sư nghề kim hoàn, ghi nhận vai trò quan trọng của nghề truyền thống trong đời sống cộng đồng Định Công.",
-    features: ["Không gian thờ phụng", "Tư liệu nghề kim hoàn", "Kiến trúc đền thờ"],
-    image: "/images-tour/Đình Làng-Đền Thờ/13 Chính điện Đền thờ Tổ nghề.jpg",
+    detail: "Lớp nội dung giới thiệu không gian thờ Tổ nghề và ký ức nghề truyền thống của cộng đồng Định Công.",
+    image: activeTour.shrineImage,
+    icon: Gem,
   },
   {
-    title: "Hệ thống cảnh quan",
-    period: "Truyền thống",
-    description:
-      "Hồ nước, vườn cảnh và không gian kết nối giữa các di tích tạo nên một quần thể kiến trúc cảnh quan hài hòa.",
-    features: ["Hồ Tả - Hữu", "Vườn cảnh phía Đông", "Lối dẫn kết nối"],
-    image: "/images-tour/Đình Làng-Đền Thờ/3 Tả Hồ.jpg",
+    title: "Cảnh quan kết nối",
+    detail: "Các điểm hồ, sân, lối dẫn và không gian chuyển tiếp giúp người xem hiểu cấu trúc quần thể di tích.",
+    image: activeTour.coverImage,
+    icon: Trees,
   },
 ];
-
-const heritageValues = [
-  {
-    icon: "building",
-    title: "Giá trị kiến trúc",
-    description: "Kiến trúc truyền thống Bắc Bộ với hệ thống cấu kiện gỗ, trang trí tinh xảo và bố cục không gian hài hòa.",
-    color: "var(--tour-coral)",
-  },
-  {
-    icon: "history",
-    title: "Giá trị lịch sử",
-    description: "Ghi dấu quá trình hình thành, phát triển và văn hóa cộng đồng làng xã Việt Nam qua nhiều thế kỷ.",
-    color: "var(--tour-gold)",
-  },
-  {
-    icon: "culture",
-    title: "Giá trị văn hóa",
-    description: "Lưu giữ tín ngưỡng thờ Thành hoàng, tổ nghề và các tập tục văn hóa truyền thống của cộng đồng.",
-    color: "var(--tour-jade)",
-  },
-  {
-    icon: "community",
-    title: "Giá trị cộng đồng",
-    description: "Không gian sinh hoạt chung, tổ chức lễ hội và duy trì sự gắn kết của cộng đồng địa phương.",
-    color: "var(--tour-teal)",
-  },
-];
-
-const icons = {
-  building: (
-    <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-    </svg>
-  ),
-  history: (
-    <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  culture: (
-    <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-    </svg>
-  ),
-  community: (
-    <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-    </svg>
-  ),
-};
 
 export default function HeritageListPage() {
   return (
     <main className="public-page min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <SiteHeader />
 
-      <section className="relative isolate overflow-hidden border-b border-[var(--surface-border)]">
+      <section className="public-subpage-hero relative isolate overflow-hidden border-b border-[var(--surface-border)]">
         <Image
-          src="/images-tour/Đình Làng-Đền Thờ/1 Cổng Đình.jpg"
+          src={activeTour.gateImage}
           alt=""
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-[0.14] blur-[1px]"
+          className="public-subpage-hero-image object-cover"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(100deg,rgb(10_6_4_/_0.98)_0%,rgb(20_12_8_/_0.88)_48%,rgb(8_5_3_/_0.60)_100%)]" />
-        <div className="absolute inset-0 bg-gradient-to-br from-[var(--tour-gold)]/20 via-transparent to-[var(--tour-jade)]/20 mix-blend-overlay" />
 
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-32">
-          <div className="public-rise mx-auto max-w-4xl text-center">
-            <p className="public-kicker">Di sản văn hóa</p>
-            <h1 className="public-gradient-text mt-4 text-[clamp(2.5rem,5vw,4.5rem)] font-black leading-[0.94]">
-              {heritageIntro.title}
+        <div className="public-subpage-hero-content mx-auto grid max-w-7xl gap-10 px-4 py-18 sm:px-6 lg:min-h-[640px] lg:grid-cols-[0.9fr_0.75fr] lg:items-center lg:py-24">
+          <div className="public-rise public-hero-rule w-full min-w-0 max-w-4xl">
+            <p className="public-kicker">Danh mục di tích</p>
+            <h1 className="public-gradient-text public-heading-safe public-subpage-title mt-4 text-[clamp(2.55rem,6vw,5.7rem)] font-extrabold">
+              Di tích Định Công trong không gian VR360.
             </h1>
-            <p className="public-slide-up mx-auto mt-6 max-w-[62ch] text-lg font-medium leading-8 text-[var(--foreground)]/78" style={{ animationDelay: '200ms' }}>
-              {heritageIntro.description}
+            <p className="public-subpage-copy mt-6 text-base leading-8 text-[var(--foreground)]/82 sm:text-lg">
+              Trang này trình bày các tuyến di tích của Phường Định Công theo trạng thái rõ ràng: tour đã sẵn sàng, tuyến đang chuẩn bị và các lớp tư liệu có thể mở rộng.
             </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <span className="public-chip">
+                <Landmark className="h-4 w-4" strokeWidth={1.8} />
+                Di tích trọng tâm
+              </span>
+              <span className="public-chip">
+                <MapPinned className="h-4 w-4" strokeWidth={1.8} />
+                Trạng thái minh bạch
+              </span>
+              <span className="public-chip">
+                <Gem className="h-4 w-4" strokeWidth={1.8} />
+                Ký ức nghề Kim hoàn
+              </span>
+            </div>
+          </div>
+
+          <div className="public-image-stage public-hero-photo public-stagger-item hidden lg:block">
+            <Image
+              src={activeTour.gateImage}
+              alt="Cổng Đình Làng Định Công Thượng"
+              fill
+              sizes="42vw"
+              className="object-cover"
+            />
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
-        <div className="space-y-16 lg:space-y-24">
-          {heritageHighlights.map((heritage, index) => {
-            const isEven = index % 2 === 0;
-            return (
-              <article
-                key={heritage.title}
-                className={`grid gap-8 lg:grid-cols-2 lg:gap-12 lg:items-center ${isEven ? "" : "lg:[&>*:first-child]:order-2"}`}
-              >
-                <div className="public-media public-scale-in relative min-h-[22rem] overflow-hidden rounded-[16px] lg:min-h-[32rem]">
-                  <Image
-                    src={heritage.image}
-                    alt={heritage.title}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover transition-all duration-700 hover:scale-105 hover:rotate-1"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-br from-[var(--tour-coral)]/20 via-transparent to-[var(--tour-teal)]/15 mix-blend-overlay" />
-                  <div className="absolute top-4 left-4 bg-gradient-to-r from-[var(--tour-coral)] to-[var(--tour-gold)] px-4 py-2 rounded-full text-xs font-black text-white shadow-lg">
-                    {heritage.period}
+      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
+        <div className="grid gap-9 lg:grid-cols-[0.38fr_1fr] lg:items-start">
+          <div className="min-w-0 lg:sticky lg:top-28">
+            <p className="public-kicker">Trạng thái tuyến</p>
+            <h2 className="public-heading-safe mt-3 text-[2rem] font-bold text-[var(--tour-ink)] sm:text-4xl">
+              Các điểm di tích trọng tâm của giai đoạn hiện tại.
+            </h2>
+            <p className="mt-4 max-w-[48ch] text-base leading-7 text-[var(--foreground)]/76">
+              {activeTour.title} đã có tour hoàn thiện. {upcomingTour.title} được thể hiện như tuyến chuẩn bị để người xem không nhầm với dữ liệu đã bàn giao.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {routeCards.slice(0, 2).map((route) => {
+              const content = (
+                <>
+                  <div className="relative aspect-[16/11] overflow-hidden">
+                    <Image
+                      src={route.image}
+                      alt={route.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 38vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-[1.025]"
+                    />
                   </div>
-                </div>
-
-                <div className="min-w-0">
-                  <h2 className="public-bounce-in text-[2rem] font-black leading-tight text-[var(--tour-ink)] sm:text-4xl" style={{ animationDelay: '100ms' }}>
-                    {heritage.title}
-                  </h2>
-                  <p className="public-fade-in mt-4 text-base leading-7 text-[var(--foreground)]/78" style={{ animationDelay: '200ms' }}>{heritage.description}</p>
-
-                  <div className="mt-6 space-y-2">
-                    <p className="text-sm font-black uppercase tracking-wider text-[var(--primary)]">
-                      Đặc điểm nổi bật
+                  <div className="p-5">
+                    <p className="inline-flex items-center gap-2 text-sm font-bold text-[var(--primary)]">
+                      <MapPinned className="h-4 w-4" strokeWidth={1.8} />
+                      {route.status}
                     </p>
-                    <ul className="space-y-2">
-                      {heritage.features.map((feature, idx) => (
-                        <li key={feature} className="public-bounce-in flex items-start gap-3" style={{ animationDelay: `${300 + idx * 100}ms` }}>
-                          <div className="mt-1.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--tour-jade)] to-[var(--tour-teal)]">
-                            <svg className="h-3.5 w-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <span className="text-sm font-semibold leading-6 text-[var(--tour-ink)]">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <h3 className="mt-3 text-2xl font-bold leading-tight text-[var(--tour-ink)]">{route.title}</h3>
+                    <p className="mt-1 text-sm font-semibold text-[var(--foreground)]/72">{route.subtitle}</p>
+                    <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{route.description}</p>
+                    <p className="mt-4 text-sm font-bold text-[var(--tour-ink)]">{route.detail}</p>
                   </div>
-                </div>
-              </article>
-            );
-          })}
+                </>
+              );
+
+              return route.href ? (
+                <Link key={route.title} href={route.href} className="public-card public-stagger-item group rounded-[8px]">
+                  {content}
+                </Link>
+              ) : (
+                <article key={route.title} className="public-card public-stagger-item group rounded-[8px]">
+                  {content}
+                </article>
+              );
+            })}
+          </div>
         </div>
       </section>
 
       <section className="border-y border-[var(--surface-border)] bg-[var(--surface-band)]">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-[2rem] font-black leading-tight text-[var(--tour-ink)] sm:text-4xl">
-              Giá trị <span className="public-gradient-text">di sản</span>
+        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
+          <div className="max-w-3xl">
+            <p className="public-kicker">Tour hiện có</p>
+            <h2 className="public-heading-safe mt-3 text-[2rem] font-bold text-[var(--tour-ink)] sm:text-4xl">
+              Các cấu phần chính trong tour Đình Làng và Đền thờ.
             </h2>
-            <p className="mx-auto mt-4 max-w-[56ch] text-base leading-7 text-[var(--foreground)]/76">
-              Di tích Định Công mang nhiều tầng giá trị quan trọng cần được bảo tồn và phát huy
-            </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:gap-8">
-            {heritageValues.map((value, index) => (
-              <article key={value.title} className="public-panel public-stagger-item public-hover-lift rounded-[16px] p-6 lg:p-8 border-t-4" style={{ borderTopColor: value.color }}>
-                <div className="flex items-start gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[12px] text-white shadow-lg" style={{ background: `linear-gradient(135deg, ${value.color}, ${value.color}dd)` }}>
-                    {icons[value.icon as keyof typeof icons]}
+          <div className="mt-10 grid gap-4 lg:grid-cols-3">
+            {currentHighlights.map((heritage) => {
+              const Icon = heritage.icon;
+
+              return (
+                <article key={heritage.title} className="public-card public-stagger-item group rounded-[8px]">
+                  <div className="relative aspect-[16/11] overflow-hidden">
+                    <Image
+                      src={heritage.image}
+                      alt={heritage.title}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 30vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-[1.025]"
+                    />
                   </div>
-                  <div className="min-w-0">
-                    <h3 className="text-xl font-black text-[var(--tour-ink)]">{value.title}</h3>
-                    <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{value.description}</p>
+                  <div className="p-5">
+                    <Icon className="h-6 w-6 text-[var(--primary)]" strokeWidth={1.8} />
+                    <h3 className="mt-4 text-xl font-bold text-[var(--tour-ink)]">{heritage.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{heritage.detail}</p>
                   </div>
-                </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
+        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div className="public-media relative min-h-[24rem] overflow-hidden rounded-[8px] lg:min-h-[36rem]">
+            <Image
+              src="/images-tour/Đình Làng-Đền Thờ/3 Tả Hồ.jpg"
+              alt="Không gian hồ trong quần thể di tích Định Công"
+              fill
+              sizes="(max-width: 1024px) 100vw, 46vw"
+              className="object-cover"
+            />
+          </div>
+
+          <div className="min-w-0">
+            <p className="public-kicker">Giá trị nội dung</p>
+            <h2 className="public-heading-safe mt-3 text-[2rem] font-bold text-[var(--tour-ink)] sm:text-4xl">
+              Mỗi di tích cần được kể bằng hình ảnh, âm thanh và ngữ cảnh phù hợp.
+            </h2>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              {heritageValues.map((value, index) => (
+                <article key={value.title} className="border-t border-[var(--surface-border)] pt-5">
+                  <div className="flex items-center gap-3">
+                    {index === 0 ? <Building2 className="h-5 w-5 text-[var(--primary)]" strokeWidth={1.8} /> : null}
+                    {index === 1 ? <Gem className="h-5 w-5 text-[var(--primary)]" strokeWidth={1.8} /> : null}
+                    {index === 2 ? <Waves className="h-5 w-5 text-[var(--primary)]" strokeWidth={1.8} /> : null}
+                    {index === 3 ? <MapPinned className="h-5 w-5 text-[var(--primary)]" strokeWidth={1.8} /> : null}
+                    <h3 className="text-lg font-bold text-[var(--tour-ink)]">{value.title}</h3>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{value.detail}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-[var(--surface-border)] bg-[var(--surface-band)]">
+        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {routeCards.map((route) => (
+              <article key={route.title} className="public-panel public-stagger-item rounded-[8px] p-5">
+                <p className="text-sm font-bold text-[var(--primary)]">{route.status}</p>
+                <h3 className="mt-3 text-xl font-bold leading-tight text-[var(--tour-ink)]">{route.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{route.description}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-[2rem] font-black leading-tight text-[var(--tour-ink)] sm:text-4xl">
-            Khám phá di sản qua <span className="public-gradient-text">VR360</span>
-          </h2>
-          <p className="mx-auto mt-4 max-w-[56ch] text-base leading-7 text-[var(--foreground)]/76">
-            Trải nghiệm các tour tham quan số đã được số hóa và các tuyến đề xuất mở rộng
-          </p>
-        </div>
-
-        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {routeCards.map((route, index) => {
-            const content = (
-              <>
-                <div className={`relative overflow-hidden ${index === 0 ? "aspect-[4/3]" : "aspect-[16/10]"}`}>
-                  <Image
-                    src={route.image}
-                    alt={route.title}
-                    fill
-                    sizes={index === 0 ? "(max-width: 768px) 100vw, 36vw" : "(max-width: 768px) 100vw, 24vw"}
-                    className="object-cover transition-all duration-700 group-hover:scale-[1.06] group-hover:brightness-110"
-                  />
-                  {index === 0 && (
-                    <div className="absolute top-4 right-4 bg-gradient-to-r from-[var(--tour-coral)] to-[var(--tour-gold)] px-3 py-1.5 rounded-full text-xs font-black text-white shadow-lg">
-                      ✦ ĐANG MỞ
-                    </div>
-                  )}
-                </div>
-                <div className="p-5">
-                  <p className="text-sm font-black text-[var(--primary)]">{route.status}</p>
-                  <h3 className="mt-2 text-xl font-black leading-tight text-[var(--tour-ink)]">{route.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{route.description}</p>
-                </div>
-              </>
-            );
-
-            const className = `public-card public-stagger-item group rounded-[16px] transition-transform hover:-translate-y-2`;
-
-            return route.href ? (
-              <Link key={route.title} href={route.href} className={className}>
-                {content}
-              </Link>
-            ) : (
-              <article key={route.title} className={className}>
-                {content}
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="px-4 pb-16 sm:px-6 lg:pb-24">
-        <div className="public-panel public-glow public-shimmer mx-auto grid max-w-7xl gap-5 rounded-[16px] p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8 border-2 border-[var(--primary)]/40">
+      <section className="px-4 py-14 sm:px-6 lg:py-20">
+        <div className="public-panel public-glow public-shimmer mx-auto grid max-w-7xl gap-5 rounded-[8px] p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8">
           <div>
-            <h2 className="text-3xl font-black leading-tight text-[var(--tour-ink)] sm:text-4xl">
-              Tham quan <span className="public-gradient-text">tour đang mở</span>
+            <h2 className="public-heading-safe text-3xl font-bold text-[var(--tour-ink)] sm:text-4xl">
+              Tour đang mở đã sẵn sàng tham quan.
             </h2>
-            <p className="mt-3 max-w-[62ch] text-sm leading-6 text-[var(--foreground)]/76 sm:text-base">
-              Bắt đầu khám phá Đình Làng Định Công Thượng và Đền thờ Tổ nghề Kim hoàn ngay bây giờ.
+            <p className="mt-3 max-w-[66ch] text-sm leading-6 text-[var(--foreground)]/76 sm:text-base">
+              Truy cập {activeTour.title} và {activeTour.subtitle} để xem bản mẫu hoàn thiện đầu tiên của dự án.
             </p>
           </div>
           <Link href={activeTour.href} className="public-cta w-fit">
-            Tham quan ngay ✦
+            Mở tour
+            <ArrowRight className="h-4 w-4" strokeWidth={1.8} />
           </Link>
         </div>
       </section>

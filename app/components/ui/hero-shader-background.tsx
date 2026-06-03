@@ -1,6 +1,6 @@
 "use client";
 
-import { MeshGradient, PulsingBorder } from "@paper-design/shaders-react";
+import { MeshGradient } from "@paper-design/shaders-react";
 import type React from "react";
 import { HeroPanoramaBackground } from "@/app/components/ui/hero-panorama-background";
 
@@ -31,61 +31,35 @@ export function HeroShaderBackground({ children, imageSrc }: HeroShaderBackgroun
 
       <div
         aria-hidden
-        className="absolute inset-0 bg-cover bg-center opacity-[0.2] saturate-[0.9]"
+        className="absolute inset-0 bg-cover bg-center opacity-[0.58] saturate-[1.12] contrast-[1.04]"
         style={{ backgroundImage: `url("${imageSrc}")` }}
       />
       <HeroPanoramaBackground imageSrc={imageSrc} />
-      <div aria-hidden className="absolute inset-0 bg-[rgb(18_21_16_/_0.34)]" />
+      <div aria-hidden className="absolute inset-0 bg-[rgb(243_247_240_/_0.12)]" />
 
-      <div aria-hidden className="absolute inset-0 overflow-hidden opacity-75 mix-blend-soft-light">
+      <div aria-hidden className="absolute inset-0 overflow-hidden opacity-48 mix-blend-soft-light">
         <MeshGradient
           className="absolute inset-0 h-full w-full"
-          colors={["#121510", "#c8a46a", "#f8f2e5", "#2b332b", "#6b5030"]}
+          colors={["#f8fbf2", "#d6b468", "#e0eddf", "#245f4b", "#ffffff"]}
           speed={0.28}
         />
         <MeshGradient
-          className="absolute inset-0 h-full w-full opacity-70"
-          colors={["#0d100c", "#f8f2e5", "#c8a46a", "#171a14"]}
+          className="absolute inset-0 h-full w-full opacity-45"
+          colors={["#ffffff", "#e7cb81", "#dcebdd", "#0e3427"]}
           speed={0.2}
         />
       </div>
 
       <div
         aria-hidden
-        className="absolute inset-0 bg-[linear-gradient(90deg,rgb(18_21_17_/_0.94)_0%,rgb(18_21_17_/_0.74)_39%,rgb(18_21_17_/_0.30)_100%)]"
+        className="absolute inset-0 bg-[linear-gradient(90deg,rgb(243_247_240_/_0.93)_0%,rgb(243_247_240_/_0.72)_42%,rgb(243_247_240_/_0.14)_100%)]"
       />
       <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(180deg,transparent,rgb(18_21_17_/_0.96))]"
+        className="absolute inset-x-0 bottom-0 h-44 bg-[linear-gradient(180deg,transparent,rgb(243_247_240_/_0.98))]"
       />
 
       {children}
-
-      <div aria-hidden className="absolute bottom-8 right-8 z-10 hidden h-20 w-20 items-center justify-center lg:flex">
-        <PulsingBorder
-          colors={["#f8f2e5", "#c8a46a", "#8d9276", "#f0eadc"]}
-          colorBack="#00000000"
-          speed={0.8}
-          roundness={1}
-          thickness={0.08}
-          softness={0.28}
-          intensity={2.8}
-          bloom={0.22}
-          spots={3}
-          spotSize={0.12}
-          pulse={0.08}
-          smoke={0.28}
-          smokeSize={3}
-          scale={0.64}
-          rotation={0}
-          style={{
-            width: "64px",
-            height: "64px",
-            borderRadius: "50%",
-          }}
-        />
-        <span className="absolute text-xs font-semibold tracking-[0.18em] text-[var(--tour-ink)]/85">VR360</span>
-      </div>
     </div>
   );
 }

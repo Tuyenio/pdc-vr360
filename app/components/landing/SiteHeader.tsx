@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Menu, PlayCircle, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { activeTour, navigation } from "@/app/content";
@@ -10,18 +11,23 @@ export function SiteHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--surface-border)] bg-[rgb(18_21_16_/_0.88)] backdrop-blur-[18px]">
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6">
+    <header className="public-header sticky top-0 z-50 border-b border-[var(--surface-border)] bg-[rgb(255_255_255_/_0.82)] shadow-[0_16px_46px_rgb(37_75_54_/_0.08)] backdrop-blur-[18px]">
+      <nav className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-5 px-4 sm:px-6">
         <Link
           href="/"
           className="flex min-w-0 items-center gap-3"
           aria-label="Con đường di sản Định Công"
         >
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] border border-[var(--surface-border)] bg-[var(--surface-glass)] text-sm font-semibold text-[var(--primary)]">
+          <span className="public-logo-mark grid h-10 w-10 shrink-0 place-items-center rounded-[8px] border border-[var(--surface-border)] bg-[var(--surface-glass-strong)] text-sm font-bold text-[var(--primary)]">
             ĐC
           </span>
-          <span className="truncate text-sm font-semibold leading-tight text-[var(--tour-ink)] sm:text-base">
-            Con đường di sản Định Công
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-bold leading-tight text-[var(--tour-ink)] sm:text-base">
+              Con đường di sản Định Công
+            </span>
+            <span className="hidden truncate text-xs leading-5 text-[var(--muted-foreground)] sm:block">
+              VR360 di tích Phường Định Công
+            </span>
           </span>
         </Link>
 
@@ -31,12 +37,13 @@ export function SiteHeader() {
             return (
               <Link
                 key={item.href}
-                className={`text-sm font-medium transition-colors ${
+                className={`public-nav-link text-sm font-semibold transition-colors ${
                   isActive
                     ? "text-[var(--primary)]"
                     : "text-[var(--muted-foreground)] hover:text-[var(--tour-ink)]"
                 }`}
                 href={item.href}
+                aria-current={isActive ? "page" : undefined}
               >
                 {item.label}
               </Link>
@@ -47,28 +54,25 @@ export function SiteHeader() {
         <div className="flex items-center gap-3">
           <Link
             href={activeTour.href}
-            className="rounded-[10px] border border-[var(--surface-border)] bg-[var(--surface-glass)] px-4 py-2 text-sm font-semibold text-[var(--tour-ink)] transition-colors hover:bg-[var(--surface-glass-strong)]"
+            className="public-header-cta hidden min-h-10 items-center gap-2 rounded-full border border-[rgb(214_180_104_/_0.42)] bg-[rgb(16_57_43_/_0.94)] px-4 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_10px_28px_rgb(37_75_54_/_0.12)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgb(37_75_54_/_0.18)] sm:inline-flex"
           >
-            Tour
+            <PlayCircle className="h-4 w-4 text-[var(--tour-gold-light)]" strokeWidth={1.8} />
+            Mở tour VR360
           </Link>
 
           <button
             onClick={() => setMobileMenuOpen((open) => !open)}
-            className="grid h-10 w-10 place-items-center rounded-[10px] border border-[var(--surface-border)] bg-[var(--surface-glass)] text-[var(--tour-ink)] lg:hidden"
+            className="grid h-10 w-10 place-items-center rounded-[8px] border border-[var(--surface-border)] bg-[rgb(255_255_255_/_0.8)] text-[var(--tour-ink)] shadow-[0_10px_28px_rgb(37_75_54_/_0.08)] transition-transform active:scale-[0.98] lg:hidden"
             aria-label="Menu"
             aria-expanded={mobileMenuOpen}
           >
-            <span className="grid w-4 gap-1">
-              <span className={`h-px bg-current transition-transform ${mobileMenuOpen ? "translate-y-[5px] rotate-45" : ""}`} />
-              <span className={`h-px bg-current transition-opacity ${mobileMenuOpen ? "opacity-0" : "opacity-100"}`} />
-              <span className={`h-px bg-current transition-transform ${mobileMenuOpen ? "-translate-y-[5px] -rotate-45" : ""}`} />
-            </span>
+            {mobileMenuOpen ? <X className="h-5 w-5" strokeWidth={1.8} /> : <Menu className="h-5 w-5" strokeWidth={1.8} />}
           </button>
         </div>
       </nav>
 
       <div
-        className={`overflow-hidden border-t border-[var(--surface-border)] transition-[max-height] duration-240 lg:hidden ${
+        className={`overflow-hidden border-t border-[var(--surface-border)] bg-[rgb(255_255_255_/_0.9)] transition-[max-height] duration-240 lg:hidden ${
           mobileMenuOpen ? "max-h-80" : "max-h-0"
         }`}
       >
@@ -80,7 +84,7 @@ export function SiteHeader() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`rounded-[10px] border px-4 py-3 text-sm font-medium transition-colors ${
+                className={`rounded-[8px] border px-4 py-3 text-sm font-medium transition-colors ${
                   isActive
                     ? "border-[var(--primary)]/35 bg-[var(--surface-glass-strong)] text-[var(--primary)]"
                     : "border-[var(--surface-border)] bg-[var(--surface-glass)] text-[var(--tour-ink)] hover:bg-[var(--surface-glass-strong)]"
@@ -90,6 +94,14 @@ export function SiteHeader() {
               </Link>
             );
           })}
+          <Link
+            href={activeTour.href}
+            onClick={() => setMobileMenuOpen(false)}
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-[rgb(214_180_104_/_0.42)] bg-[rgb(16_57_43_/_0.94)] px-4 py-3 text-sm font-bold text-[var(--primary-foreground)]"
+          >
+            <PlayCircle className="h-4 w-4 text-[var(--tour-gold-light)]" strokeWidth={1.8} />
+            Mở tour VR360
+          </Link>
         </div>
       </div>
     </header>
