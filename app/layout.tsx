@@ -9,9 +9,9 @@ const notoSans = Noto_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Con đường di sản Định Công",
+  title: "VR360 Định Công",
   description:
-    "Nền tảng VR360 giới thiệu di tích Phường Định Công, bắt đầu với Đình Làng Định Công Thượng, Đền thờ Tổ nghề Kim hoàn và tuyến Chùa Liên Hoa đang chuẩn bị.",
+    "Nền tảng tham quan và giới thiệu không gian văn hóa phường Định Công bằng công nghệ VR360.",
 };
 
 export const viewport: Viewport = {

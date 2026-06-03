@@ -119,7 +119,6 @@ const narrationPath = (fileName: string) => encodeURI(`${narrationBasePath}/${fi
 const chuaNarrationPath = (fileName: string) => encodeURI(`${chuaNarrationBasePath}/${fileName}`);
 const hotspotIcon = encodeURI("/icon/hotspotelement.png");
 const infoModalBackground = encodeURI("/modal/modal-2.png");
-const welcomeTitleBackground = encodeURI("/modal/background-1.png");
 const heroImage = encodeURI(`${basePath}/6 Trung Đình.jpg`);
 const welcomeBackgroundImage = panoramaPath("3 Tả Hồ.jpg");
 const dinhCardImage = encodeURI(`${basePath}/Toa_Dai_Bai.png`);
@@ -1176,21 +1175,15 @@ function WelcomeScreen({
         }`}
       >
         <div className="flex w-full max-w-5xl flex-col items-center text-center">
-          <div className="relative w-[min(88vw,780px)] px-4  pt-9 sm:px-9 sm:pb-7 sm:pt-9 lg:w-[min(90vw,840px)]">
-            <Image
-              src={welcomeTitleBackground}
-              alt=""
-              fill
-              priority
-              sizes="1000px"
-              className="pointer-events-none scale-x-[1.32] scale-y-[1.72] select-none object-contain sm:scale-x-[1.05] sm:scale-y-[1.35] lg:scale-x-[1.16] lg:scale-y-[1.26]"
-              draggable={false}
-            />
-            <h1 className="font-display-vn relative text-balance text-[1.85rem] font-bold uppercase leading-[1.18] text-[var(--tour-ink)] drop-shadow-[0_2px_0_rgba(255,252,245,0.92),0_3px_8px_rgba(45,38,33,0.28)] sm:text-[3rem] sm:leading-[1.12] lg:text-[3.72rem]">
+          <div className="welcome-title-plaque relative w-[min(92vw,760px)] px-5 py-6 sm:px-8 sm:py-7 lg:w-[min(82vw,820px)] lg:px-10 lg:py-8">
+            <span className="welcome-plaque-crown" aria-hidden="true" />
+            <span className="welcome-plaque-ornament welcome-plaque-ornament--left" aria-hidden="true" />
+            <span className="welcome-plaque-ornament welcome-plaque-ornament--right" aria-hidden="true" />
+            <h1 className="font-display-vn relative mx-auto max-w-[17ch] text-balance text-[clamp(2rem,8vw,3.9rem)] font-bold uppercase leading-[1.08] text-[var(--tour-ink)] drop-shadow-[0_2px_0_rgba(255,252,245,0.92),0_3px_8px_rgba(45,38,33,0.24)]">
               {tourConfig.welcomeTitle}
               <span className="mt-1.5 block text-[var(--primary)] sm:mt-1">{tourConfig.welcomeAccent}</span>
             </h1>
-            <p className="relative mt-3.5 text-[0.76rem] font-bold text-[rgb(58_50_44_/_0.88)] drop-shadow-[0_1px_0_rgba(255,252,245,0.76)] sm:mt-4 sm:text-[0.95rem]">
+            <p className="relative mx-auto mt-3.5 max-w-[58ch] text-balance text-[0.78rem] font-bold leading-5 text-[rgb(58_50_44_/_0.9)] drop-shadow-[0_1px_0_rgba(255,252,245,0.76)] sm:mt-4 sm:text-[0.95rem] sm:leading-6">
               {tourConfig.welcomeSubtitle}
             </p>
           </div>
@@ -1239,7 +1232,17 @@ function WelcomeScreen({
 
         .welcome-title-plaque {
           isolation: isolate;
+          border: 2px solid rgba(185, 139, 86, 0.62);
           border-radius: 56px 56px 48px 48px / 42px 42px 36px 36px;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(255, 252, 245, 0.94), transparent 24%),
+            linear-gradient(180deg, rgba(255, 252, 245, 0.96), rgba(246, 234, 210, 0.96));
+          box-shadow:
+            0 28px 74px rgba(8, 10, 7, 0.38),
+            0 0 0 5px rgba(255, 252, 245, 0.62),
+            0 0 0 7px rgba(166, 124, 82, 0.34),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9),
+            inset 0 -14px 28px rgba(166, 124, 82, 0.12);
         }
 
         .welcome-title-plaque::before,
@@ -1393,10 +1396,10 @@ function WelcomeCard({
       title={label}
       aria-label={label}
     >
-      <div className="absolute inset-0 rounded-[18px] bg-[conic-gradient(from_140deg,#f6ead4,#c8a27a,#315f50,#c8a27a,#f6ead4)] opacity-55 blur-[14px]" />
-      <div className="relative rounded-[18px] bg-[linear-gradient(150deg,rgba(255,252,245,0.9),rgba(255,252,245,0.55)_46%,rgba(255,252,245,0.2))] p-[2px] shadow-[0_26px_70px_rgb(74_63_53_/_0.26)]">
-        <div className="rounded-[16px] border border-[rgb(166_124_82_/_0.18)] bg-[linear-gradient(160deg,rgba(255,252,245,0.85),rgba(236,229,216,0.6))] p-2">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-[14px]">
+      <div className="absolute inset-0 rounded-[8px] bg-[conic-gradient(from_140deg,#f6ead4,#c8a27a,#315f50,#c8a27a,#f6ead4)] opacity-55 blur-[14px]" />
+      <div className="relative rounded-[8px] bg-[linear-gradient(150deg,rgba(255,252,245,0.9),rgba(255,252,245,0.55)_46%,rgba(255,252,245,0.2))] p-[2px] shadow-[0_26px_70px_rgb(74_63_53_/_0.26)]">
+        <div className="rounded-[8px] border border-[rgb(166_124_82_/_0.18)] bg-[linear-gradient(160deg,rgba(255,252,245,0.85),rgba(236,229,216,0.6))] p-2">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[7px]">
             <Image
               src={image}
               alt={label}
@@ -2464,7 +2467,7 @@ function TourExperience({
             onClick={() => setIsMiniMapOverviewOpen(false)}
             aria-label="Đóng bản đồ phóng to"
           />
-          <section className="relative max-h-[88dvh] w-[min(92vw,760px)] overflow-y-auto rounded-[14px] border border-[rgb(232_207_170_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.13),rgb(255_252_245_/_0.045)_40%,transparent_72%),rgb(45_38_33_/_0.78)] p-3 text-white shadow-[0_38px_120px_rgb(0_0_0_/_0.48),inset_0_1px_0_rgb(255_255_255_/_0.16)] backdrop-blur-2xl [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin] sm:p-4">
+          <section className="relative max-h-[88dvh] w-[min(92vw,760px)] overflow-y-auto rounded-[8px] border border-[rgb(232_207_170_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.13),rgb(255_252_245_/_0.045)_40%,transparent_72%),rgb(45_38_33_/_0.78)] p-3 text-white shadow-[0_38px_120px_rgb(0_0_0_/_0.48),inset_0_1px_0_rgb(255_255_255_/_0.16)] backdrop-blur-2xl [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin] sm:p-4">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-[0.7rem] font-black uppercase tracking-[0.16em] text-[var(--tour-gold-light)]">
@@ -2751,7 +2754,7 @@ function TourExperience({
             onClick={() => setActivePanel(null)}
             aria-label="Đóng vị trí"
           />
-          <section className="relative grid max-h-[calc(100dvh-8.5rem)] w-[calc(100vw-1.5rem)] max-w-[980px] grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-[14px] border border-[rgb(232_207_170_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.13),rgb(255_252_245_/_0.045)_40%,transparent_72%),rgb(58_50_44_/_0.82)] text-white shadow-[0_38px_120px_rgb(0_0_0_/_0.46),inset_0_1px_0_rgb(255_255_255_/_0.16)] backdrop-blur-2xl sm:w-[calc(100vw-2.5rem)] sm:max-h-[calc(100dvh-9.5rem)] lg:max-w-[1080px]">
+          <section className="relative grid max-h-[calc(100dvh-8.5rem)] w-[calc(100vw-1.5rem)] max-w-[980px] grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-[8px] border border-[rgb(232_207_170_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.13),rgb(255_252_245_/_0.045)_40%,transparent_72%),rgb(58_50_44_/_0.82)] text-white shadow-[0_38px_120px_rgb(0_0_0_/_0.46),inset_0_1px_0_rgb(255_255_255_/_0.16)] backdrop-blur-2xl sm:w-[calc(100vw-2.5rem)] sm:max-h-[calc(100dvh-9.5rem)] lg:max-w-[1080px]">
             <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-5 sm:py-4">
               <h2 className="text-xl font-black tracking-[-0.02em] sm:text-2xl">Vị trí</h2>
               <button

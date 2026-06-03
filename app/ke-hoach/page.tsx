@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { Archive, BookOpen, CheckCircle2, FlaskConical, Globe2, GraduationCap, MoveRight, Workflow } from "lucide-react";
 import { SiteFooter } from "@/app/components/landing/SiteFooter";
 import { SiteHeader } from "@/app/components/landing/SiteHeader";
 import { activeTour, budgetGroups, deliverySteps } from "@/app/content";
 
 export const metadata: Metadata = {
-  title: "Kế hoạch triển khai | Con đường di sản Định Công",
-  description: "Kế hoạch triển khai dự án Con đường di sản Phường Định Công qua công nghệ VR360.",
+  title: "Kế hoạch triển khai | VR360 Định Công",
+  description: "Kế hoạch triển khai dự án số hóa không gian văn hóa phường Định Công qua công nghệ VR360.",
 };
 
 export default function PlanPage() {
   return (
-    <main className="public-page min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <main className="public-page min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <SiteHeader />
 
       <section className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-center lg:py-20">
@@ -31,12 +32,13 @@ export default function PlanPage() {
               href={activeTour.href}
               className="public-cta"
             >
-              Xem tour mẫu ✦
+              Xem tour mẫu
+              <MoveRight className="h-4 w-4" strokeWidth={1.8} />
             </Link>
           </div>
         </div>
 
-        <div className="public-media public-float public-shimmer relative min-h-[22rem] overflow-hidden rounded-[16px] lg:min-h-[32rem] lg:translate-x-8">
+        <div className="public-media public-float public-shimmer relative min-h-[22rem] overflow-hidden rounded-[8px] lg:min-h-[32rem] lg:translate-x-8">
           <Image
             src="/images-tour/Đình Làng-Đền Thờ/12 Không gian kết nối di tích.jpg"
             alt="Không gian kết nối di tích Định Công"
@@ -68,7 +70,7 @@ export default function PlanPage() {
             {deliverySteps.map((step, index) => (
               <article
                 key={step.title}
-                className={`public-card public-stagger-item public-hover-lift rounded-[16px] p-6 border-t-4 ${
+                className={`public-card public-stagger-item public-hover-lift rounded-[8px] p-6 border-t-4 ${
                   index === 0
                     ? "lg:col-span-4 border-[var(--tour-coral)]"
                     : index === 1
@@ -78,7 +80,7 @@ export default function PlanPage() {
                         : "lg:col-span-3 lg:translate-y-8 border-[var(--tour-teal)]"
                 }`}
               >
-                <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-[12px] text-white font-black text-xl shadow-lg" style={{
+                <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-[8px] text-white font-black text-xl shadow-lg" style={{
                   background: `linear-gradient(135deg, ${index === 0 ? 'var(--tour-coral)' : index === 1 ? 'var(--tour-gold)' : index === 2 ? 'var(--tour-jade)' : 'var(--tour-teal)'}, ${index === 0 ? 'var(--tour-gold)' : index === 1 ? 'var(--tour-jade)' : index === 2 ? 'var(--tour-teal)' : 'var(--tour-purple)'})`
                 }}>
                   {index + 1}
@@ -93,7 +95,7 @@ export default function PlanPage() {
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
         <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
-          <div className="public-media public-drift public-shimmer relative min-h-[24rem] overflow-hidden rounded-[16px] lg:min-h-[40rem] lg:-translate-x-8">
+          <div className="public-media public-drift public-shimmer relative min-h-[24rem] overflow-hidden rounded-[8px] lg:min-h-[40rem] lg:-translate-x-8">
             <Image
               src="/images-tour/Đình Làng-Đền Thờ/13 Chính điện Đền thờ Tổ nghề.jpg"
               alt="Chính điện Đền thờ Tổ nghề tại Định Công"
@@ -116,7 +118,7 @@ export default function PlanPage() {
               {budgetGroups.map((group, index) => (
                 <article
                   key={group.title}
-                  className={`public-panel public-stagger-item public-hover-lift rounded-[16px] p-6 border-l-4 ${
+                  className={`public-panel public-stagger-item public-hover-lift rounded-[8px] p-6 border-l-4 ${
                     index === 1 ? "lg:ml-10" : index === 2 ? "lg:mr-14" : ""
                   }`}
                   style={{
@@ -124,7 +126,7 @@ export default function PlanPage() {
                   }}
                 >
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-white font-black shadow-lg" style={{
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-white font-black shadow-lg" style={{
                       background: `linear-gradient(135deg, ${index === 0 ? 'var(--tour-coral)' : index === 1 ? 'var(--tour-jade)' : 'var(--tour-teal)'}, ${index === 0 ? 'var(--tour-gold)' : index === 1 ? 'var(--tour-teal)' : 'var(--tour-purple)'})`
                     }}>
                       {index + 1}
@@ -132,12 +134,10 @@ export default function PlanPage() {
                     <h3 className="text-2xl font-black text-[var(--tour-ink)]">{group.title}</h3>
                   </div>
                   <div className="divide-y divide-[var(--surface-border)]">
-                    {group.items.map((item, idx) => (
+                    {group.items.map((item) => (
                       <div key={item} className="py-3 flex items-center gap-2">
-                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--tour-jade)] to-[var(--tour-teal)]">
-                          <svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
+                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--tour-jade)] to-[var(--tour-teal)] text-white">
+                          <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
                         </div>
                         <p className="text-sm font-semibold leading-6 text-[var(--foreground)]/78">
                           {item}
@@ -166,7 +166,8 @@ export default function PlanPage() {
             href="/giai-phap"
             className="w-fit border-b-2 border-[var(--primary)] pb-1 text-sm font-extrabold text-[var(--tour-ink)] transition-all hover:text-[var(--primary)] hover:border-[var(--tour-jade)]"
           >
-            Xem giải pháp công nghệ →
+            Xem giải pháp công nghệ
+            <MoveRight className="ml-2 inline h-4 w-4" strokeWidth={1.8} />
           </Link>
         </div>
       </section>
@@ -187,56 +188,60 @@ export default function PlanPage() {
               {
                 title: "Lưu giữ vĩnh viễn",
                 desc: "Dữ liệu số hóa được bảo quản an toàn, không bị ảnh hưởng bởi thời gian và thiên tai",
-                icon: "💾",
+                icon: Archive,
                 color: "var(--tour-coral)"
               },
               {
                 title: "Giáo dục miễn phí",
                 desc: "Học sinh và người dân có thể học tập về lịch sử địa phương mọi lúc, mọi nơi",
-                icon: "📚",
+                icon: GraduationCap,
                 color: "var(--tour-gold)"
               },
               {
                 title: "Quảng bá rộng rãi",
                 desc: "Người nước ngoài và người Việt xa quê có thể tìm hiểu về di sản Định Công",
-                icon: "🌏",
+                icon: Globe2,
                 color: "var(--tour-jade)"
               },
               {
                 title: "Dễ mở rộng",
                 desc: "Hệ thống sẵn sàng cho các tuyến di sản mới mà không cần xây dựng lại từ đầu",
-                icon: "🚀",
+                icon: Workflow,
                 color: "var(--tour-teal)"
               },
               {
                 title: "Nghiên cứu khoa học",
                 desc: "Nhà nghiên cứu có thể sử dụng dữ liệu cho các công trình học thuật",
-                icon: "🔬",
+                icon: FlaskConical,
                 color: "var(--tour-purple)"
               },
               {
                 title: "Tài liệu mở",
                 desc: "Dữ liệu có thể chia sẻ cho giảng dạy, nghiên cứu và hoạt động văn hóa",
-                icon: "📖",
+                icon: BookOpen,
                 color: "var(--tour-coral)"
               }
-            ].map((benefit, idx) => (
+            ].map((benefit) => {
+              const Icon = benefit.icon;
+
+              return (
               <article
                 key={benefit.title}
-                className="public-panel public-stagger-item public-hover-lift rounded-[16px] p-6 border-t-4"
+                className="public-panel public-stagger-item public-hover-lift rounded-[8px] p-6 border-t-4"
                 style={{ borderTopColor: benefit.color }}
               >
-                <div className="text-4xl mb-3">{benefit.icon}</div>
+                <Icon className="mb-3 h-8 w-8 text-[var(--primary)]" strokeWidth={1.8} />
                 <h3 className="text-xl font-black text-[var(--tour-ink)]">{benefit.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{benefit.desc}</p>
               </article>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
       <section className="px-4 pb-16 sm:px-6 lg:pb-24">
-        <div className="public-panel public-glow public-shimmer mx-auto grid max-w-7xl gap-5 rounded-[16px] p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8 border-2 border-[var(--primary)]/40">
+        <div className="public-panel public-glow public-shimmer mx-auto grid max-w-7xl gap-5 rounded-[8px] p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8 border-2 border-[var(--primary)]/40">
           <div>
             <h2 className="text-3xl font-black leading-tight text-[var(--tour-ink)] sm:text-4xl">
               Trải nghiệm <span className="public-gradient-text">kế hoạch thực tế</span>
@@ -246,7 +251,8 @@ export default function PlanPage() {
             </p>
           </div>
           <Link href={activeTour.href} className="public-cta w-fit">
-            Xem tour mẫu ✦
+            Xem tour mẫu
+            <MoveRight className="h-4 w-4" strokeWidth={1.8} />
           </Link>
         </div>
       </section>

@@ -1,24 +1,43 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Clock, Compass, MapPinned, PlayCircle } from "lucide-react";
+import { ArrowRight, Box, Globe2, Landmark, PlayCircle, School, Sparkles } from "lucide-react";
 import { SiteFooter } from "@/app/components/landing/SiteFooter";
 import { SiteHeader } from "@/app/components/landing/SiteHeader";
 import { HeroShaderBackground } from "@/app/components/ui/hero-shader-background";
-import {
-  activeTour,
-  capabilities,
-  deliverySteps,
-  projectPillars,
-  routeCards,
-  upcomingTour,
-} from "@/app/content";
+import { activeTour, heritageSites } from "@/app/content";
 
 export const metadata: Metadata = {
-  title: "Trang chủ | Con đường di sản Định Công",
+  title: "Trang chủ | VR360 Định Công",
   description:
-    "Landing page giới thiệu sản phẩm VR360 cho di tích Phường Định Công, gồm tour Đình Làng Định Công Thượng, Đền thờ Tổ nghề Kim hoàn và Chùa Liên Hoa.",
+    "Landing page chính thức giới thiệu dự án VR360 số hóa di tích, không gian văn hóa và giá trị truyền thống phường Định Công.",
 };
+
+const availableSites = heritageSites.filter((site) => site.isAvailable);
+const upcomingSites = heritageSites.filter((site) => !site.isAvailable);
+
+const benefits = [
+  {
+    title: "Tham quan trực tuyến mọi lúc",
+    detail: "Người xem có thể tiếp cận không gian văn hóa ngay trên điện thoại hoặc máy tính.",
+    icon: Globe2,
+  },
+  {
+    title: "Lưu giữ giá trị văn hóa",
+    detail: "Ảnh 360 độ, thuyết minh và tư liệu được tổ chức thành kho dữ liệu dễ mở rộng.",
+    icon: Landmark,
+  },
+  {
+    title: "Trải nghiệm không gian 360 độ",
+    detail: "Các điểm chuyển cảnh giúp người xem di chuyển mạch lạc giữa từng không gian.",
+    icon: Box,
+  },
+  {
+    title: "Hỗ trợ giáo dục địa phương",
+    detail: "Tư liệu trực quan phục vụ học sinh, người dân, du khách và hoạt động truyền thông.",
+    icon: School,
+  },
+];
 
 export default function Home() {
   return (
@@ -26,76 +45,111 @@ export default function Home() {
       <SiteHeader />
 
       <HeroShaderBackground imageSrc={activeTour.heroImage}>
-        <div className="public-hero-inner relative z-10 mx-auto flex min-h-[640px] max-w-7xl items-center px-4 pb-12 pt-14 sm:px-6 lg:min-h-[700px] lg:pb-16">
-          <div className="public-rise w-full min-w-0 max-w-[54rem]">
-            <p className="public-kicker">VR360 di tích Phường Định Công</p>
-            <h1 className="public-gradient-text public-heading-safe public-hero-title mt-5 text-[clamp(3rem,7vw,6.4rem)] font-extrabold">
-              Con đường di sản Định Công
+        <section className="public-hero-inner relative z-10 mx-auto grid min-h-[680px] max-w-7xl items-center gap-10 px-4 pb-14 pt-16 sm:px-6 lg:grid-cols-[0.92fr_0.78fr] lg:pb-18">
+          <div className="public-rise min-w-0">
+            <p className="public-kicker">VR360 số hóa di tích phường Định Công</p>
+            <h1 className="public-gradient-text public-heading-safe mt-5 max-w-[18ch] text-[clamp(2.85rem,5.35vw,5rem)] font-extrabold">
+              Khám phá không gian văn hóa Định Công qua trải nghiệm VR360
             </h1>
-            <p className="mt-5 max-w-[54ch] text-base leading-8 text-[var(--foreground)]/82 sm:text-lg">
-              Không gian giới thiệu tour tham quan số cho di tích Phường Định Công, bắt đầu với Đình Làng Định Công Thượng, Đền thờ Tổ nghề Kim hoàn và Chùa Liên Hoa.
+            <p className="mt-6 max-w-[58ch] text-base leading-8 text-[var(--foreground)]/82 sm:text-lg">
+              Hành trình số hóa các di tích, không gian văn hóa và giá trị truyền thống của phường Định Công bằng công nghệ tham quan thực tế ảo 360 độ.
             </p>
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <Link href={activeTour.href} className="public-cta">
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link href="/di-tich" className="public-cta">
                 <PlayCircle className="h-4 w-4" strokeWidth={1.8} />
-                Bắt đầu tour VR360
+                Khám phá ngay
               </Link>
-              <Link href="/di-tich" className="public-cta-secondary">
-                Xem danh mục di tích
+              <Link href="/gioi-thieu" className="public-cta-secondary">
+                Tìm hiểu dự án
               </Link>
             </div>
           </div>
-        </div>
+
+          <div className="public-image-stage public-stagger-item relative hidden min-h-[31rem] lg:block">
+            <Image
+              src="/images-tour/Đình Làng-Đền Thờ/12 Không gian kết nối di tích.jpg"
+              alt="Không gian văn hóa Định Công được số hóa VR360"
+              fill
+              priority
+              sizes="42vw"
+              className="object-cover"
+            />
+          </div>
+        </section>
       </HeroShaderBackground>
 
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
-        <div className="grid gap-9 lg:grid-cols-[0.42fr_1fr] lg:items-start">
-          <div className="min-w-0 lg:sticky lg:top-28">
-            <p className="public-kicker">Danh mục số hóa</p>
-            <h2 className="public-heading-safe mt-3 text-[2rem] font-bold text-[var(--tour-ink)] sm:text-4xl">
-              Các tour di tích đang mở.
-            </h2>
-            <p className="mt-4 max-w-[48ch] text-base leading-7 text-[var(--foreground)]/76">
-              Mỗi tuyến được trình bày rõ trạng thái để người dân, học sinh và du khách có thể mở đúng tour đã hoàn thiện và theo dõi các lớp tư liệu sẽ tiếp tục bổ sung.
-            </p>
+      <section className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:py-20">
+        <div className="min-w-0">
+          <p className="public-kicker">Giới thiệu nhanh</p>
+          <h2 className="public-heading-safe mt-3 text-[2rem] font-bold text-[var(--tour-ink)] sm:text-4xl">
+            Dự án số hóa di tích phường Định Công
+          </h2>
+        </div>
+        <div className="grid gap-4 text-base leading-7 text-[var(--foreground)]/78">
+          <p>
+            Dự án VR360 Định Công được xây dựng nhằm bảo tồn tư liệu, quảng bá văn hóa địa phương và tạo điều kiện để người dân, học sinh, du khách tham quan trực tuyến các di tích tiêu biểu.
+          </p>
+          <p>
+            Mỗi không gian được giới thiệu bằng hình ảnh thật, điểm tương tác, thuyết minh tiếng Việt và cấu trúc nội dung dễ theo dõi để phục vụ lâu dài cho truyền thông văn hóa.
+          </p>
+        </div>
+      </section>
+
+      <section className="border-y border-[var(--surface-border)] bg-[var(--surface-band)]">
+        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
+          <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+            <div className="max-w-3xl">
+              <p className="public-kicker">Di tích nổi bật</p>
+              <h2 className="public-heading-safe mt-3 text-[2rem] font-bold text-[var(--tour-ink)] sm:text-4xl">
+                Hai không gian đang mở tour VR360.
+              </h2>
+            </div>
+            <Link href="/di-tich" className="inline-flex items-center gap-2 text-sm font-extrabold text-[var(--tour-ink)] transition hover:text-[var(--primary)]">
+              Xem toàn bộ không gian
+              <ArrowRight className="h-4 w-4" strokeWidth={1.8} />
+            </Link>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {routeCards.slice(0, 2).map((route) => {
-              const content = (
-                <>
-                  <div className="relative aspect-[16/11] overflow-hidden">
-                    <Image
-                      src={route.image}
-                      alt={route.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 38vw"
-                      className="object-cover transition-transform duration-700 group-hover:scale-[1.025]"
-                    />
-                  </div>
-                  <div className="p-5">
-                    <div className="flex flex-wrap items-center gap-2 text-sm font-bold text-[var(--primary)]">
-                      <MapPinned className="h-4 w-4" strokeWidth={1.8} />
-                      {route.status}
-                    </div>
-                    <h3 className="mt-3 text-2xl font-bold leading-tight text-[var(--tour-ink)]">{route.title}</h3>
-                    <p className="mt-1 text-sm font-semibold text-[var(--foreground)]/72">{route.subtitle}</p>
-                    <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{route.description}</p>
-                    <p className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[var(--tour-ink)]">
-                      {route.detail}
-                      {route.href ? <ArrowRight className="h-4 w-4 text-[var(--primary)]" strokeWidth={1.8} /> : <Clock className="h-4 w-4 text-[var(--primary)]" strokeWidth={1.8} />}
-                    </p>
-                  </div>
-                </>
-              );
+          <div className="mt-10 grid gap-4 lg:grid-cols-2">
+            {availableSites.map((site) => (
+              <HomeSiteCard key={site.id} site={site} />
+            ))}
+          </div>
+        </div>
+      </section>
 
-              return route.href ? (
-                <Link key={route.title} href={route.href} className="public-card public-stagger-item group rounded-[8px]">
-                  {content}
-                </Link>
-              ) : (
-                <article key={route.title} className="public-card public-stagger-item group rounded-[8px]">
-                  {content}
+      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
+        <div className="max-w-3xl">
+          <p className="public-kicker">Sắp ra mắt</p>
+          <h2 className="public-heading-safe mt-3 text-[2rem] font-bold text-[var(--tour-ink)] sm:text-4xl">
+            Các điểm đang bổ sung tư liệu.
+          </h2>
+        </div>
+
+        <div className="mt-10 grid gap-4 md:grid-cols-2">
+          {upcomingSites.map((site) => (
+            <HomeSiteCard key={site.id} site={site} />
+          ))}
+        </div>
+      </section>
+
+      <section className="border-y border-[var(--surface-border)] bg-[var(--surface-band)]">
+        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
+          <div className="max-w-3xl">
+            <p className="public-kicker">Điểm nổi bật</p>
+            <h2 className="public-heading-safe mt-3 text-[2rem] font-bold text-[var(--tour-ink)] sm:text-4xl">
+              Giá trị của nền tảng VR360.
+            </h2>
+          </div>
+          <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {benefits.map((benefit) => {
+              const Icon = benefit.icon;
+
+              return (
+                <article key={benefit.title} className="public-panel public-stagger-item rounded-[8px] p-5">
+                  <Icon className="h-7 w-7 text-[var(--primary)]" strokeWidth={1.8} />
+                  <h3 className="mt-5 text-xl font-bold text-[var(--tour-ink)]">{benefit.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{benefit.detail}</p>
                 </article>
               );
             })}
@@ -103,103 +157,59 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-y border-[var(--surface-border)] bg-[var(--surface-band)]">
-        <div className="mx-auto grid max-w-7xl gap-9 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-20">
-          <div className="public-media relative min-h-[24rem] overflow-hidden rounded-[8px] lg:min-h-[35rem]">
-            <Image
-              src="/images-tour/Đình Làng-Đền Thờ/12 Không gian kết nối di tích.jpg"
-              alt="Không gian kết nối di tích Định Công"
-              fill
-              sizes="(max-width: 1024px) 100vw, 52vw"
-              className="object-cover"
-            />
-          </div>
-
-          <div className="min-w-0">
-            <p className="public-kicker">Năng lực nền tảng</p>
-            <h2 className="public-heading-safe mt-3 text-[2rem] font-bold text-[var(--tour-ink)] sm:text-4xl">
-              Sản phẩm VR360 được thiết kế để bàn giao và mở rộng.
-            </h2>
-            <div className="mt-6 grid gap-3">
-              {capabilities.map((capability) => (
-                <p key={capability} className="public-line-item flex items-start gap-3 text-sm font-semibold leading-6 text-[var(--tour-ink)]">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[var(--primary)]" strokeWidth={1.8} />
-                  {capability}
-                </p>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
-        <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:items-start">
-          <div className="min-w-0">
-            <p className="public-kicker">Định hướng thiết kế</p>
-            <h2 className="public-heading-safe mt-3 text-[2rem] font-bold text-[var(--tour-ink)] sm:text-4xl">
-              Trang trọng, dễ hiểu, dùng được lâu dài.
-            </h2>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            {projectPillars.map((pillar) => (
-              <article key={pillar.title} className="public-panel public-stagger-item rounded-[8px] p-5">
-                <Compass className="h-6 w-6 text-[var(--primary)]" strokeWidth={1.8} />
-                <h3 className="mt-4 text-xl font-bold text-[var(--tour-ink)]">{pillar.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{pillar.detail}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-[var(--surface-border)] bg-[var(--surface-band)]">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-start lg:py-20">
-          <div className="min-w-0">
-            <p className="public-kicker">Quy trình</p>
-            <h2 className="public-heading-safe mt-3 text-[2rem] font-bold text-[var(--tour-ink)] sm:text-4xl">
-              Từ khảo sát hiện trạng đến vận hành tour.
-            </h2>
-            <p className="mt-4 max-w-[52ch] text-base leading-7 text-[var(--foreground)]/76">
-              Quy trình giữ nội dung trong tầm kiểm soát của đầu mối địa phương và sẵn sàng tiếp nhận tuyến {upcomingTour.title}.
-            </p>
-          </div>
-
-          <div className="grid gap-4">
-            {deliverySteps.map((step, index) => (
-              <article
-                key={step.title}
-                className="public-stagger-item grid gap-3 border-t border-[var(--surface-border)] pt-5 sm:grid-cols-[4rem_1fr]"
-              >
-                <p className="text-2xl font-bold text-[var(--primary)]">{String(index + 1).padStart(2, "0")}</p>
-                <div>
-                  <h3 className="text-xl font-bold text-[var(--tour-ink)]">{step.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">{step.detail}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section className="px-4 py-14 sm:px-6 lg:py-20">
-        <div className="public-panel public-glow public-shimmer mx-auto grid max-w-7xl gap-5 rounded-[8px] p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8">
+        <div className="public-panel public-glow mx-auto grid max-w-7xl gap-5 rounded-[8px] p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8">
           <div>
-            <h2 className="public-heading-safe text-3xl font-bold text-[var(--tour-ink)] sm:text-4xl">
-              Trải nghiệm tour đầu tiên trên dữ liệu thật.
+            <p className="public-kicker">Bắt đầu khám phá</p>
+            <h2 className="public-heading-safe mt-2 text-3xl font-bold text-[var(--tour-ink)] sm:text-4xl">
+              Bắt đầu hành trình khám phá Định Công
             </h2>
             <p className="mt-3 max-w-[66ch] text-sm leading-6 text-[var(--foreground)]/76 sm:text-base">
-              Mở tour {activeTour.title} để kiểm tra chất lượng ảnh 360, điểm chuyển cảnh và thuyết minh trước khi mở rộng {upcomingTour.title}.
+              Mở danh sách không gian văn hóa để tìm kiếm, lọc và lựa chọn điểm tham quan phù hợp.
             </p>
           </div>
-          <Link href={activeTour.href} className="public-cta w-fit">
-            <PlayCircle className="h-4 w-4" strokeWidth={1.8} />
-            Mở tour
+          <Link href="/di-tich" className="public-cta w-fit">
+            <Sparkles className="h-4 w-4" strokeWidth={1.8} />
+            Xem không gian văn hóa
           </Link>
         </div>
       </section>
 
       <SiteFooter />
     </main>
+  );
+}
+
+function HomeSiteCard({ site }: { site: (typeof heritageSites)[number] }) {
+  return (
+    <article className="public-card public-stagger-item group grid overflow-hidden rounded-[8px] md:grid-cols-[0.92fr_1.08fr]">
+      <div className="relative min-h-[18rem]">
+        <Image
+          src={site.image}
+          alt={site.name}
+          fill
+          sizes="(max-width: 768px) 100vw, 42vw"
+          className="object-cover transition-transform duration-700 group-hover:scale-[1.025]"
+        />
+      </div>
+      <div className="flex min-h-[18rem] flex-col p-5 sm:p-6">
+        <span
+          className={`w-fit rounded-full border px-3 py-1 text-xs font-extrabold ${
+            site.isAvailable
+              ? "border-[rgb(14_52_39_/_0.18)] bg-[rgb(14_92_62_/_0.12)] text-[var(--tour-ink)]"
+              : "border-[rgb(142_95_11_/_0.18)] bg-[rgb(142_95_11_/_0.1)] text-[var(--primary)]"
+          }`}
+        >
+          {site.status}
+        </span>
+        <p className="mt-4 text-sm font-bold text-[var(--primary)]">{site.type}</p>
+        <h3 className="mt-2 text-2xl font-extrabold leading-tight text-[var(--tour-ink)]">{site.name}</h3>
+        <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{site.shortDescription}</p>
+        <Link href={site.isAvailable ? site.vrUrl ?? site.detailUrl : site.detailUrl} className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-extrabold text-[var(--tour-ink)] transition hover:text-[var(--primary)]">
+          {site.isAvailable ? "Khám phá VR360" : "Xem thông tin"}
+          <ArrowRight className="h-4 w-4" strokeWidth={1.8} />
+        </Link>
+      </div>
+    </article>
   );
 }

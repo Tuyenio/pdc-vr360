@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { CheckCircle2, Headphones, MoveRight, Route, Search, ZoomIn } from "lucide-react";
 import { SiteFooter } from "@/app/components/landing/SiteFooter";
 import { SiteHeader } from "@/app/components/landing/SiteHeader";
 import { activeTour, capabilities } from "@/app/content";
@@ -24,13 +25,13 @@ const principles = [
 ];
 
 export const metadata: Metadata = {
-  title: "Giải pháp VR360 | Con đường di sản Định Công",
+  title: "Giải pháp VR360 | VR360 Định Công",
   description: "Tổng quan giải pháp công nghệ lõi VR360 cho dự án số hóa di sản Phường Định Công.",
 };
 
 export default function SolutionPage() {
   return (
-    <main className="public-page min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <main className="public-page min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <SiteHeader />
 
       <section className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:py-16">
@@ -45,7 +46,7 @@ export default function SolutionPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-[1fr_0.72fr] md:items-end">
-          <div className="public-media public-shimmer public-scale-in relative min-h-[24rem] rounded-[16px] lg:min-h-[34rem]">
+          <div className="public-media public-shimmer public-scale-in relative min-h-[24rem] rounded-[8px] lg:min-h-[34rem]">
             <Image
               src={activeTour.heroImage}
               alt={activeTour.title}
@@ -64,10 +65,10 @@ export default function SolutionPage() {
           {principles.map((principle, index) => (
             <article
               key={principle.title}
-              className={`public-card public-stagger-item public-hover-lift rounded-[16px] p-6 border-t-4 ${index === 1 ? "lg:translate-y-8" : ""}`}
+              className={`public-card public-stagger-item public-hover-lift rounded-[8px] p-6 border-t-4 ${index === 1 ? "lg:translate-y-8" : ""}`}
               style={{ borderTopColor: principle.color }}
             >
-              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-[12px] text-white font-black text-xl shadow-lg" style={{ background: `linear-gradient(135deg, ${principle.color}, ${principle.color}dd)` }}>
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-[8px] text-white font-black text-xl shadow-lg" style={{ background: `linear-gradient(135deg, ${principle.color}, ${principle.color}dd)` }}>
                 {index + 1}
               </div>
               <h2 className="text-2xl font-black leading-tight text-[var(--tour-ink)]">{principle.title}</h2>
@@ -92,14 +93,14 @@ export default function SolutionPage() {
             {capabilities.map((capability, idx) => (
               <div
                 key={capability}
-                className="public-panel public-stagger-item public-hover-lift rounded-[12px] px-4 py-4 text-sm font-bold leading-5 text-[var(--tour-ink)] border-l-4"
+                className="public-panel public-stagger-item public-hover-lift rounded-[8px] px-4 py-4 text-sm font-bold leading-5 text-[var(--tour-ink)] border-l-4"
                 style={{
                   borderLeftColor: idx === 0 ? 'var(--tour-coral)' : idx === 1 ? 'var(--tour-gold)' : idx === 2 ? 'var(--tour-jade)' : idx === 3 ? 'var(--tour-teal)' : 'var(--tour-purple)'
                 }}
               >
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--tour-coral)] to-[var(--tour-jade)] text-white text-xs font-black">
-                    ✓
+                    <CheckCircle2 className="h-4 w-4" strokeWidth={1.9} />
                   </div>
                   <span>{capability}</span>
                 </div>
@@ -112,7 +113,7 @@ export default function SolutionPage() {
       <section className="border-t border-[var(--surface-border)] bg-[var(--surface-band)]">
         <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
           <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16 lg:items-center">
-            <div className="public-media public-float relative min-h-[24rem] overflow-hidden rounded-[16px] lg:min-h-[36rem]">
+            <div className="public-media public-float relative min-h-[24rem] overflow-hidden rounded-[8px] lg:min-h-[36rem]">
               <Image
                 src="/images-tour/Đình Làng-Đền Thờ/9 Chính điện Đình làng.jpg"
                 alt="Chính điện Đình làng"
@@ -138,13 +139,13 @@ export default function SolutionPage() {
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2">
                 {[
-                  { label: "Tự do khám phá", icon: "🔍" },
-                  { label: "Di chuyển linh hoạt", icon: "🚶" },
-                  { label: "Thuyết minh âm thanh", icon: "🎧" },
-                  { label: "Phóng to chi tiết", icon: "🔎" }
+                  { label: "Tự do khám phá", icon: Search },
+                  { label: "Di chuyển linh hoạt", icon: Route },
+                  { label: "Thuyết minh âm thanh", icon: Headphones },
+                  { label: "Phóng to chi tiết", icon: ZoomIn }
                 ].map((item, idx) => (
-                  <div key={item.label} className="public-bounce-in flex items-center gap-3 rounded-[12px] bg-[var(--surface-glass)] border border-[var(--surface-border)] px-4 py-3" style={{ animationDelay: `${500 + idx * 100}ms` }}>
-                    <span className="text-2xl">{item.icon}</span>
+                  <div key={item.label} className="public-bounce-in flex items-center gap-3 rounded-[8px] bg-[var(--surface-glass)] border border-[var(--surface-border)] px-4 py-3" style={{ animationDelay: `${500 + idx * 100}ms` }}>
+                    <item.icon className="h-5 w-5 text-[var(--primary)]" strokeWidth={1.8} />
                     <span className="text-sm font-bold text-[var(--tour-ink)]">{item.label}</span>
                   </div>
                 ))}
@@ -155,7 +156,7 @@ export default function SolutionPage() {
       </section>
 
       <section className="px-4 pb-16 sm:px-6 lg:pb-24">
-        <div className="public-panel public-glow public-shimmer mx-auto grid max-w-7xl gap-5 rounded-[16px] p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8 border-2 border-[var(--primary)]/40">
+        <div className="public-panel public-glow public-shimmer mx-auto grid max-w-7xl gap-5 rounded-[8px] p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8 border-2 border-[var(--primary)]/40">
           <div>
             <h2 className="text-3xl font-black leading-tight text-[var(--tour-ink)] sm:text-4xl">
               Xem giải pháp trên <span className="public-gradient-text">dữ liệu thật</span>.
@@ -165,7 +166,8 @@ export default function SolutionPage() {
             </p>
           </div>
           <Link href={activeTour.href} className="public-cta w-fit">
-            Mở tour ✦
+            Mở tour
+            <MoveRight className="h-4 w-4" strokeWidth={1.8} />
           </Link>
         </div>
       </section>

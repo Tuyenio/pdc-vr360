@@ -1,47 +1,50 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowRight, Building2, ClipboardList, FileText, MapPin, MessageSquareText, PlayCircle, ShieldCheck } from "lucide-react";
+import { Building2, Clock, FileText, Mail, MapPin, Phone, Send, Upload } from "lucide-react";
 import { SiteFooter } from "@/app/components/landing/SiteFooter";
 import { SiteHeader } from "@/app/components/landing/SiteHeader";
-import { activeTour, upcomingTour } from "@/app/content";
+import { activeTour } from "@/app/content";
 
-const contactPoints = [
+export const metadata: Metadata = {
+  title: "Liên hệ | VR360 Định Công",
+  description:
+    "Gửi góp ý, đề xuất tư liệu hoặc liên hệ hợp tác phát triển không gian văn hóa số phường Định Công.",
+};
+
+const contactInfo = [
   {
-    title: "Đầu mối phối hợp",
-    detail: "Dành cho UBND phường, ban quản lý di tích, tổ dân phố và đơn vị triển khai khi cần thống nhất nội dung số hóa.",
+    label: "Đơn vị phụ trách",
+    value: "Ban quản trị dự án VR360 phường Định Công",
     icon: Building2,
   },
   {
-    title: "Địa bàn phục vụ",
-    detail: "Các điểm di tích, không gian sinh hoạt văn hóa và tuyến ký ức cộng đồng thuộc Phường Định Công, Hà Nội.",
+    label: "Khu vực",
+    value: "Phường Định Công, Hà Nội",
     icon: MapPin,
   },
   {
-    title: "Nội dung làm việc",
-    detail: "Phạm vi số hóa, lịch khảo sát, danh mục điểm chụp, lớp thuyết minh, phương án duyệt nội dung và bàn giao.",
-    icon: MessageSquareText,
+    label: "Email",
+    value: "Đang cập nhật",
+    icon: Mail,
+  },
+  {
+    label: "Số điện thoại",
+    value: "Đang cập nhật",
+    icon: Phone,
+  },
+  {
+    label: "Thời gian phản hồi",
+    value: "Trong giờ hành chính",
+    icon: Clock,
   },
 ];
-
-const preparationItems = [
-  "Danh mục di tích ưu tiên, hiện trạng tư liệu và đầu mối phụ trách từng điểm",
-  "Các khu vực cần giới thiệu kỹ, khu vực cần hạn chế ghi hình hoặc cần xin ý kiến trước",
-  "Ngôn ngữ trình bày, nhận diện địa phương và quy trình duyệt thuyết minh",
-  "Kế hoạch cập nhật tuyến Chùa Liên Hoa và bổ sung tư liệu cộng đồng trong giai đoạn tiếp theo",
-];
-
-export const metadata: Metadata = {
-  title: "Liên hệ | Con đường di sản Định Công",
-  description: "Thông tin liên hệ và đầu mối trao đổi dự án VR360 di tích Phường Định Công.",
-};
 
 export default function ContactPage() {
   return (
     <main className="public-page min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <SiteHeader />
 
-      <section className="public-subpage-hero relative isolate overflow-hidden border-b border-[var(--surface-border)]">
+      <section className="public-subpage-hero public-subpage-hero--compact relative isolate overflow-hidden border-b border-[var(--surface-border)]">
         <Image
           src={activeTour.gateImage}
           alt=""
@@ -51,127 +54,133 @@ export default function ContactPage() {
           className="public-subpage-hero-image object-cover"
         />
 
-        <div className="public-subpage-hero-content mx-auto grid max-w-7xl gap-10 px-4 py-18 sm:px-6 lg:min-h-[640px] lg:grid-cols-[0.9fr_0.75fr] lg:items-center lg:py-24">
+        <div className="public-subpage-hero-content mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:min-h-[540px] lg:grid-cols-[0.95fr_0.7fr] lg:items-center lg:py-20">
           <div className="public-rise public-hero-rule w-full min-w-0 max-w-4xl">
-            <p className="public-kicker">Liên hệ phối hợp</p>
-            <h1 className="public-gradient-text public-heading-safe public-subpage-title mt-4 text-[clamp(2.55rem,6vw,5.7rem)] font-extrabold">
-              Trao đổi triển khai VR360 di tích Định Công.
+            <p className="public-kicker">Liên hệ và góp ý</p>
+            <h1 className="public-gradient-text public-heading-safe public-subpage-title mt-4 text-[clamp(2.55rem,5.8vw,5.35rem)] font-extrabold">
+              Liên hệ
             </h1>
             <p className="public-subpage-copy mt-6 text-base leading-8 text-[var(--foreground)]/82 sm:text-lg">
-              Trang liên hệ dành cho các đầu mối của phường, ban quản lý di tích và đơn vị triển khai khi cần thống nhất phạm vi số hóa, lịch khảo sát, nội dung thuyết minh và kế hoạch bàn giao.
+              Gửi góp ý, đề xuất tư liệu hoặc liên hệ hợp tác phát triển không gian văn hóa số phường Định Công.
             </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link href={activeTour.href} className="public-cta">
-                <PlayCircle className="h-4 w-4" strokeWidth={1.8} />
-                Xem tour mẫu
-              </Link>
-              <Link href="/di-tich" className="public-cta-secondary">
-                Xem danh mục di tích
-              </Link>
-            </div>
           </div>
 
           <div className="public-image-stage public-hero-photo public-stagger-item hidden lg:block">
             <Image
-              src={activeTour.gateImage}
-              alt="Cổng Đình Làng Định Công Thượng"
-              fill
-              sizes="42vw"
-              className="object-cover"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-[var(--surface-border)] bg-[var(--surface-band)]">
-        <div className="mx-auto grid max-w-7xl gap-4 px-4 py-14 sm:px-6 lg:grid-cols-3 lg:py-20">
-          {contactPoints.map((point) => {
-            const Icon = point.icon;
-
-            return (
-              <article key={point.title} className="public-panel public-stagger-item rounded-[8px] p-5">
-                <Icon className="h-6 w-6 text-[var(--primary)]" strokeWidth={1.8} />
-                <h2 className="public-heading-safe mt-5 text-xl font-bold text-[var(--tour-ink)]">{point.title}</h2>
-                <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">{point.detail}</p>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.82fr_1.18fr] lg:items-start lg:py-20">
-        <div className="min-w-0">
-          <p className="public-kicker">Chuẩn bị làm việc</p>
-          <h2 className="public-heading-safe mt-3 text-[2rem] font-bold text-[var(--tour-ink)] sm:text-4xl">
-            Những thông tin giúp chốt phạm vi nhanh và chính xác.
-          </h2>
-          <p className="mt-4 max-w-[52ch] text-base leading-7 text-[var(--foreground)]/76">
-            Khi có đủ dữ liệu đầu vào, đội triển khai có thể xác định tuyến chụp, nội dung thuyết minh và kế hoạch bàn giao rõ ràng hơn.
-          </p>
-        </div>
-
-        <div className="grid gap-4">
-          {preparationItems.map((item, index) => (
-            <article key={item} className="grid gap-3 border-t border-[var(--surface-border)] pt-5 sm:grid-cols-[4rem_1fr]">
-              <p className="text-2xl font-bold text-[var(--primary)]">{String(index + 1).padStart(2, "0")}</p>
-              <p className="text-sm font-semibold leading-6 text-[var(--tour-ink)]">{item}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="border-y border-[var(--surface-border)] bg-[var(--surface-band)]">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_0.9fr] lg:items-center lg:py-20">
-          <div className="public-media relative min-h-[22rem] overflow-hidden rounded-[8px] lg:min-h-[32rem]">
-            <Image
               src="/images-tour/Đình Làng-Đền Thờ/13 Chính điện Đền thờ Tổ nghề.jpg"
-              alt="Chính điện Đền thờ Tổ nghề Kim hoàn"
+              alt="Không gian thờ tự tại Định Công"
               fill
-              sizes="(max-width: 1024px) 100vw, 48vw"
+              sizes="38vw"
               className="object-cover"
             />
           </div>
+        </div>
+      </section>
 
-          <div className="public-panel public-glow rounded-[8px] p-6">
-            <ClipboardList className="h-7 w-7 text-[var(--primary)]" strokeWidth={1.8} />
-            <h2 className="public-heading-safe mt-5 text-2xl font-bold text-[var(--tour-ink)]">
-              Phạm vi giai đoạn hiện tại
+      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-start lg:py-20">
+        <div className="grid gap-4">
+          <div className="public-panel rounded-[8px] p-6">
+            <p className="public-kicker">Thông tin liên hệ</p>
+            <h2 className="public-heading-safe mt-3 text-2xl font-bold text-[var(--tour-ink)]">
+              Đầu mối tiếp nhận thông tin dự án.
+            </h2>
+            <div className="mt-6 grid gap-4">
+              {contactInfo.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <div key={item.label} className="grid gap-2 border-t border-[var(--surface-border)] pt-4 sm:grid-cols-[2rem_1fr]">
+                    <Icon className="h-5 w-5 text-[var(--primary)]" strokeWidth={1.8} />
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--primary)]">{item.label}</p>
+                      <p className="mt-1 text-sm font-semibold leading-6 text-[var(--tour-ink)]">{item.value}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="public-panel rounded-[8px] p-6">
+            <Upload className="h-7 w-7 text-[var(--primary)]" strokeWidth={1.8} />
+            <h2 className="public-heading-safe mt-4 text-2xl font-bold text-[var(--tour-ink)]">
+              Đề xuất tư liệu
             </h2>
             <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">
-              Tour {activeTour.title}, {activeTour.subtitle} và tuyến {upcomingTour.title} đã có dữ liệu VR360 để phục vụ xem thử, góp ý nội dung và hoàn thiện quy trình vận hành sau bàn giao.
+              Nếu bạn có hình ảnh, tư liệu lịch sử, câu chuyện hoặc thông tin liên quan đến các di tích tại Định Công, hãy gửi cho chúng tôi để cùng hoàn thiện kho tư liệu số.
             </p>
-            <div className="mt-5 grid gap-3">
-              <p className="public-line-item flex items-start gap-3 text-sm font-semibold leading-6 text-[var(--tour-ink)]">
-                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[var(--primary)]" strokeWidth={1.8} />
-                Ưu tiên thông tin chính xác, được duyệt bởi đầu mối phụ trách trước khi công bố.
-              </p>
-              <p className="public-line-item flex items-start gap-3 text-sm font-semibold leading-6 text-[var(--tour-ink)]">
-                <FileText className="mt-0.5 h-5 w-5 shrink-0 text-[var(--primary)]" strokeWidth={1.8} />
-                Dữ liệu bàn giao cần rõ ảnh, âm thanh, điểm chuyển cảnh và hướng dẫn vận hành.
-              </p>
+          </div>
+        </div>
+
+        <form className="public-card rounded-[8px] p-5 sm:p-6">
+          <p className="public-kicker">Form liên hệ</p>
+          <h2 className="public-heading-safe mt-3 text-2xl font-bold text-[var(--tour-ink)]">
+            Gửi liên hệ
+          </h2>
+
+          <div className="mt-6 grid gap-4">
+            <label className="grid gap-2">
+              <span className="text-sm font-bold text-[var(--tour-ink)]">Họ và tên</span>
+              <input className="h-12 rounded-[8px] border border-[var(--surface-border)] bg-white/82 px-4 text-sm font-semibold text-[var(--tour-ink)] outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[rgb(142_95_11_/_0.12)]" placeholder="Nhập họ và tên" />
+            </label>
+
+            <label className="grid gap-2">
+              <span className="text-sm font-bold text-[var(--tour-ink)]">Số điện thoại hoặc email</span>
+              <input className="h-12 rounded-[8px] border border-[var(--surface-border)] bg-white/82 px-4 text-sm font-semibold text-[var(--tour-ink)] outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[rgb(142_95_11_/_0.12)]" placeholder="Nhập thông tin liên hệ" />
+            </label>
+
+            <label className="grid gap-2">
+              <span className="text-sm font-bold text-[var(--tour-ink)]">Chủ đề liên hệ</span>
+              <input className="h-12 rounded-[8px] border border-[var(--surface-border)] bg-white/82 px-4 text-sm font-semibold text-[var(--tour-ink)] outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[rgb(142_95_11_/_0.12)]" placeholder="Góp ý, đề xuất tư liệu, hợp tác" />
+            </label>
+
+            <label className="grid gap-2">
+              <span className="text-sm font-bold text-[var(--tour-ink)]">Nội dung</span>
+              <textarea className="min-h-36 rounded-[8px] border border-[var(--surface-border)] bg-white/82 px-4 py-3 text-sm font-semibold leading-6 text-[var(--tour-ink)] outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[rgb(142_95_11_/_0.12)]" placeholder="Nhập nội dung cần trao đổi" />
+            </label>
+          </div>
+
+          <button type="button" className="public-cta mt-6 w-full sm:w-fit">
+            <Send className="h-4 w-4" strokeWidth={1.8} />
+            Gửi liên hệ
+          </button>
+        </form>
+      </section>
+
+      <section className="border-y border-[var(--surface-border)] bg-[var(--surface-band)]">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-center lg:py-20">
+          <div className="min-w-0">
+            <p className="public-kicker">Bản đồ</p>
+            <h2 className="public-heading-safe mt-3 text-[2rem] font-bold text-[var(--tour-ink)] sm:text-4xl">
+              Bản đồ khu vực phường Định Công
+            </h2>
+            <p className="mt-4 max-w-[56ch] text-base leading-7 text-[var(--foreground)]/76">
+              Khu vực bản đồ có thể tích hợp bản đồ số trong giai đoạn phát triển tiếp theo để hiển thị vị trí các điểm văn hóa.
+            </p>
+          </div>
+
+          <div className="public-panel grid min-h-[22rem] place-items-center rounded-[8px] p-6 text-center">
+            <div>
+              <MapPin className="mx-auto h-10 w-10 text-[var(--primary)]" strokeWidth={1.8} />
+              <p className="mt-4 text-lg font-bold text-[var(--tour-ink)]">Bản đồ khu vực phường Định Công</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">Placeholder bản đồ số</p>
             </div>
-            <Link href="/di-tich" className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[var(--tour-ink)] hover:text-[var(--primary)]">
-              Xem trạng thái di tích
-              <ArrowRight className="h-4 w-4" strokeWidth={1.8} />
-            </Link>
           </div>
         </div>
       </section>
 
       <section className="px-4 py-14 sm:px-6 lg:py-20">
-        <div className="public-panel public-glow public-shimmer mx-auto grid max-w-7xl gap-5 rounded-[8px] p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8">
+        <div className="public-panel public-glow mx-auto grid max-w-7xl gap-5 rounded-[8px] p-6 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8">
           <div>
-            <h2 className="public-heading-safe text-3xl font-bold text-[var(--tour-ink)] sm:text-4xl">
-              Bắt đầu trao đổi từ tour mẫu hiện có.
+            <p className="public-kicker">Tiếp nhận góp ý</p>
+            <h2 className="public-heading-safe mt-2 text-3xl font-bold text-[var(--tour-ink)] sm:text-4xl">
+              Cùng hoàn thiện không gian văn hóa số Định Công.
             </h2>
             <p className="mt-3 max-w-[66ch] text-sm leading-6 text-[var(--foreground)]/76 sm:text-base">
-              Tour đầu tiên là cơ sở trực quan để góp ý giao diện, nội dung, chất lượng ảnh và kế hoạch mở rộng.
+              Mọi tư liệu và góp ý phù hợp sẽ giúp dự án được đầy đủ, chính xác và gần hơn với cộng đồng.
             </p>
           </div>
-          <Link href={activeTour.href} className="public-cta w-fit">
-            <PlayCircle className="h-4 w-4" strokeWidth={1.8} />
-            Mở tour mẫu
-          </Link>
+          <FileText className="hidden h-14 w-14 text-[var(--primary)] lg:block" strokeWidth={1.6} />
         </div>
       </section>
 

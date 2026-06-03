@@ -24,46 +24,76 @@ export const upcomingTour = {
 export const navigation = [
   { href: "/", label: "Trang chủ" },
   { href: "/gioi-thieu", label: "Giới thiệu" },
-  { href: "/di-tich", label: "Di tích" },
+  { href: "/di-tich", label: "Không gian văn hóa" },
   { href: "/lien-he", label: "Liên hệ" },
 ];
 
-export const routeCards = [
+export type HeritageSite = {
+  id: string;
+  name: string;
+  type: string;
+  status: "Đang mở tour" | "Đang bổ sung tư liệu";
+  shortDescription: string;
+  image: string;
+  vrUrl?: string;
+  detailUrl: string;
+  isAvailable: boolean;
+};
+
+export const heritageSites: HeritageSite[] = [
   {
-    title: "Đình Làng Định Công Thượng",
-    subtitle: "Đền thờ Tổ nghề Kim hoàn",
-    description: "Tour VR360 đầu tiên đã sẵn sàng với không gian đình, hồ, sân lễ, chính điện và khu thờ Tổ nghề của cộng đồng Định Công.",
-    image: activeTour.shrineImage,
+    id: "dinh-lang-dinh-cong",
+    name: "Đình Làng Định Công Thượng - Đền thờ Tổ nghề Kim hoàn",
+    type: "Đình làng / Di tích văn hóa",
     status: "Đang mở tour",
-    href: activeTour.href,
-    detail: "13 điểm tham quan",
+    shortDescription: "Không gian văn hóa gắn với lịch sử làng nghề kim hoàn truyền thống của Định Công.",
+    image: activeTour.shrineImage,
+    vrUrl: activeTour.href,
+    detailUrl: activeTour.href,
+    isAvailable: true,
   },
   {
-    title: upcomingTour.title,
-    subtitle: upcomingTour.subtitle,
-    description: "Tour VR360 Chùa Liên Hoa đã có dữ liệu ảnh 360, tuyến chuyển cảnh từ Cổng Tam Quan đến Đài Quan Âm, Vườn Tháp Tổ và lớp thuyết minh theo từng điểm.",
+    id: "chua-lien-hoa",
+    name: "Chùa Liên Hoa",
+    type: "Chùa / Không gian tâm linh",
+    status: "Đang mở tour",
+    shortDescription: "Không gian chùa thanh tịnh, gắn với đời sống tín ngưỡng và văn hóa cộng đồng.",
     image: upcomingTour.coverImage,
-    status: upcomingTour.status,
-    href: upcomingTour.href,
-    detail: "7 chặng tham quan",
+    vrUrl: upcomingTour.href,
+    detailUrl: upcomingTour.href,
+    isAvailable: true,
   },
   {
-    title: "Không gian nghề Kim hoàn",
-    subtitle: "Lớp nội dung nghề truyền thống",
-    description: "Tuyến kể chuyện về ký ức nghề, nhân vật địa phương, tư liệu cộng đồng và đạo lý tri ân tiền nhân.",
-    image: "/images-tour/Đình Làng-Đền Thờ/11 Lối dẫn sang Đền thờ Tổ.jpg",
-    status: "Đề xuất mở rộng",
-    detail: "Bổ sung tư liệu",
-  },
-  {
-    title: "Tuyến ký ức cộng đồng",
-    subtitle: "Tư liệu người dân Định Công",
-    description: "Thu thập câu chuyện, ảnh cũ và các điểm kể chuyện từ cộng đồng để làm giàu bản đồ di sản.",
+    id: "nha-tho-nguyen-van-sieu",
+    name: "Di tích cấp quốc gia: Nhà thờ cụ Nguyễn Văn Siêu",
+    type: "Nhà thờ danh nhân / Di tích cấp quốc gia",
+    status: "Đang bổ sung tư liệu",
+    shortDescription: "Công trình gắn với danh nhân văn hóa Nguyễn Văn Siêu, đang được bổ sung dữ liệu để mở rộng trải nghiệm số.",
     image: "/images-tour/Đình Làng-Đền Thờ/12 Không gian kết nối di tích.jpg",
-    status: "Đề xuất mở rộng",
-    detail: "Mở theo giai đoạn",
+    detailUrl: "/di-tich#nha-tho-nguyen-van-sieu",
+    isAvailable: false,
+  },
+  {
+    id: "thap-but-den-ngoc-son",
+    name: "Tháp Bút - Đền Ngọc Sơn",
+    type: "Di tích văn hóa / Điểm mở rộng",
+    status: "Đang bổ sung tư liệu",
+    shortDescription: "Không gian di tích nổi bật, dự kiến được mở rộng trong hệ thống tham quan 3D.",
+    image: "/images-tour/Chùa Liên Hoa/7 Tượng bồ tát.jpg",
+    detailUrl: "/di-tich#thap-but-den-ngoc-son",
+    isAvailable: false,
   },
 ];
+
+export const routeCards = heritageSites.map((site) => ({
+  title: site.name,
+  subtitle: site.type,
+  description: site.shortDescription,
+  image: site.image,
+  status: site.status,
+  href: site.vrUrl,
+  detail: site.isAvailable ? "Khám phá VR360" : "Xem thông tin",
+}));
 
 export const deliverySteps = [
   {

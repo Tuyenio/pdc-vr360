@@ -299,6 +299,10 @@ a {
   min-height: min(760px, calc(100dvh - 72px));
 }
 
+.public-subpage-hero--compact {
+  min-height: auto;
+}
+
 .public-subpage-hero-image {
   opacity: 0.62;
   filter: saturate(1.08) contrast(1.05) brightness(1.02);
@@ -400,6 +404,74 @@ a {
   filter: saturate(1.08) contrast(1.05);
 }
 
+.public-tour-showcase {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.public-tour-feature,
+.public-tour-preview {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: rgb(14 52 39 / 0.12);
+  box-shadow:
+    0 26px 78px rgb(37 75 54 / 0.18),
+    inset 0 1px 0 rgb(255 255 255 / 0.2);
+  isolation: isolate;
+}
+
+.public-tour-feature {
+  min-height: clamp(25rem, 48vw, 32rem);
+  z-index: 2;
+}
+
+.public-tour-preview {
+  min-height: 17rem;
+}
+
+.public-tour-side {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 900px) {
+  .public-tour-showcase {
+    grid-template-columns: minmax(13rem, 0.78fr) minmax(24rem, 1.45fr) minmax(13rem, 0.78fr);
+    gap: 0;
+  }
+
+  .public-tour-feature {
+    min-height: 30rem;
+    transform: translateZ(0);
+  }
+
+  .public-tour-side-left {
+    transform: translateX(1.5rem) rotate(-2.4deg);
+  }
+
+  .public-tour-side-right {
+    transform: translateX(-1.5rem) rotate(2.2deg);
+  }
+
+  .public-tour-side-right .public-tour-preview + .public-tour-preview {
+    margin-top: -1.25rem;
+    transform: rotate(-3.4deg) translateX(0.75rem);
+  }
+}
+
+@media (max-width: 899px) {
+  .public-tour-feature,
+  .public-tour-preview {
+    min-height: 20rem;
+  }
+}
+
 .public-chip {
   display: inline-flex;
   align-items: center;
@@ -441,6 +513,63 @@ a {
     background:
       linear-gradient(180deg, rgb(243 247 240 / 0.84) 0%, rgb(243 247 240 / 0.78) 52%, rgb(243 247 240 / 0.96) 100%),
       linear-gradient(90deg, rgb(243 247 240 / 0.94), rgb(243 247 240 / 0.64));
+  }
+}
+
+@media (max-width: 520px) {
+  .public-page h1,
+  .public-page h2,
+  .public-page h3,
+  .public-page p {
+    max-width: 100%;
+    text-wrap: normal;
+  }
+
+  .public-header nav > a:first-child {
+    max-width: calc(100vw - 6rem);
+  }
+
+  .public-page .public-rise,
+  .public-page .public-hero-inner > div,
+  .public-page section > div {
+    min-width: 0;
+    max-width: calc(100vw - 2rem);
+  }
+
+  .public-page .public-hero-inner {
+    overflow: hidden;
+  }
+
+  .public-page .public-heading-safe {
+    font-size: clamp(1.85rem, 8.7vw, 2.35rem);
+    line-height: 1.12;
+  }
+
+  .public-page .public-hero-title {
+    max-width: min(10.4ch, 100%);
+    font-size: clamp(2.55rem, 12vw, 3.1rem);
+  }
+
+  .public-page .public-subpage-title {
+    max-width: min(11ch, 100%);
+    font-size: clamp(2.2rem, 10.5vw, 3rem);
+  }
+
+  .tour-welcome .welcome-title-plaque {
+    width: min(94vw, 25rem);
+    padding-inline: 1rem;
+  }
+
+  .tour-welcome .welcome-title-plaque h1 {
+    max-width: 16ch;
+    font-size: clamp(1.62rem, 6.9vw, 2rem);
+    line-height: 1.08;
+  }
+
+  .tour-welcome .welcome-title-plaque p {
+    max-width: 38ch;
+    font-size: 0.72rem;
+    line-height: 1.45;
   }
 }
 
