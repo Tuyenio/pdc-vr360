@@ -112,7 +112,7 @@ export default function AboutPage() {
               Nội dung hướng đến ba nhóm chính: người dân địa phương cần nguồn tham khảo tin cậy, học sinh cần tư liệu trực quan, và du khách cần cách tiếp cận di sản trước khi tới thực địa.
             </p>
             <p>
-              Khi hoàn thiện thêm Chùa Liên Hoa, hệ thống có thể tiếp tục mở rộng mà không phải thay đổi cấu trúc website hay cách vận hành tour.
+              Khi bổ sung Chùa Liên Hoa, hệ thống tiếp tục mở rộng trên cùng cấu trúc website và cách vận hành tour đã ổn định.
             </p>
           </div>
         </div>

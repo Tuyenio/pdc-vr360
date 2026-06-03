@@ -9,7 +9,7 @@ import { activeTour, heritageValues, routeCards, upcomingTour } from "@/app/cont
 export const metadata: Metadata = {
   title: "Di tích | Con đường di sản Định Công",
   description:
-    "Danh mục di tích trong dự án VR360 Phường Định Công, gồm tour Đình Làng Định Công Thượng, Đền thờ Tổ nghề Kim hoàn và tuyến Chùa Liên Hoa đang chuẩn bị.",
+    "Danh mục di tích trong dự án VR360 Phường Định Công, gồm tour Đình Làng Định Công Thượng, Đền thờ Tổ nghề Kim hoàn và Chùa Liên Hoa.",
 };
 
 const currentHighlights = [
@@ -55,7 +55,7 @@ export default function HeritageListPage() {
               Di tích Định Công trong không gian VR360.
             </h1>
             <p className="public-subpage-copy mt-6 text-base leading-8 text-[var(--foreground)]/82 sm:text-lg">
-              Trang này trình bày các tuyến di tích của Phường Định Công theo trạng thái rõ ràng: tour đã sẵn sàng, tuyến đang chuẩn bị và các lớp tư liệu có thể mở rộng.
+              Trang này trình bày các tuyến di tích của Phường Định Công theo trạng thái rõ ràng: tour đã sẵn sàng, tuyến đã mở và các lớp tư liệu có thể mở rộng.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <span className="public-chip">
@@ -93,7 +93,7 @@ export default function HeritageListPage() {
               Các điểm di tích trọng tâm của giai đoạn hiện tại.
             </h2>
             <p className="mt-4 max-w-[48ch] text-base leading-7 text-[var(--foreground)]/76">
-              {activeTour.title} đã có tour hoàn thiện. {upcomingTour.title} được thể hiện như tuyến chuẩn bị để người xem không nhầm với dữ liệu đã bàn giao.
+              {activeTour.title} và {upcomingTour.title} đều đã có tour VR360 để người xem mở trực tiếp, nghe thuyết minh và di chuyển theo đúng tuyến tham quan.
             </p>
           </div>
 

@@ -84,10 +84,39 @@ type MapRoute = {
   via?: { x: number; y: number }[];
 };
 
+type WelcomeCardConfig = {
+  image: string;
+  label: string;
+  rotate: string;
+  sceneId: SceneId;
+};
+
+type TourConfig = {
+  id: "dinh-lang-dinh-cong" | "chua-lien-hoa";
+  title: string;
+  subtitle: string;
+  welcomeTitle: string;
+  welcomeAccent: string;
+  welcomeSubtitle: string;
+  welcomeBackgroundImage: string;
+  welcomeCards: WelcomeCardConfig[];
+  backgroundAudio: string;
+  scenes: TourScene[];
+  sceneById: Map<SceneId, TourScene>;
+  sceneNarration: Map<SceneId, string[]>;
+  continuousNarrationGroups: SceneId[][];
+  mapRoutes: MapRoute[];
+  locationGroups: TourScene[];
+};
+
 const basePath = "/images-tour/Đình Làng-Đền Thờ";
+const chuaBasePath = "/images-tour/Chùa Liên Hoa";
 const panoramaPath = (fileName: string) => encodeURI(`${basePath}/${fileName}`);
+const chuaPanoramaPath = (fileName: string) => encodeURI(`${chuaBasePath}/${fileName}`);
 const narrationBasePath = "/media/voice định công";
+const chuaNarrationBasePath = "/media/voice chùa liên hoa";
 const narrationPath = (fileName: string) => encodeURI(`${narrationBasePath}/${fileName}`);
+const chuaNarrationPath = (fileName: string) => encodeURI(`${chuaNarrationBasePath}/${fileName}`);
 const hotspotIcon = encodeURI("/icon/hotspotelement.png");
 const infoModalBackground = encodeURI("/modal/modal-2.png");
 const welcomeTitleBackground = encodeURI("/modal/background-1.png");
@@ -423,15 +452,18 @@ const continuousNarrationGroups: SceneId[][] = [
   ["scene-11", "scene-12", "scene-13"],
 ];
 
-const isContinuousNarrationTransition = (from: SceneId | null, to: SceneId) => {
+const isContinuousNarrationTransition = (
+  groups: SceneId[][],
+  from: SceneId | null,
+  to: SceneId,
+) => {
   if (!from) {
     return false;
   }
 
-  return continuousNarrationGroups.some((group) => group.includes(from) && group.includes(to));
+  return groups.some((group) => group.includes(from) && group.includes(to));
 };
 
-const sceneById = new Map(scenes.map((scene) => [scene.id, scene]));
 const mapRoutes: MapRoute[] = [
   { from: "scene-1", to: "scene-2" },
   { from: "scene-2", to: "scene-3" },
@@ -448,17 +480,239 @@ const mapRoutes: MapRoute[] = [
   { from: "scene-11", to: "scene-12" },
   { from: "scene-12", to: "scene-13" },
 ];
-const locationGroups = Array.from(
-  scenes
-    .reduce((groups, scene) => {
-      if (!groups.has(scene.location)) {
-        groups.set(scene.location, scene);
-      }
 
-      return groups;
-    }, new Map<string, TourScene>())
-    .values(),
+const chuaScenes: TourScene[] = [
+  {
+    id: "scene-1",
+    order: "01",
+    title: "Cổng Tam Quan",
+    location: "Cổng Tam Quan",
+    image: chuaPanoramaPath("1 Trước Cổng.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 50, y: 90 },
+    hotspots: [
+      { targetId: "scene-2", label: "Tiền Đường", yaw: 50, pitch: -16, rotation: 0 },
+    ],
+  },
+  {
+    id: "scene-2",
+    order: "02",
+    title: "Tiền Đường",
+    location: "Tiền Đường",
+    image: chuaPanoramaPath("2 Sảnh Chính.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 50, y: 72 },
+    hotspots: [
+      { targetId: "scene-1", label: "Cổng Tam Quan", yaw: 180, pitch: -16, rotation: 180 },
+      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: 0, pitch: -16, rotation: 0 },
+      { targetId: "scene-7", label: "Đài Quan Âm", yaw: 72, pitch: -15, rotation: 20 },
+      { targetId: "scene-4", label: "Bên trái", yaw: -74, pitch: -15, rotation: -20 },
+    ],
+  },
+  {
+    id: "scene-3",
+    order: "03",
+    title: "Điện Tam Bảo",
+    location: "Điện Tam Bảo",
+    image: chuaPanoramaPath("3 Ban Tam Bảo.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 50, y: 54 },
+    hotspots: [
+      { targetId: "scene-2", label: "Tiền Đường", yaw: 180, pitch: -18, rotation: 180 },
+      { targetId: "scene-4", label: "Bên trái", yaw: -82, pitch: -15, rotation: -24 },
+      { targetId: "scene-7", label: "Đài Quan Âm", yaw: 82, pitch: -15, rotation: 24 },
+    ],
+  },
+  {
+    id: "scene-4",
+    order: "04",
+    title: "Bên trái",
+    location: "Bên trái",
+    image: chuaPanoramaPath("4a Bên Trái.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 29, y: 62 },
+    hotspots: [
+      { targetId: "scene-2", label: "Tiền Đường", yaw: 52, pitch: -16, rotation: 18 },
+      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: 18, pitch: -15, rotation: 0 },
+      { targetId: "scene-5", label: "Chi tiết bên trái", yaw: -82, pitch: -15, rotation: -22 },
+    ],
+  },
+  {
+    id: "scene-5",
+    order: "04B",
+    title: "Chi tiết bên trái",
+    location: "Chi tiết bên trái",
+    image: chuaPanoramaPath("4b Chi tiết bên trái.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 20, y: 49 },
+    hotspots: [
+      { targetId: "scene-4", label: "Bên trái", yaw: 164, pitch: -15, rotation: 180 },
+      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: 48, pitch: -15, rotation: 16 },
+      { targetId: "scene-8", label: "Sảnh trung tâm", yaw: -18, pitch: -15, rotation: -8 },
+    ],
+  },
+  {
+    id: "scene-8",
+    order: "05",
+    title: "Sảnh trung tâm",
+    location: "Sảnh trung tâm",
+    image: chuaPanoramaPath("5 Sảnh trung tâm.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 42, y: 42 },
+    hotspots: [
+      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: 16, pitch: -15, rotation: 0 },
+      { targetId: "scene-6", label: "Vườn Tháp Tổ", yaw: 92, pitch: -15, rotation: 22 },
+      { targetId: "scene-5", label: "Chi tiết bên trái", yaw: -118, pitch: -15, rotation: -28 },
+    ],
+  },
+  {
+    id: "scene-6",
+    order: "06",
+    title: "Vườn Tháp Tổ",
+    location: "Vườn Tháp Tổ",
+    image: chuaPanoramaPath("6 Tháp.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 70, y: 34 },
+    hotspots: [
+      { targetId: "scene-7", label: "Đài Quan Âm", yaw: 52, pitch: -15, rotation: 18 },
+      { targetId: "scene-8", label: "Sảnh trung tâm", yaw: -126, pitch: -15, rotation: -28 },
+    ],
+  },
+  {
+    id: "scene-7",
+    order: "07",
+    title: "Đài Quan Âm",
+    location: "Đài Quan Âm",
+    image: chuaPanoramaPath("7 Tượng bồ tát.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 75, y: 58 },
+    hotspots: [
+      { targetId: "scene-2", label: "Tiền Đường", yaw: -116, pitch: -15, rotation: -24 },
+      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: -74, pitch: -15, rotation: -18 },
+      { targetId: "scene-6", label: "Vườn Tháp Tổ", yaw: 36, pitch: -15, rotation: 12 },
+    ],
+  },
+];
+
+const chuaSceneNarration = new Map<SceneId, string[]>([
+  ["scene-1", [chuaNarrationPath("lời cảm ơn.mp3"), chuaNarrationPath("Cổng tam quan.mp3")]],
+  ["scene-2", [chuaNarrationPath("tiền đường.mp3")]],
+  ["scene-3", [chuaNarrationPath("điện tam bảo.mp3")]],
+  ["scene-4", []],
+  ["scene-5", [chuaNarrationPath("nhà tổ thổ .mp3"), chuaNarrationPath("bia công đức.mp3")]],
+  ["scene-8", []],
+  ["scene-6", [chuaNarrationPath("vườn tháp tổ.mp3"), chuaNarrationPath("Hồ sen.mp3")]],
+  ["scene-7", [chuaNarrationPath("đài quan âm.mp3"), chuaNarrationPath("lời chào.mp3")]],
+]);
+
+const chuaContinuousNarrationGroups: SceneId[][] = [
+  ["scene-5", "scene-8"],
+  ["scene-6", "scene-7"],
+];
+
+const chuaMapRoutes: MapRoute[] = [
+  { from: "scene-1", to: "scene-2" },
+  { from: "scene-2", to: "scene-3" },
+  { from: "scene-2", to: "scene-4" },
+  { from: "scene-2", to: "scene-7" },
+  { from: "scene-3", to: "scene-4" },
+  { from: "scene-3", to: "scene-7" },
+  { from: "scene-4", to: "scene-5" },
+  { from: "scene-5", to: "scene-8" },
+  { from: "scene-8", to: "scene-6" },
+  { from: "scene-6", to: "scene-7" },
+];
+
+function createTourConfig(config: Omit<TourConfig, "sceneById" | "locationGroups">): TourConfig {
+  const sceneById = new Map(config.scenes.map((scene) => [scene.id, scene]));
+  const locationGroups = Array.from(
+    config.scenes
+      .reduce((groups, scene) => {
+        if (!groups.has(scene.location)) {
+          groups.set(scene.location, scene);
+        }
+
+        return groups;
+      }, new Map<string, TourScene>())
+      .values(),
+  );
+
+  return {
+    ...config,
+    sceneById,
+    locationGroups,
+  };
+}
+
+const dinhTourConfig = createTourConfig({
+  id: "dinh-lang-dinh-cong",
+  title: "Đình Làng Định Công Thượng",
+  subtitle: "Đền thờ Tổ nghề Kim hoàn",
+  welcomeTitle: "Số hóa di tích",
+  welcomeAccent: "lịch sử văn hóa",
+  welcomeSubtitle: "Đình Làng Định Công Thượng · Đền thờ Tổ nghề Kim hoàn",
+  welcomeBackgroundImage,
+  welcomeCards: [
+    {
+      image: dinhCardImage,
+      label: "Đình Làng Định Công Thượng",
+      rotate: "-rotate-6",
+      sceneId: "scene-8",
+    },
+    {
+      image: shrineCardImage,
+      label: "Đền thờ Tổ nghề Kim hoàn",
+      rotate: "rotate-5",
+      sceneId: "scene-13",
+    },
+  ],
+  backgroundAudio,
+  scenes,
+  sceneNarration,
+  continuousNarrationGroups,
+  mapRoutes,
+});
+
+const chuaTourConfig = createTourConfig({
+  id: "chua-lien-hoa",
+  title: "Chùa Liên Hoa",
+  subtitle: "Tuyến VR360 di tích Phường Định Công",
+  welcomeTitle: "Chùa Liên Hoa",
+  welcomeAccent: "không gian VR360",
+  welcomeSubtitle: "Cổng Tam Quan · Tiền Đường · Điện Tam Bảo · Đài Quan Âm",
+  welcomeBackgroundImage: chuaPanoramaPath("2 Sảnh Chính.jpg"),
+  welcomeCards: [
+    {
+      image: chuaPanoramaPath("1 Trước Cổng.jpg"),
+      label: "Cổng Tam Quan",
+      rotate: "-rotate-6",
+      sceneId: "scene-1",
+    },
+    {
+      image: chuaPanoramaPath("7 Tượng bồ tát.jpg"),
+      label: "Đài Quan Âm",
+      rotate: "rotate-5",
+      sceneId: "scene-7",
+    },
+  ],
+  backgroundAudio,
+  scenes: chuaScenes,
+  sceneNarration: chuaSceneNarration,
+  continuousNarrationGroups: chuaContinuousNarrationGroups,
+  mapRoutes: chuaMapRoutes,
+});
+
+const toursById = {
+  "dinh-lang-dinh-cong": dinhTourConfig,
+  "chua-lien-hoa": chuaTourConfig,
+} satisfies Record<TourConfig["id"], TourConfig>;
+
+const defaultTourConfig = dinhTourConfig;
+
+const getTourConfig = (tourId?: TourConfig["id"]) => (
+  tourId ? toursById[tourId] : defaultTourConfig
 );
+
 const panoramaTextureCache = new Map<string, THREE.Texture>();
 const panoramaTexturePromises = new Map<string, Promise<THREE.Texture>>();
 const panoramaTextureProgress = new Map<string, number>();
@@ -532,7 +786,7 @@ function loadPanoramaTexture(image: string, onProgress?: (progress: number) => v
   return texturePromise.finally(unsubscribe);
 }
 
-function preloadSceneAndHotspots(scene: TourScene) {
+function preloadSceneAndHotspots(scene: TourScene, sceneById: Map<SceneId, TourScene>) {
   loadPanoramaTexture(scene.image).catch(() => undefined);
 
   scene.hotspots.forEach((hotspot) => {
@@ -560,7 +814,12 @@ function directionFromYawPitch(yaw: number, pitch: number) {
   );
 }
 
-export default function VirtualTour() {
+export default function VirtualTour({
+  tourId = "dinh-lang-dinh-cong",
+}: {
+  tourId?: TourConfig["id"];
+}) {
+  const tourConfig = getTourConfig(tourId);
   const [hasEntered, setHasEntered] = useState(false);
   const [isEntering, setIsEntering] = useState(false);
   const [initialSceneId, setInitialSceneId] = useState<SceneId>("scene-1");
@@ -720,11 +979,12 @@ export default function VirtualTour() {
 
   return (
     <>
-      <audio ref={audioRef} src={backgroundAudio} preload="auto" loop playsInline />
+      <audio ref={audioRef} src={tourConfig.backgroundAudio} preload="auto" loop playsInline />
       {!hasEntered ? (
-        <WelcomeScreen isEntering={isEntering} onEnter={handleEnter} />
+        <WelcomeScreen tourConfig={tourConfig} isEntering={isEntering} onEnter={handleEnter} />
       ) : (
         <TourExperience
+          tourConfig={tourConfig}
           initialSceneId={initialSceneId}
           soundEnabled={soundEnabled}
           onToggleSound={toggleSound}
@@ -779,9 +1039,11 @@ function useDeviceOrientation() {
 }
 
 function WelcomeScreen({
+  tourConfig,
   isEntering,
   onEnter,
 }: {
+  tourConfig: TourConfig;
   isEntering: boolean;
   onEnter: (sceneId?: SceneId) => void;
 }) {
@@ -821,9 +1083,9 @@ function WelcomeScreen({
     scene.add(sphere);
 
     let isDisposed = false;
-    const firstScene = sceneById.get("scene-1")!;
+    const firstScene = tourConfig.sceneById.get("scene-1") ?? tourConfig.scenes[0];
     
-    preloadSceneAndHotspots(firstScene);
+    preloadSceneAndHotspots(firstScene, tourConfig.sceneById);
 
     loadPanoramaTexture(firstScene.image)
       .then(() => {
@@ -837,7 +1099,7 @@ function WelcomeScreen({
         }
       });
 
-    loadPanoramaTexture(welcomeBackgroundImage)
+    loadPanoramaTexture(tourConfig.welcomeBackgroundImage)
       .then((texture) => {
         if (isDisposed) {
           return;
@@ -879,7 +1141,7 @@ function WelcomeScreen({
       material.dispose();
       renderer.dispose();
     };
-  }, []);
+  }, [tourConfig]);
 
   return (
     <main
@@ -925,11 +1187,11 @@ function WelcomeScreen({
               draggable={false}
             />
             <h1 className="font-display-vn relative text-balance text-[1.85rem] font-bold uppercase leading-[1.18] text-[var(--tour-ink)] drop-shadow-[0_2px_0_rgba(255,252,245,0.92),0_3px_8px_rgba(45,38,33,0.28)] sm:text-[3rem] sm:leading-[1.12] lg:text-[3.72rem]">
-              Số hóa di tích
-              <span className="mt-1.5 block text-[var(--primary)] sm:mt-1">lịch sử văn hóa</span>
+              {tourConfig.welcomeTitle}
+              <span className="mt-1.5 block text-[var(--primary)] sm:mt-1">{tourConfig.welcomeAccent}</span>
             </h1>
             <p className="relative mt-3.5 text-[0.76rem] font-bold text-[rgb(58_50_44_/_0.88)] drop-shadow-[0_1px_0_rgba(255,252,245,0.76)] sm:mt-4 sm:text-[0.95rem]">
-              Đình Làng Định Công Thượng · Đền thờ Tổ nghề Kim hoàn
+              {tourConfig.welcomeSubtitle}
             </p>
           </div>
 
@@ -947,20 +1209,16 @@ function WelcomeScreen({
           </button>
 
           <div className="relative mt-6 grid w-full max-w-[480px] grid-cols-2 gap-4 px-4 sm:mt-7 sm:gap-6">
-            <WelcomeCard
-              image={dinhCardImage}
-              label="Đình Làng  Định Công Thượng"
-              rotate="-rotate-6"
-              disabled={isEntering || !canEnterTour}
-              onClick={() => onEnter("scene-8")}
-            />
-            <WelcomeCard
-              image={shrineCardImage}
-              label="Đền thờ Tổ nghề Kim hoàn"
-              rotate="rotate-5"
-              disabled={isEntering || !canEnterTour}
-              onClick={() => onEnter("scene-13")}
-            />
+            {tourConfig.welcomeCards.map((card) => (
+              <WelcomeCard
+                key={card.sceneId}
+                image={card.image}
+                label={card.label}
+                rotate={card.rotate}
+                disabled={isEntering || !canEnterTour}
+                onClick={() => onEnter(card.sceneId)}
+              />
+            ))}
           </div>
         </div>
       </section>
@@ -1162,11 +1420,13 @@ function WelcomeCard({
 }
 
 function TourExperience({
+  tourConfig,
   initialSceneId,
   soundEnabled,
   onToggleSound,
   onNarrationStateChange,
 }: {
+  tourConfig: TourConfig;
   initialSceneId: SceneId;
   soundEnabled: boolean;
   onToggleSound: () => void;
@@ -1197,7 +1457,7 @@ function TourExperience({
   const transitionMaterialRef = useRef<THREE.MeshBasicMaterial | null>(null);
   const warmedTextureUrlsRef = useRef<Set<string>>(new Set());
   const hotspotRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
-  const currentSceneRef = useRef<TourScene>(sceneById.get("scene-1")!);
+  const currentSceneRef = useRef<TourScene>(tourConfig.sceneById.get(initialSceneId) ?? tourConfig.scenes[0]);
   const lastOrientationRef = useRef<{ alpha: number; beta: number; gamma: number } | null>(null);
   const stopOrientationRef = useRef<(() => void) | null>(null);
   const vrModeRef = useRef(false);
@@ -1309,7 +1569,7 @@ function TourExperience({
       return;
     }
 
-    const narrationSources = sceneNarration.get(currentSceneId);
+    const narrationSources = tourConfig.sceneNarration.get(currentSceneId);
 
     if (!narrationSources || narrationSources.length === 0) {
       stopNarration();
@@ -1319,6 +1579,7 @@ function TourExperience({
 
     const audio = narrationRef.current;
     const shouldKeepPlaying = isContinuousNarrationTransition(
+      tourConfig.continuousNarrationGroups,
       lastNarrationSceneRef.current,
       currentSceneId,
     );
@@ -1335,11 +1596,11 @@ function TourExperience({
 
     void playNarrationSequence(narrationSources);
     lastNarrationSceneRef.current = currentSceneId;
-  }, [currentSceneId, playNarrationSequence, soundEnabled, stopNarration]);
+  }, [currentSceneId, playNarrationSequence, soundEnabled, stopNarration, tourConfig]);
 
   const activeScene = useMemo(
-    () => sceneById.get(currentSceneId) ?? sceneById.get("scene-1")!,
-    [currentSceneId],
+    () => tourConfig.sceneById.get(currentSceneId) ?? tourConfig.scenes[0],
+    [currentSceneId, tourConfig],
   );
 
   const closeInfoMarker = useCallback(() => {
@@ -1529,14 +1790,14 @@ function TourExperience({
 
       preloadImage(scene.image);
       scene.hotspots.forEach((hotspot) => {
-        const targetScene = sceneById.get(hotspot.targetId);
+        const targetScene = tourConfig.sceneById.get(hotspot.targetId);
 
         if (targetScene) {
           preloadImage(targetScene.image);
         }
       });
     },
-    [warmPanoramaTexture],
+    [tourConfig, warmPanoramaTexture],
   );
 
   useEffect(() => {
@@ -2122,7 +2383,7 @@ function TourExperience({
       setActivePanel(null);
     }
 
-    const targetScene = sceneById.get(sceneId);
+    const targetScene = tourConfig.sceneById.get(sceneId);
     if (targetScene) {
       runSceneTransition(targetScene, arrivalYaw ?? targetScene.initialYaw);
     }
@@ -2166,6 +2427,7 @@ function TourExperience({
               </button>
             </div>
             <MiniMap
+              tourConfig={tourConfig}
               activeScene={activeScene}
               onSceneSelect={(sceneId) => goToScene(sceneId, true)}
               compact
@@ -2223,6 +2485,7 @@ function TourExperience({
               </button>
             </div>
             <MiniMap
+              tourConfig={tourConfig}
               activeScene={activeScene}
               onSceneSelect={(sceneId) => {
                 goToScene(sceneId, true);
@@ -2504,6 +2767,7 @@ function TourExperience({
 
             <div className="flex min-h-0 flex-col gap-3 overflow-y-auto p-3 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin] sm:p-4 lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(260px,3fr)] lg:overflow-hidden">
               <MiniMap
+                tourConfig={tourConfig}
                 activeScene={activeScene}
                 onSceneSelect={(sceneId) => goToScene(sceneId, true)}
                 cameraYaw={cameraYaw}
@@ -2523,7 +2787,7 @@ function TourExperience({
                 </div>
 
                 <div className="mt-4 grid min-h-0 gap-2 overflow-y-auto pr-1 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin]">
-                  {locationGroups.map((scene) => {
+                  {tourConfig.locationGroups.map((scene) => {
                     const isActiveLocation = scene.location === activeScene.location;
 
                     return (
@@ -2589,7 +2853,7 @@ function TourExperience({
 
             {activePanel === "scenes" ? (
               <div className="flex w-full gap-2.5 overflow-x-auto overflow-y-hidden px-2.5 py-2.5 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin]">
-                {scenes.map((scene) => (
+                {tourConfig.scenes.map((scene) => (
                   <button
                     key={scene.id}
                     type="button"
@@ -2763,7 +3027,7 @@ function TourExperience({
           to {
             transform: translateX(180%) skewX(-18deg);
           }
-        }
+         }
 
         .welcome-cta-sheen {
           background: linear-gradient(90deg, transparent, rgba(255, 252, 245, 0.28), transparent);
@@ -3146,6 +3410,7 @@ function panelTitle(panel: Exclude<Panel, null>) {
 }
 
 function MiniMap({
+  tourConfig,
   activeScene,
   className = "",
   compact = false,
@@ -3156,6 +3421,7 @@ function MiniMap({
   showLegend = false,
   showNames = false,
 }: {
+  tourConfig: TourConfig;
   activeScene: TourScene;
   className?: string;
   compact?: boolean;
@@ -3166,6 +3432,7 @@ function MiniMap({
   showLegend?: boolean;
   showNames?: boolean;
 }) {
+  const { mapRoutes, sceneById, scenes } = tourConfig;
   const isOverview = mode === "overview";
   const nodeSize = compact ? 5.2 : 5.2;
   const edgeInset = nodeSize / 2;

@@ -28,7 +28,7 @@ const preparationItems = [
   "Danh mục di tích ưu tiên, hiện trạng tư liệu và đầu mối phụ trách từng điểm",
   "Các khu vực cần giới thiệu kỹ, khu vực cần hạn chế ghi hình hoặc cần xin ý kiến trước",
   "Ngôn ngữ trình bày, nhận diện địa phương và quy trình duyệt thuyết minh",
-  "Kế hoạch bổ sung tuyến Chùa Liên Hoa và các tư liệu cộng đồng trong giai đoạn tiếp theo",
+  "Kế hoạch cập nhật tuyến Chùa Liên Hoa và bổ sung tư liệu cộng đồng trong giai đoạn tiếp theo",
 ];
 
 export const metadata: Metadata = {
@@ -138,7 +138,7 @@ export default function ContactPage() {
               Phạm vi giai đoạn hiện tại
             </h2>
             <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">
-              Tour {activeTour.title} và {activeTour.subtitle} đã là dữ liệu mẫu để nghiệm thu trải nghiệm. Tuyến {upcomingTour.title} đang chuẩn bị, cần thống nhất hiện trạng tư liệu, điểm chụp và lớp thuyết minh trước khi hoàn thiện.
+              Tour {activeTour.title}, {activeTour.subtitle} và tuyến {upcomingTour.title} đã có dữ liệu VR360 để phục vụ xem thử, góp ý nội dung và hoàn thiện quy trình vận hành sau bàn giao.
             </p>
             <div className="mt-5 grid gap-3">
               <p className="public-line-item flex items-start gap-3 text-sm font-semibold leading-6 text-[var(--tour-ink)]">

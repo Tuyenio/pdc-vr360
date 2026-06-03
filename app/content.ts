@@ -12,9 +12,13 @@ export const activeTour = {
 
 export const upcomingTour = {
   title: "Chùa Liên Hoa",
-  subtitle: "Tuyến di tích đang chuẩn bị số hóa",
-  coverImage: "/images-tour/Đình Làng-Đền Thờ/8 Tiền sảnh Đình làng.jpg",
-  status: "Đang chuẩn bị",
+  subtitle: "Tuyến VR360 chùa và cảnh quan tâm linh",
+  href: "/tour/chua-lien-hoa",
+  coverImage: "/images-tour/Chùa Liên Hoa/1 Trước Cổng.jpg",
+  heroImage: "/images-tour/Chùa Liên Hoa/7 Tượng bồ tát.jpg",
+  sceneCount: "07",
+  stopCount: "08",
+  status: "Đang mở tour",
 };
 
 export const navigation = [
@@ -37,10 +41,11 @@ export const routeCards = [
   {
     title: upcomingTour.title,
     subtitle: upcomingTour.subtitle,
-    description: "Tuyến tiếp theo đang được chuẩn bị để hoàn thiện dữ liệu hình ảnh, điểm chuyển cảnh, tư liệu địa phương và lớp thuyết minh.",
+    description: "Tour VR360 Chùa Liên Hoa đã có dữ liệu ảnh 360, tuyến chuyển cảnh từ Cổng Tam Quan đến Đài Quan Âm, Vườn Tháp Tổ và lớp thuyết minh theo từng điểm.",
     image: upcomingTour.coverImage,
     status: upcomingTour.status,
-    detail: "Chuẩn bị khảo sát",
+    href: upcomingTour.href,
+    detail: "7 chặng tham quan",
   },
   {
     title: "Không gian nghề Kim hoàn",
@@ -104,7 +109,7 @@ export const projectPillars = [
   },
   {
     title: "Mở rộng theo danh mục",
-    detail: "Nền tảng có thể bổ sung Chùa Liên Hoa, tư liệu người dân và các tuyến ký ức cộng đồng khi dữ liệu được hoàn thiện.",
+    detail: "Nền tảng đã bổ sung Chùa Liên Hoa và vẫn có thể tiếp tục tiếp nhận tư liệu người dân, tuyến ký ức cộng đồng hoặc các điểm di sản mới.",
   },
 ];
 

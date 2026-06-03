@@ -16,7 +16,10 @@ export function SiteFooter() {
               Tour đang mở
               <ArrowUpRight className="h-4 w-4" strokeWidth={1.8} />
             </Link>
-            <span className="text-sm text-[var(--muted-foreground)]">{upcomingTour.title} đang chuẩn bị</span>
+            <Link href={upcomingTour.href} className="inline-flex items-center gap-2 text-sm font-bold text-[var(--tour-ink)] hover:text-[var(--primary)]">
+              Tour {upcomingTour.title}
+              <ArrowUpRight className="h-4 w-4" strokeWidth={1.8} />
+            </Link>
           </div>
         </div>
 

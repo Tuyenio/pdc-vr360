@@ -17,7 +17,7 @@ import {
 export const metadata: Metadata = {
   title: "Trang chủ | Con đường di sản Định Công",
   description:
-    "Landing page giới thiệu sản phẩm VR360 cho di tích Phường Định Công, gồm tour Đình Làng Định Công Thượng, Đền thờ Tổ nghề Kim hoàn và tuyến Chùa Liên Hoa đang chuẩn bị.",
+    "Landing page giới thiệu sản phẩm VR360 cho di tích Phường Định Công, gồm tour Đình Làng Định Công Thượng, Đền thờ Tổ nghề Kim hoàn và Chùa Liên Hoa.",
 };
 
 export default function Home() {
@@ -33,7 +33,7 @@ export default function Home() {
               Con đường di sản Định Công
             </h1>
             <p className="mt-5 max-w-[54ch] text-base leading-8 text-[var(--foreground)]/82 sm:text-lg">
-              Không gian giới thiệu tour tham quan số cho di tích Phường Định Công, bắt đầu với Đình Làng Định Công Thượng, Đền thờ Tổ nghề Kim hoàn và chuẩn bị mở rộng Chùa Liên Hoa.
+              Không gian giới thiệu tour tham quan số cho di tích Phường Định Công, bắt đầu với Đình Làng Định Công Thượng, Đền thờ Tổ nghề Kim hoàn và Chùa Liên Hoa.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link href={activeTour.href} className="public-cta">
@@ -53,10 +53,10 @@ export default function Home() {
           <div className="min-w-0 lg:sticky lg:top-28">
             <p className="public-kicker">Danh mục số hóa</p>
             <h2 className="public-heading-safe mt-3 text-[2rem] font-bold text-[var(--tour-ink)] sm:text-4xl">
-              Di tích đang mở và tuyến chuẩn bị.
+              Các tour di tích đang mở.
             </h2>
             <p className="mt-4 max-w-[48ch] text-base leading-7 text-[var(--foreground)]/76">
-              Mỗi tuyến được trình bày rõ trạng thái để người dân, học sinh và du khách biết đâu là tour đã hoàn thiện, đâu là phần đang chờ dữ liệu.
+              Mỗi tuyến được trình bày rõ trạng thái để người dân, học sinh và du khách có thể mở đúng tour đã hoàn thiện và theo dõi các lớp tư liệu sẽ tiếp tục bổ sung.
             </p>
           </div>
 
