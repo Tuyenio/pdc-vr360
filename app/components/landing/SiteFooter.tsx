@@ -52,7 +52,7 @@ export function SiteFooter() {
           </Link>
         </div>
       </div>
-      <div className="mx-auto mt-8 max-w-7xl border-t border-[var(--surface-border)] pt-5 text-sm font-semibold text-[var(--muted-foreground)]">
+      <div className="mx-auto mt-8 max-w-7xl border-t border-[var(--surface-border)] pt-5 text-center text-sm font-semibold text-[var(--muted-foreground)]">
         © 2026 VR360 Định Công. All rights reserved.
       </div>
     </footer>

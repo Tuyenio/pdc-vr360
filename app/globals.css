@@ -1016,13 +1016,15 @@ a {
 .public-back-to-top {
   --scroll-progress: 0%;
   position: fixed !important;
-  right: max(1.25rem, env(safe-area-inset-right));
-  bottom: max(1.25rem, env(safe-area-inset-bottom));
-  z-index: 60 !important;
+  top: auto !important;
+  left: auto !important;
+  right: max(1rem, env(safe-area-inset-right)) !important;
+  bottom: max(1rem, env(safe-area-inset-bottom)) !important;
+  z-index: 80 !important;
   display: inline-grid;
   place-items: center;
-  width: 3.75rem;
-  height: 3.75rem;
+  width: 3.65rem;
+  height: 3.65rem;
   border: 0;
   background: transparent;
   padding: 0;
@@ -1047,15 +1049,15 @@ a {
 
 .public-back-to-top-ring {
   position: absolute;
-  inset: -3px;
+  inset: 0;
   border-radius: 999px;
   background:
-    conic-gradient(from -90deg, rgb(142 95 11 / 0.98) var(--scroll-progress), rgb(25 76 55 / 0.14) 0),
-    linear-gradient(135deg, rgb(255 255 255 / 0.94), rgb(226 238 221 / 0.82));
+    conic-gradient(from -90deg, rgb(214 180 104) var(--scroll-progress), rgb(142 95 11 / 0.36) 0),
+    linear-gradient(135deg, #e6cf82 0%, #8e5f0b 48%, #f4d98c 100%);
   box-shadow:
-    0 20px 54px rgb(14 52 39 / 0.26),
-    0 0 0 1px rgb(255 255 255 / 0.74),
-    inset 0 1px 0 rgb(255 255 255 / 0.72);
+    0 18px 42px rgb(14 52 39 / 0.3),
+    0 0 0 1px rgb(255 255 255 / 0.72),
+    inset 0 1px 0 rgb(255 255 255 / 0.62);
   transition:
     transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 320ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -1065,16 +1067,16 @@ a {
 .public-back-to-top-core {
   position: relative;
   display: inline-flex;
-  height: 3.35rem;
-  width: 3.35rem;
+  height: 3.18rem;
+  width: 3.18rem;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   border-radius: 999px;
-  border: 1px solid rgb(214 180 104 / 0.38);
+  border: 1px solid rgb(255 248 232 / 0.24);
   background:
-    linear-gradient(135deg, rgb(37 99 75), rgb(13 55 41) 62%, rgb(142 95 11)),
-    #123a2c;
+    radial-gradient(circle at 32% 20%, rgb(255 255 255 / 0.16), transparent 28%),
+    linear-gradient(145deg, #1f6a50 0%, #0f4a37 48%, #073124 100%);
   padding: 0;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.2),
@@ -1096,7 +1098,7 @@ a {
 
 .public-back-to-top:hover,
 .public-back-to-top:focus-visible {
-  transform: translate3d(0, -4px, 0) scale(1.02);
+  transform: translate3d(0, -5px, 0) scale(1.025);
 }
 
 .public-back-to-top:hover .public-back-to-top-ring,
@@ -1122,7 +1124,15 @@ a {
 
 .public-back-to-top svg {
   flex: 0 0 auto;
-  filter: drop-shadow(0 5px 14px rgb(0 0 0 / 0.16));
+  color: #ffffff;
+  filter: drop-shadow(0 5px 14px rgb(0 0 0 / 0.22));
+}
+
+@media (min-width: 640px) {
+  .public-back-to-top {
+    right: max(1.6rem, env(safe-area-inset-right)) !important;
+    bottom: max(1.6rem, env(safe-area-inset-bottom)) !important;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

@@ -1,10 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Menu, PlayCircle, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { activeTour, navigation } from "@/app/content";
+
+const dinhCongLogo = encodeURI("/images/định công.png");
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -18,8 +21,15 @@ export function SiteHeader() {
           className="flex min-w-0 items-center gap-3"
           aria-label="VR360 Định Công"
         >
-          <span className="public-logo-mark grid h-10 w-10 shrink-0 place-items-center rounded-[8px] border border-[var(--surface-border)] bg-[var(--surface-glass-strong)] text-sm font-bold text-[var(--primary)]">
-            VR
+          <span className="public-logo-mark grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full border border-[rgb(142_95_11_/_0.24)] bg-[linear-gradient(135deg,rgb(255_255_255_/_0.94),rgb(232_219_176_/_0.74))] p-1 shadow-[0_10px_24px_rgb(37_75_54_/_0.1),inset_0_1px_0_rgb(255_255_255_/_0.92)]">
+            <Image
+              src={dinhCongLogo}
+              alt="Logo phường Định Công"
+              width={36}
+              height={36}
+              priority
+              className="h-full w-full rounded-full object-contain"
+            />
           </span>
           <span className="min-w-0">
             <span className="block truncate text-sm font-bold leading-tight text-[var(--tour-ink)] sm:text-base">
