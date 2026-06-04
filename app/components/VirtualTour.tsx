@@ -91,6 +91,17 @@ type WelcomeCardConfig = {
   sceneId: SceneId;
 };
 
+type PracticalInfoItem = {
+  label: string;
+  value: string;
+};
+
+type TourPracticalInfo = {
+  intro: string;
+  items: PracticalInfoItem[];
+  notes: string[];
+};
+
 type TourConfig = {
   id: "dinh-lang-dinh-cong" | "chua-lien-hoa";
   title: string;
@@ -101,6 +112,7 @@ type TourConfig = {
   welcomeBackgroundImage: string;
   welcomeCards: WelcomeCardConfig[];
   backgroundAudio: string;
+  practicalInfo: TourPracticalInfo;
   scenes: TourScene[];
   sceneById: Map<SceneId, TourScene>;
   sceneNarration: Map<SceneId, string[]>;
@@ -131,11 +143,69 @@ const DEFAULT_FOV = 76;
 const WIDE_FOV = 88;
 const MIN_ZOOM_FOV = 36;
 const MAX_ZOOM_FOV = 96;
-const AUDIO_TARGET_VOLUME = 0.24;
-const BACKGROUND_DUCK_VOLUME = 0.12;
+const AUDIO_TARGET_VOLUME = 0.16;
+const BACKGROUND_DUCK_VOLUME = 0.045;
 const NARRATION_TARGET_VOLUME = 0.7;
 const NARRATION_PLAYBACK_RATE = 1.48;
 const AUDIO_FADE_DURATION = 650;
+
+const dinhPracticalInfo: TourPracticalInfo = {
+  intro:
+    "Thông tin phục vụ tham quan, dâng hương và liên hệ tại Đình Làng Định Công Thượng - Đền thờ Tổ nghề Kim hoàn.",
+  items: [
+    {
+      label: "Đơn vị quản lý",
+      value:
+        "Ban quản lý di tích Đình Làng Định Công Thượng - Đền thờ Tổ nghề Kim hoàn. Người phụ trách trực tiếp đang cập nhật.",
+    },
+    {
+      label: "Số điện thoại",
+      value: "Đang cập nhật. Du khách nên liên hệ kênh chính thức của phường Định Công trước khi đến theo đoàn.",
+    },
+    {
+      label: "Giờ mở cửa",
+      value: "Đón khách trong giờ hành chính và theo lịch sinh hoạt, lễ hội của địa phương.",
+    },
+    {
+      label: "Công đức, quyên góp",
+      value:
+        "Vui lòng thực hiện trực tiếp tại hòm công đức hoặc theo hướng dẫn của Ban quản lý di tích. Không chuyển khoản khi chưa xác minh tài khoản chính thức.",
+    },
+  ],
+  notes: [
+    "Khi dâng hương, giữ trang phục lịch sự, nói nhỏ và không tự ý di chuyển đồ thờ.",
+    "Nội dung tên người phụ trách, số điện thoại và tài khoản công đức sẽ được cập nhật khi có thông tin xác thực.",
+  ],
+};
+
+const chuaPracticalInfo: TourPracticalInfo = {
+  intro:
+    "Thông tin phục vụ tham quan, lễ chùa, liên hệ nhà chùa và công đức tại Chùa Liên Hoa.",
+  items: [
+    {
+      label: "Người phụ trách",
+      value:
+        "Thầy trụ trì, sư bác hoặc người trông chùa trực tiếp tại Chùa Liên Hoa. Tên người phụ trách đang cập nhật.",
+    },
+    {
+      label: "Số điện thoại",
+      value: "Đang cập nhật. Nếu đi theo đoàn, vui lòng liên hệ trước qua kênh chính thức của phường hoặc nhà chùa.",
+    },
+    {
+      label: "Giờ mở cửa",
+      value: "Theo lịch sinh hoạt của nhà chùa; nên liên hệ trước vào các dịp lễ, rằm, mùng một hoặc khi đi theo đoàn.",
+    },
+    {
+      label: "Lễ chùa, công đức",
+      value:
+        "Có thể công đức trực tiếp tại hòm công đức hoặc ban tiếp nhận của nhà chùa. Chỉ dùng QR/tài khoản khi đã được nhà chùa xác nhận tại chỗ.",
+    },
+  ],
+  notes: [
+    "Giữ không gian thanh tịnh, tắt chuông điện thoại và hạn chế quay chụp khu vực thờ tự nếu chưa được cho phép.",
+    "Nội dung tên thầy/sư bác, số điện thoại, giờ mở cửa chi tiết và thông tin quyên góp sẽ được cập nhật khi có dữ liệu xác thực.",
+  ],
+};
 
 const clampFov = (fov: number) => THREE.MathUtils.clamp(fov, MIN_ZOOM_FOV, MAX_ZOOM_FOV);
 
@@ -817,6 +887,7 @@ const dinhTourConfig = createTourConfig({
     },
   ],
   backgroundAudio,
+  practicalInfo: dinhPracticalInfo,
   scenes,
   sceneNarration,
   continuousNarrationGroups,
@@ -846,6 +917,7 @@ const chuaTourConfig = createTourConfig({
     },
   ],
   backgroundAudio,
+  practicalInfo: chuaPracticalInfo,
   scenes: chuaScenes,
   sceneNarration: chuaSceneNarration,
   continuousNarrationGroups: chuaContinuousNarrationGroups,
@@ -3040,15 +3112,36 @@ function TourExperience({
             ) : null}
 
             {activePanel === "info" ? (
-              <div className="space-y-2.5 p-3 text-[0.82rem] leading-5 text-white/76">
-                <p>
-                  Di chuyển bằng chuột hoặc vuốt trên màn hình để xoay 360 độ. Dùng con
-                  lăn chuột hoặc chụm hai ngón để phóng to, thu nhỏ trong không gian.
-                </p>
-                <p>
-                  Cảnh hiện tại:{" "}
-                  <span className="font-semibold text-white">{activeScene.title}</span>.
-                </p>
+              <div className="max-h-[calc(46dvh-44px)] space-y-3 overflow-y-auto p-3 pr-2 text-[0.82rem] leading-5 text-white/76 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin]">
+                <p className="text-white/82">{tourConfig.practicalInfo.intro}</p>
+
+                <div className="grid gap-2">
+                  {tourConfig.practicalInfo.items.map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-[6px] border border-[rgb(255_252_245_/_0.1)] bg-[rgb(255_252_245_/_0.055)] px-3 py-2.5"
+                    >
+                      <p className="text-[0.66rem] font-black uppercase tracking-[0.1em] text-[var(--tour-gold-light)]">
+                        {item.label}
+                      </p>
+                      <p className="mt-1 text-white/82">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-[6px] border border-[rgb(232_207_170_/_0.16)] bg-[rgb(49_95_80_/_0.18)] px-3 py-2.5">
+                  <p className="font-semibold text-white">
+                    Đang tham quan: {activeScene.title}
+                  </p>
+                  <ul className="mt-1.5 space-y-1.5">
+                    {tourConfig.practicalInfo.notes.map((note) => (
+                      <li key={note} className="flex gap-2">
+                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[var(--tour-gold-light)]" />
+                        <span>{note}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             ) : null}
 
