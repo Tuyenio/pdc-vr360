@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, PlayCircle, X } from "lucide-react";
+import { LayoutDashboard, Menu, PlayCircle, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { activeTour, navigation } from "@/app/content";
@@ -69,6 +69,13 @@ export function SiteHeader() {
             <PlayCircle className="h-4 w-4 text-[var(--tour-gold-light)]" strokeWidth={1.8} />
             Khám phá VR360
           </Link>
+          <Link
+            href="/quan-tri/dang-nhap"
+            className="public-admin-cta hidden min-h-10 items-center gap-2 rounded-full border border-[rgb(14_52_39_/_0.16)] bg-[rgb(255_255_255_/_0.82)] px-4 text-sm font-bold text-[var(--tour-ink)] shadow-[0_10px_28px_rgb(37_75_54_/_0.08)] transition-all hover:-translate-y-0.5 hover:border-[rgb(142_95_11_/_0.28)] hover:bg-[var(--surface-glass-strong)] hover:text-[var(--primary)] hover:shadow-[0_14px_34px_rgb(37_75_54_/_0.12)] sm:inline-flex"
+          >
+            <LayoutDashboard className="h-4 w-4 text-[var(--primary)]" strokeWidth={1.8} />
+            Quản trị
+          </Link>
 
           <button
             onClick={() => setMobileMenuOpen((open) => !open)}
@@ -111,6 +118,14 @@ export function SiteHeader() {
           >
             <PlayCircle className="h-4 w-4 text-[var(--tour-gold-light)]" strokeWidth={1.8} />
             Khám phá VR360
+          </Link>
+          <Link
+            href="/quan-tri/dang-nhap"
+            onClick={() => setMobileMenuOpen(false)}
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--surface-border)] bg-white/88 px-4 py-3 text-sm font-bold text-[var(--tour-ink)]"
+          >
+            <LayoutDashboard className="h-4 w-4 text-[var(--primary)]" strokeWidth={1.8} />
+            Quản trị
           </Link>
         </div>
       </div>

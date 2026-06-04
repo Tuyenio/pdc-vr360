@@ -1128,6 +1128,56 @@ a {
   filter: drop-shadow(0 5px 14px rgb(0 0 0 / 0.22));
 }
 
+.admin-console,
+.admin-page {
+  overflow-x: hidden;
+}
+
+.admin-console *,
+.admin-page * {
+  min-width: 0;
+}
+
+.admin-console-sidebar {
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.admin-console button,
+.admin-console a,
+.admin-page button,
+.admin-page a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin-console button:focus-visible,
+.admin-console a:focus-visible,
+.admin-console input:focus-visible,
+.admin-console textarea:focus-visible,
+.admin-page button:focus-visible,
+.admin-page a:focus-visible,
+.admin-page input:focus-visible {
+  outline: 2px solid rgb(142 95 11 / 0.72);
+  outline-offset: 3px;
+}
+
+.admin-console ::-webkit-scrollbar {
+  width: 0.72rem;
+  height: 0.72rem;
+}
+
+.admin-console ::-webkit-scrollbar-track {
+  background: rgb(231 240 227 / 0.72);
+  border-radius: 999px;
+}
+
+.admin-console ::-webkit-scrollbar-thumb {
+  background: rgb(14 52 39 / 0.28);
+  border: 3px solid rgb(231 240 227 / 0.72);
+  border-radius: 999px;
+}
+
 @media (min-width: 640px) {
   .public-back-to-top {
     right: max(1.6rem, env(safe-area-inset-right)) !important;
