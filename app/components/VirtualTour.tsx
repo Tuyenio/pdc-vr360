@@ -485,8 +485,8 @@ const chuaScenes: TourScene[] = [
   {
     id: "scene-1",
     order: "01",
-    title: "Cổng Tam Quan",
-    location: "Cổng Tam Quan",
+    title: "Sơn Môn",
+    location: "Sơn Môn",
     image: chuaPanoramaPath("1 Trước Cổng.jpg"),
     initialYaw: 0,
     mapPosition: { x: 50, y: 90 },
@@ -496,7 +496,7 @@ const chuaScenes: TourScene[] = [
     infoMarkers: [
       {
       id: "cong-tam-quan-chua-info",
-      title: "Cổng Tam Quan",
+      title: "Sơn Môn - Cổng Tam Quan",
       eyebrow: "Lối vào Chùa Liên Hoa",
       yaw: 177,
       pitch: 8,
@@ -522,10 +522,10 @@ image: chuaPanoramaPath("2 Sảnh Chính.jpg"),
 initialYaw: 0,
 mapPosition: { x: 50, y: 72 },
 hotspots: [
-{ targetId: "scene-1", label: "Cổng Tam Quan", yaw: -45, pitch: -16, rotation: 0 },
+{ targetId: "scene-1", label: "Sơn Môn", yaw: -45, pitch: -16, rotation: 0 },
 { targetId: "scene-3", label: "Điện Tam Bảo", yaw: 120, pitch: -16, rotation: 0 },
 { targetId: "scene-7", label: "Đài Quan Âm", yaw: 172, pitch: -15, rotation: 20 },
-{ targetId: "scene-4", label: "Bên trái", yaw: 64, pitch: -15, rotation: -20 },
+{ targetId: "scene-4", label: "Sân Tả Vu", yaw: 64, pitch: -15, rotation: -20 },
 ],
 
 infoMarkers: [
@@ -555,9 +555,9 @@ initialYaw: 0,
 mapPosition: { x: 50, y: 54 },
 hotspots: [
 { targetId: "scene-2", label: "Tiền Đường", yaw: 320, pitch: -22, rotation: 0, nextYaw: 0 },
-{ targetId: "scene-4", label: "Bên trái", yaw: 68, pitch: -39, rotation: -24 },
+{ targetId: "scene-4", label: "Sân Tả Vu", yaw: 68, pitch: -39, rotation: -24 },
 { targetId: "scene-7", label: "Đài Quan Âm", yaw: 192, pitch: -39, rotation: 24 },
-{ targetId: "scene-8", label: "Sảnh trung tâm", yaw: 110, pitch: -39, rotation: 0 },
+{ targetId: "scene-8", label: "Chính Điện Tam Bảo", yaw: 110, pitch: -39, rotation: 0 },
 ],
 
 infoMarkers: [
@@ -584,42 +584,42 @@ content: [
   {
     id: "scene-4",
     order: "04",
-    title: "Bên trái",
-    location: "Bên trái",
+    title: "Sân Tả Vu",
+    location: "Sân Tả Vu",
     image: chuaPanoramaPath("4a Bên Trái.jpg"),
     initialYaw: 0,
     mapPosition: { x: 29, y: 62 },
     hotspots: [
       { targetId: "scene-2", label: "Tiền Đường", yaw: 242, pitch: -26, rotation: 0, nextYaw: 0 },
       { targetId: "scene-3", label: "Điện Tam Bảo", yaw: 168, pitch: -30, rotation: 0 },
-      { targetId: "scene-5", label: "Chi tiết bên trái", yaw: 99, pitch: -25, rotation: 0 },
+      { targetId: "scene-5", label: "Hành Lang Tả", yaw: 99, pitch: -25, rotation: 0 },
     ],
   },
   {
     id: "scene-5",
     order: "04B",
-    title: "Chi tiết bên trái",
-    location: "Chi tiết bên trái",
+    title: "Hành Lang Tả",
+    location: "Hành Lang Tả",
     image: chuaPanoramaPath("4b Chi tiết bên trái.jpg"),
     initialYaw: 0,
     mapPosition: { x: 20, y: 49 },
     hotspots: [
-      { targetId: "scene-4", label: "Bên trái", yaw: -39, pitch: -25, rotation: 0 },
-      { targetId: "scene-8", label: "Sảnh trung tâm", yaw: -180, pitch: -25, rotation: -8 },
+      { targetId: "scene-4", label: "Sân Tả Vu", yaw: -39, pitch: -25, rotation: 0 },
+      { targetId: "scene-8", label: "Chính Điện Tam Bảo", yaw: -180, pitch: -25, rotation: -8 },
     ],
   },
  {
   id: "scene-8",
   order: "05",
-  title: "Sảnh trung tâm",
-  location: "Sảnh trung tâm",
+  title: "Chính Điện Tam Bảo",
+  location: "Chính Điện Tam Bảo",
   image: chuaPanoramaPath("5 Sảnh trung tâm.jpg"),
   initialYaw: 0,
   mapPosition: { x: 42, y: 42 },
   hotspots: [
     { targetId: "scene-3", label: "Điện Tam Bảo", yaw: -66, pitch: -25, rotation: 0 },
     { targetId: "scene-6", label: "Vườn Tháp Tổ", yaw: 205, pitch: -15, rotation: 0 },
-    { targetId: "scene-5", label: "Chi tiết bên trái", yaw: 5, pitch: -15, rotation: -28 },
+    { targetId: "scene-5", label: "Hành Lang Tả", yaw: 5, pitch: -15, rotation: -28 },
   ],
 
   infoMarkers: [
@@ -628,7 +628,7 @@ content: [
       title: "Tam Bảo",
       eyebrow: "Sảnh Trung Tâm",
       yaw: 130,
-      pitch: 15,
+      pitch: 20,
       rotation: 0,
       iconType: "landmark",
       content: [
@@ -641,8 +641,8 @@ content: [
       id: "nha-to-info",
       title: "Nhà Tổ",
       eyebrow: "Nơi thờ các bậc Sư Tổ",
-      yaw: 240,
-      pitch: -10,
+      yaw: -325,
+      pitch: 15,
       rotation: 0,
       iconType: "landmark",
       content: [
@@ -655,8 +655,8 @@ content: [
       id: "bia-cong-duc-info",
       title: "Bia Công Đức",
       eyebrow: "Tấm bia ghi nhận công đức",
-      yaw: 45,          
-      pitch: -25,
+      yaw: 328,          
+      pitch: 0,
       rotation: 0,
       iconType: "landmark",
       content: [
@@ -677,7 +677,7 @@ content: [
   mapPosition: { x: 70, y: 34 },
   hotspots: [
     { targetId: "scene-7", label: "Đài Quan Âm", yaw: -80, pitch: -12, rotation: -28 },
-    { targetId: "scene-8", label: "Sảnh trung tâm", yaw: -59, pitch: -12, rotation: 38 },
+    { targetId: "scene-8", label: "Chính Điện Tam Bảo", yaw: -59, pitch: -12, rotation: 38 },
   ],
 
   infoMarkers: [
@@ -685,7 +685,7 @@ content: [
       id: "ho-sen-info",
       title: "Hồ Sen / Hồ Phóng Sinh",
       eyebrow: "Không gian sinh thái thanh tịnh",
-      yaw: 80,          
+      yaw: 297,          
       pitch: -15,
       rotation: 0,
       iconType: "landmark",
@@ -699,8 +699,8 @@ content: [
       id: "vuon-thap-to-info",
       title: "Vườn Tháp Tổ",
       eyebrow: "Nơi an nghỉ các bậc Sư Tổ",
-      yaw: 200,        
-      pitch: -20,
+      yaw: -249,        
+      pitch: -2,
       rotation: 0,
       iconType: "landmark",
       content: [
@@ -834,7 +834,7 @@ const chuaTourConfig = createTourConfig({
   welcomeCards: [
     {
       image: chuaPanoramaPath("1 Trước Cổng.jpg"),
-      label: "Cổng Tam Quan",
+      label: "Sơn Môn",
       rotate: "-rotate-6",
       sceneId: "scene-1",
     },
@@ -2870,7 +2870,7 @@ function TourExperience({
                   <p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-[var(--tour-gold)] sm:text-[0.66rem]">
                     {activeInfoMarker.eyebrow}
                   </p>
-                  <h2 className="font-display-vn mt-0.5 text-[1.85rem] font-bold leading-tight text-[var(--tour-ink)] sm:text-[2.55rem]">
+                 <h2 className="font-display-vn mt-0.5 text-[1.85rem] font-bold leading-tight text-[var(--tour-gold)] sm:text-[2.55rem]">
                     {activeInfoMarker.title}
                   </h2>
                 </div>
