@@ -119,6 +119,7 @@ const narrationPath = (fileName: string) => encodeURI(`${narrationBasePath}/${fi
 const chuaNarrationPath = (fileName: string) => encodeURI(`${chuaNarrationBasePath}/${fileName}`);
 const hotspotIcon = encodeURI("/icon/hotspotelement.png");
 const infoModalBackground = encodeURI("/modal/modal-2.png");
+const welcomeTitleBackground = encodeURI("/modal/background-1.png");
 const heroImage = encodeURI(`${basePath}/6 Trung Đình.jpg`);
 const welcomeBackgroundImage = panoramaPath("3 Tả Hồ.jpg");
 const dinhCardImage = encodeURI(`${basePath}/Toa_Dai_Bai.png`);
