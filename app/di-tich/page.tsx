@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPinned } from "lucide-react";
+import { BackToTopButton } from "@/app/components/landing/BackToTopButton";
 import { CulturalSpaceExplorer } from "@/app/components/landing/CulturalSpaceExplorer";
 import { SiteFooter } from "@/app/components/landing/SiteFooter";
 import { SiteHeader } from "@/app/components/landing/SiteHeader";
@@ -82,6 +83,7 @@ export default function HeritageListPage() {
       </section>
 
       <SiteFooter />
+      <BackToTopButton />
     </main>
   );
 }

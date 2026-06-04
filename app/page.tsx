@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Box, Globe2, Landmark, PlayCircle, School, Sparkles } from "lucide-react";
+import { BackToTopButton } from "@/app/components/landing/BackToTopButton";
 import { SiteFooter } from "@/app/components/landing/SiteFooter";
 import { SiteHeader } from "@/app/components/landing/SiteHeader";
 import { HeroShaderBackground } from "@/app/components/ui/hero-shader-background";
@@ -176,6 +177,7 @@ export default function Home() {
       </section>
 
       <SiteFooter />
+      <BackToTopButton />
     </main>
   );
 }

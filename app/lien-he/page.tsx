@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Building2, Clock, FileText, Mail, MapPin, Phone, Send, Upload } from "lucide-react";
+import { Building2, Clock, ExternalLink, FileText, Globe2, Mail, MapPin, Phone, Send, Upload } from "lucide-react";
+import { BackToTopButton } from "@/app/components/landing/BackToTopButton";
 import { SiteFooter } from "@/app/components/landing/SiteFooter";
 import { SiteHeader } from "@/app/components/landing/SiteHeader";
 import { activeTour } from "@/app/content";
@@ -19,8 +20,20 @@ const contactInfo = [
   },
   {
     label: "Khu vực",
-    value: "Phường Định Công, Hà Nội",
+    value: "Số 1 ngõ 282 Kim Giang, Hanoi, Vietnam, 100000",
     icon: MapPin,
+  },
+  {
+    label: "Cổng thông tin",
+    value: "dinhcong.hanoi.gov.vn",
+    href: "http://dinhcong.hanoi.gov.vn/",
+    icon: Globe2,
+  },
+  {
+    label: "Facebook",
+    value: "Facebook phường Định Công",
+    href: "https://www.facebook.com/profile.php?id=61578181220775",
+    icon: ExternalLink,
   },
   {
     label: "Email",
@@ -93,7 +106,18 @@ export default function ContactPage() {
                     <Icon className="h-5 w-5 text-[var(--primary)]" strokeWidth={1.8} />
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--primary)]">{item.label}</p>
-                      <p className="mt-1 text-sm font-semibold leading-6 text-[var(--tour-ink)]">{item.value}</p>
+                      {"href" in item ? (
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-1 inline-flex text-sm font-semibold leading-6 text-[var(--tour-ink)] transition hover:text-[var(--primary)]"
+                        >
+                          {item.value}
+                        </a>
+                      ) : (
+                        <p className="mt-1 text-sm font-semibold leading-6 text-[var(--tour-ink)]">{item.value}</p>
+                      )}
                     </div>
                   </div>
                 );
@@ -162,7 +186,7 @@ export default function ContactPage() {
           <div className="public-map-frame public-panel rounded-[8px] p-2">
             <iframe
               title="Bản đồ khu vực phường Định Công"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d16221.373933751474!2d105.81476381553804!3d20.975519950799196!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135acf7140205b7%3A0xf0c855e17637e8c4!2zxJDhu4tuaCBDw7RuZywgSMOgIE7hu5lpLCBWaeG7h3QgTmFt!5e1!3m2!1svi!2s!4v1780474484599!5m2!1svi!2s"
+              src="https://www.google.com/maps?q=S%E1%BB%91%201%20ng%C3%B5%20282%20Kim%20Giang%2C%20Hanoi%2C%20Vietnam%2C%20100000&output=embed"
               className="h-[28rem] w-full rounded-[6px] border-0"
               allowFullScreen
               loading="lazy"
@@ -188,6 +212,7 @@ export default function ContactPage() {
       </section>
 
       <SiteFooter />
+      <BackToTopButton />
     </main>
   );
 }

@@ -134,7 +134,7 @@ const MAX_ZOOM_FOV = 96;
 const AUDIO_TARGET_VOLUME = 0.24;
 const BACKGROUND_DUCK_VOLUME = 0.12;
 const NARRATION_TARGET_VOLUME = 0.7;
-const NARRATION_PLAYBACK_RATE = 1.08;
+const NARRATION_PLAYBACK_RATE = 1.48;
 const AUDIO_FADE_DURATION = 650;
 
 const clampFov = (fov: number) => THREE.MathUtils.clamp(fov, MIN_ZOOM_FOV, MAX_ZOOM_FOV);
@@ -745,14 +745,14 @@ content: [
 ];
 
 const chuaSceneNarration = new Map<SceneId, string[]>([
-  ["scene-1", [chuaNarrationPath("lời cảm ơn.mp3"), chuaNarrationPath("Cổng tam quan.mp3")]],
-  ["scene-2", [chuaNarrationPath("tiền đường.mp3")]],
-  ["scene-3", [chuaNarrationPath("điện tam bảo.mp3")]],
+  ["scene-1", [chuaNarrationPath("Điểm 0- Lời chào mở đầu.mp3"), chuaNarrationPath("Điểm 1- Cổng tam quan .mp3")]],
+  ["scene-2", [chuaNarrationPath("Điểm 2- Nhà bái đường.mp3")]],
+  ["scene-3", [chuaNarrationPath("Điểm 4- Điện tam bảo.mp3")]],
   ["scene-4", []],
-  ["scene-5", [chuaNarrationPath("nhà tổ thổ .mp3"), chuaNarrationPath("bia công đức.mp3")]],
-  ["scene-8", []],
-  ["scene-6", [chuaNarrationPath("vườn tháp tổ.mp3"), chuaNarrationPath("Hồ sen.mp3")]],
-  ["scene-7", [chuaNarrationPath("đài quan âm.mp3"), chuaNarrationPath("lời chào.mp3")]],
+  ["scene-5", []],
+  ["scene-8", [chuaNarrationPath("Điểm 5- Nhà tổ.mp3"), chuaNarrationPath("Điểm 6- Bia Công Đức.mp3")]],
+  ["scene-6", [chuaNarrationPath("Điểm 8- Vườn tháp tổ.mp3"), chuaNarrationPath("Điểm 7- Hồ sen.mp3")]],
+  ["scene-7", [chuaNarrationPath("Điểm 3- Đài quan âm.mp3"), chuaNarrationPath("Điểm 9- Lời chào tạm biệt.mp3")]],
 ]);
 
 const chuaContinuousNarrationGroups: SceneId[][] = [

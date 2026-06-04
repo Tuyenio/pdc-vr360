@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Archive, Building2, Compass, Database, Globe2, Landmark, MapPinned, Radio, School, Users } from "lucide-react";
+import { BackToTopButton } from "@/app/components/landing/BackToTopButton";
 import { SiteFooter } from "@/app/components/landing/SiteFooter";
 import { SiteHeader } from "@/app/components/landing/SiteHeader";
 
@@ -219,6 +220,7 @@ export default function AboutPage() {
       </section>
 
       <SiteFooter />
+      <BackToTopButton />
     </main>
   );
 }

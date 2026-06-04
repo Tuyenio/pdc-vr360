@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, MapPin } from "lucide-react";
+import { ExternalLink, Globe2, Mail, MapPin } from "lucide-react";
 import { navigation } from "@/app/content";
 
 export function SiteFooter() {
@@ -26,8 +26,26 @@ export function SiteFooter() {
           <p className="font-bold text-[var(--tour-ink)]">Thông tin liên hệ</p>
           <p className="inline-flex items-center gap-2 lg:justify-end">
             <MapPin className="h-4 w-4 text-[var(--primary)]" strokeWidth={1.8} />
-            Phường Định Công, Hà Nội
+            Số 1 ngõ 282 Kim Giang, Hanoi, Vietnam, 100000
           </p>
+          <a
+            href="http://dinhcong.hanoi.gov.vn/"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 font-semibold text-[var(--tour-ink)] hover:text-[var(--primary)] lg:justify-end"
+          >
+            <Globe2 className="h-4 w-4 text-[var(--primary)]" strokeWidth={1.8} />
+            Cổng thông tin phường Định Công
+          </a>
+          <a
+            href="https://www.facebook.com/profile.php?id=61578181220775"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 font-semibold text-[var(--tour-ink)] hover:text-[var(--primary)] lg:justify-end"
+          >
+            <ExternalLink className="h-4 w-4 text-[var(--primary)]" strokeWidth={1.8} />
+            Facebook phường Định Công
+          </a>
           <Link href="/lien-he" className="inline-flex items-center gap-2 font-semibold text-[var(--tour-ink)] hover:text-[var(--primary)] lg:justify-end">
             <Mail className="h-4 w-4 text-[var(--primary)]" strokeWidth={1.8} />
             Gửi góp ý hoặc tư liệu
