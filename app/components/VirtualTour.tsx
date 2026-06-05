@@ -2,6 +2,7 @@
 
 import {
   Info,
+  BookOpenText,
   Layers3,
   LucideIcon,
   MapPin,
@@ -58,7 +59,7 @@ type InfoMarker = {
   pitch: number;
   rotation?: number;
   content: string[];
-   iconType?: "envelope" | "landmark" | "info";
+  iconType?: "envelope" | "landmark" | "info";
 };
 
 type TourScene = {
@@ -83,10 +84,51 @@ type MapRoute = {
   via?: { x: number; y: number }[];
 };
 
+type WelcomeCardConfig = {
+  image: string;
+  label: string;
+  rotate: string;
+  sceneId: SceneId;
+};
+
+type PracticalInfoItem = {
+  label: string;
+  value: string;
+};
+
+type TourPracticalInfo = {
+  intro: string;
+  items: PracticalInfoItem[];
+  notes: string[];
+};
+
+type TourConfig = {
+  id: "dinh-lang-dinh-cong" | "chua-lien-hoa";
+  title: string;
+  subtitle: string;
+  welcomeTitle: string;
+  welcomeAccent: string;
+  welcomeSubtitle: string;
+  welcomeBackgroundImage: string;
+  welcomeCards: WelcomeCardConfig[];
+  backgroundAudio: string;
+  practicalInfo: TourPracticalInfo;
+  scenes: TourScene[];
+  sceneById: Map<SceneId, TourScene>;
+  sceneNarration: Map<SceneId, string[]>;
+  continuousNarrationGroups: SceneId[][];
+  mapRoutes: MapRoute[];
+  locationGroups: TourScene[];
+};
+
 const basePath = "/images-tour/Đình Làng-Đền Thờ";
+const chuaBasePath = "/images-tour/Chùa Liên Hoa";
 const panoramaPath = (fileName: string) => encodeURI(`${basePath}/${fileName}`);
+const chuaPanoramaPath = (fileName: string) => encodeURI(`${chuaBasePath}/${fileName}`);
 const narrationBasePath = "/media/voice định công";
+const chuaNarrationBasePath = "/media/voice chùa liên hoa";
 const narrationPath = (fileName: string) => encodeURI(`${narrationBasePath}/${fileName}`);
+const chuaNarrationPath = (fileName: string) => encodeURI(`${chuaNarrationBasePath}/${fileName}`);
 const hotspotIcon = encodeURI("/icon/hotspotelement.png");
 const infoModalBackground = encodeURI("/modal/modal-2.png");
 const welcomeTitleBackground = encodeURI("/modal/background-1.png");
@@ -101,11 +143,69 @@ const DEFAULT_FOV = 76;
 const WIDE_FOV = 88;
 const MIN_ZOOM_FOV = 36;
 const MAX_ZOOM_FOV = 96;
-const AUDIO_TARGET_VOLUME = 0.24;
-const BACKGROUND_DUCK_VOLUME = 0.12;
+const AUDIO_TARGET_VOLUME = 0.16;
+const BACKGROUND_DUCK_VOLUME = 0.045;
 const NARRATION_TARGET_VOLUME = 0.7;
-const NARRATION_PLAYBACK_RATE = 1.08;
+const NARRATION_PLAYBACK_RATE = 1.48;
 const AUDIO_FADE_DURATION = 650;
+
+const dinhPracticalInfo: TourPracticalInfo = {
+  intro:
+    "Thông tin phục vụ tham quan, dâng hương và liên hệ tại Đình Làng Định Công Thượng - Đền thờ Tổ nghề Kim hoàn.",
+  items: [
+    {
+      label: "Đơn vị quản lý",
+      value:
+        "Ban quản lý di tích Đình Làng Định Công Thượng - Đền thờ Tổ nghề Kim hoàn. Người phụ trách trực tiếp đang cập nhật.",
+    },
+    {
+      label: "Số điện thoại",
+      value: "Đang cập nhật. Du khách nên liên hệ kênh chính thức của phường Định Công trước khi đến theo đoàn.",
+    },
+    {
+      label: "Giờ mở cửa",
+      value: "Đón khách trong giờ hành chính và theo lịch sinh hoạt, lễ hội của địa phương.",
+    },
+    {
+      label: "Công đức, quyên góp",
+      value:
+        "Vui lòng thực hiện trực tiếp tại hòm công đức hoặc theo hướng dẫn của Ban quản lý di tích. Không chuyển khoản khi chưa xác minh tài khoản chính thức.",
+    },
+  ],
+  notes: [
+    "Khi dâng hương, giữ trang phục lịch sự, nói nhỏ và không tự ý di chuyển đồ thờ.",
+    "Nội dung tên người phụ trách, số điện thoại và tài khoản công đức sẽ được cập nhật khi có thông tin xác thực.",
+  ],
+};
+
+const chuaPracticalInfo: TourPracticalInfo = {
+  intro:
+    "Thông tin phục vụ tham quan, lễ chùa, liên hệ nhà chùa và công đức tại Chùa Liên Hoa.",
+  items: [
+    {
+      label: "Người phụ trách",
+      value:
+        "Thầy trụ trì, sư bác hoặc người trông chùa trực tiếp tại Chùa Liên Hoa. Tên người phụ trách đang cập nhật.",
+    },
+    {
+      label: "Số điện thoại",
+      value: "Đang cập nhật. Nếu đi theo đoàn, vui lòng liên hệ trước qua kênh chính thức của phường hoặc nhà chùa.",
+    },
+    {
+      label: "Giờ mở cửa",
+      value: "Theo lịch sinh hoạt của nhà chùa; nên liên hệ trước vào các dịp lễ, rằm, mùng một hoặc khi đi theo đoàn.",
+    },
+    {
+      label: "Lễ chùa, công đức",
+      value:
+        "Có thể công đức trực tiếp tại hòm công đức hoặc ban tiếp nhận của nhà chùa. Chỉ dùng QR/tài khoản khi đã được nhà chùa xác nhận tại chỗ.",
+    },
+  ],
+  notes: [
+    "Giữ không gian thanh tịnh, tắt chuông điện thoại và hạn chế quay chụp khu vực thờ tự nếu chưa được cho phép.",
+    "Nội dung tên thầy/sư bác, số điện thoại, giờ mở cửa chi tiết và thông tin quyên góp sẽ được cập nhật khi có dữ liệu xác thực.",
+  ],
+};
 
 const clampFov = (fov: number) => THREE.MathUtils.clamp(fov, MIN_ZOOM_FOV, MAX_ZOOM_FOV);
 
@@ -134,8 +234,8 @@ const scenes: TourScene[] = [
         id: "gioi-thieu-cum-di-tich",
         title: "Giới thiệu",
         eyebrow: "Cụm di tích",
-        yaw: 42,
-        pitch: -4,
+        yaw: 38,
+        pitch: -2,
         rotation: -0,
         iconType: "info",
         content: [
@@ -176,58 +276,58 @@ const scenes: TourScene[] = [
     ],
   },
   {
-  id: "scene-3",
-  order: "03",
-  title: "Tả Hồ",
-  location: "Đình Làng Định Công Thượng",
-  image: panoramaPath("3 Tả Hồ.jpg"),
-  initialYaw: 0,
-  mapPosition: { x: 35, y: 65 },
-  hotspots: [
-    { targetId: "scene-2", label: "Tiền Đình", yaw: -40, pitch: -18, rotation: 2 },
-    { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: -220, pitch: -15, nextYaw: -180 },
-  ],
-  infoMarkers: [
-    {
-      id: "ta-ho-info",
-      title: "Tả Hồ",
-      eyebrow: "Hồ nước phong thủy",
-      yaw: -130,
-      pitch: -8,
-      rotation: 0,
-      content: [
-        "Nằm ngay trước sân Đền Định Công Thượng là một chiếc hồ sâu cổ kính. Trong mạch đất \"Long chầu hổ phục\", chiếc hồ đóng vai trò là điểm \"tụ thủy\" phong thủy vô cùng quan trọng, giúp gom tụ tài lộc, sinh khí và sự thịnh vượng cho làng nghề kim hoàn suốt hàng trăm năm qua, đồng thời điều hòa không khí mang lại sự thoáng đãng cho toàn di tích. ",
-      ],
-    },
-  ],
-},
- {
-  id: "scene-4",
-  order: "04",
-  title: "Hữu Hồ",
-  location: "Đình Làng Định Công Thượng",
-  image: panoramaPath("4 Hữu Hồ.jpg"),
-  initialYaw: 0,
-  mapPosition: { x: 70, y: 65 },
-  hotspots: [
-    { targetId: "scene-2", label: "Tiền Đình", yaw: 72, pitch: -18, rotation: -12 },
-    { targetId: "scene-5", label: "Vườn cảnh phía Đông", yaw: 222, pitch: -15, rotation: -2 },
-  ],
-  infoMarkers: [
-    {
-      id: "huu-ho-info",
-      title: "Hữu Hồ",
-      eyebrow: "Hồ nước phong thủy",
-      yaw: 160,
-      pitch: 5,
-      rotation: 0,
-      iconType: "landmark",
-      content: [
-       "Nằm ngay trước sân Đền Định Công Thượng là một chiếc hồ sâu cổ kính. Trong mạch đất \"Long chầu hổ phục\", chiếc hồ đóng vai trò là điểm \"tụ thủy\" phong thủy vô cùng quan trọng, giúp gom tụ tài lộc, sinh khí và sự thịnh vượng cho làng nghề kim hoàn suốt hàng trăm năm qua, đồng thời điều hòa không khí mang lại sự thoáng đãng cho toàn di tích.",
-      ],
-    },
-  ],
-},
+    id: "scene-3",
+    order: "03",
+    title: "Tả Hồ",
+    location: "Đình Làng Định Công Thượng",
+    image: panoramaPath("3 Tả Hồ.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 35, y: 65 },
+    hotspots: [
+      { targetId: "scene-2", label: "Tiền Đình", yaw: -40, pitch: -18, rotation: 2 },
+      { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: -220, pitch: -15, nextYaw: -180 },
+    ],
+    infoMarkers: [
+      {
+        id: "ta-ho-info",
+        title: "Tả Hồ",
+        eyebrow: "Hồ nước phong thủy",
+        yaw: -130,
+        pitch: -8,
+        rotation: 0,
+        content: [
+          "Nằm ngay trước sân Đền Định Công Thượng là một chiếc hồ sâu cổ kính. Trong mạch đất \"Long chầu hổ phục\", chiếc hồ đóng vai trò là điểm \"tụ thủy\" phong thủy vô cùng quan trọng, giúp gom tụ tài lộc, sinh khí và sự thịnh vượng cho làng nghề kim hoàn suốt hàng trăm năm qua, đồng thời điều hòa không khí mang lại sự thoáng đãng cho toàn di tích. ",
+        ],
+      },
+    ],
+  },
+  {
+    id: "scene-4",
+    order: "04",
+    title: "Hữu Hồ",
+    location: "Đình Làng Định Công Thượng",
+    image: panoramaPath("4 Hữu Hồ.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 70, y: 65 },
+    hotspots: [
+      { targetId: "scene-2", label: "Tiền Đình", yaw: 72, pitch: -18, rotation: -12 },
+      { targetId: "scene-5", label: "Vườn cảnh phía Đông", yaw: 222, pitch: -15, rotation: -2 },
+    ],
+    infoMarkers: [
+      {
+        id: "huu-ho-info",
+        title: "Hữu Hồ",
+        eyebrow: "Hồ nước phong thủy",
+        yaw: 160,
+        pitch: 5,
+        rotation: 0,
+        iconType: "landmark",
+        content: [
+          "Nằm ngay trước sân Đền Định Công Thượng là một chiếc hồ sâu cổ kính. Trong mạch đất \"Long chầu hổ phục\", chiếc hồ đóng vai trò là điểm \"tụ thủy\" phong thủy vô cùng quan trọng, giúp gom tụ tài lộc, sinh khí và sự thịnh vượng cho làng nghề kim hoàn suốt hàng trăm năm qua, đồng thời điều hòa không khí mang lại sự thoáng đãng cho toàn di tích.",
+        ],
+      },
+    ],
+  },
   {
     id: "scene-5",
     order: "05",
@@ -253,7 +353,7 @@ const scenes: TourScene[] = [
       { targetId: "scene-2", label: "Tiền Đình", yaw: -78, pitch: -18, rotation: 0 },
       { targetId: "scene-7", label: "Tả đình làng", yaw: 82, pitch: -15, rotation: 0 },
       { targetId: "scene-10", label: "Sân hậu", yaw: 121, pitch: -15 },
-      { targetId: "scene-11", label: "Lối dẫn sang Đền thờ Tổ", yaw: -190, pitch: -15 , rotation: 22 },
+      { targetId: "scene-11", label: "Lối dẫn sang Đền thờ Tổ", yaw: -190, pitch: -15, rotation: 22 },
     ],
   },
   {
@@ -323,33 +423,88 @@ const scenes: TourScene[] = [
   ],
 },
   {
-  id: "scene-9",
-  order: "09",
-  title: "Chính điện Đình làng",
-  location: "Đình Làng Định Công Thượng",
-  image: panoramaPath("9 Chính điện Đình làng.jpg"),
-  initialYaw: 0,
-  mapPosition: { x: 38, y: 28 },
-  hotspots: [{ targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: 180, pitch: -30, rotation: -30 }],
-  infoMarkers: [
-    {
-      id: "chinh-dien-dinh-info",
-      title: "Chính Điện Đình Làng",
-      eyebrow: "Nhà Thờ Tổ Kim Hoàn",
-      yaw: -85,
-      pitch: -20,
-      rotation: 0,
-      iconType: "landmark",
-      content: [
-       "Nhà thờ Tổ nghề nằm trong quần thể di tích là hạng mục lịch sử mang đặc trưng độc nhất vu nhị, nơi thờ phụng ba anh em là Trần Đình Điền, Trần Đình Điện và Thiên Thanh tổ Trần Đình Hòa sống vào thời Lý Nam Đế (thế kỷ VI), những người đã có công khai sáng, truyền dạy kỹ nghệ chế tác các loại nữ trang nhỏ nhắn, tinh xảo như hoa tai, xuyến, hột vòng cho dân cư bản địa, đặt nền móng đầu tiên cho làng nghề phát đạt. Đền cấu trúc theo kiểu chuôi vồ, Đại Đền 5 gian hậu cung 3 gian. Mái làm kiểu hai tầng mái ở 3 gian giữa ĐẠI ĐỀN, nên tạo thành 4 bức tường hồi, với kiểu dáng giống nhau. Tại cung cấm, sự lộng lẫy được thể hiện qua hệ thống cửa võng sơn son thếp vàng, các món đồ thờ tự cổ và 3 bộ bài vị thờ Tam vị Tổ nghề đặt dưới bức hoành phi \"Vạn Đại Ân Sư - Muôn đời nhờ thầy\", trở thành biểu tượng kiêu hãnh của đạo lý \"Uống nước nhớ nguồn\" nhằm tôn vinh bàn tay tài hoa của các bậc tiền nhân. ",
-      ],
-    },
-  ],
-},
-    {
-      id: "scene-10",
-      order: "10",
-      title: "Sân hậu",
+    id: "scene-7",
+    order: "07",
+    title: "Tả đình làng",
+    location: "Đình Làng Định Công Thượng",
+    image: panoramaPath("7 Tả đình làng.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 44, y: 49 },
+    hotspots: [
+      { targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: 159, pitch: -15, rotation: 0 },
+      { targetId: "scene-6", label: "Trung Đình", yaw: 49, pitch: -17, rotation: 0 },
+    ],
+    infoMarkers: [
+      {
+        id: "ta-dinh-info",
+        title: "Ban Thờ Thần Nông",
+        eyebrow: "Tả Đình Làng",
+        yaw: -80,
+        pitch: -18,
+        rotation: 0,
+        content: [
+          "Ban thờ Thần Nông được bố trí trang trọng ở không gian lộ thiên ngoài sân đình, phản ánh sâu sắc cội nguồn lịch sử nông nghiệp trù phú lâu đời của làng cổ Định Công trước khi phát triển nghề thủ công. Đây là nơi thờ phụng vị thần cai quản nông nghiệp, gắn liền với ước vọng cầu xin Thần Nông Đại Đế ban cho mưa thuận gió hòa, thiên thời địa lợi, mùa màng luôn tốt tươi, vạn vật hanh thông và đời sống nhân dân được no ấm.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "scene-8",
+    order: "08",
+    title: "Tiền sảnh Đình làng",
+    location: "Đình Làng Định Công Thượng",
+    image: panoramaPath("8 Tiền sảnh Đình làng.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 38, y: 43 },
+    hotspots: [
+      { targetId: "scene-9", label: "Chính điện Đình làng", yaw: -87, pitch: -14 },
+      { targetId: "scene-3", label: "Tả Hồ", yaw: -166, pitch: -17, rotation: -20 },
+      { targetId: "scene-7", label: "Tả đình làng", yaw: -37, pitch: -15, rotation: 10 },
+    ],
+    infoMarkers: [
+      {
+        id: "tien-sanh-info",
+        title: "Tòa Đại Bái",
+        eyebrow: "Tiền Sảnh Đình Làng",
+        yaw: -80,
+        pitch: 2,
+        rotation: 0,
+
+        content: [
+          "Toà Đại Bái là không gian kiến trúc trung tâm nằm ngay sau sân đình. Ngôi đình cổ này mang đậm dáng dấp của nghệ thuật kiến trúc thời Lê với kết cấu xây thấp, phần mái trầm mặc rất dài so với chiều cao và được lợp ngói ta truyền thống. Toà Đại Bái nổi bật với kiểu tường hồi bít đốc, bờ nóc hai đầu đắp đầu kìm vững chãi, bờ dải xây vuông cạnh nhô cao. Bên trong là bộ khung gồm 6 bộ vì kèo bằng gỗ lim tròn vững chãi, liên kết theo kiểu chồng rường bẩy hiên và trụ trốn kẻ suốt.",
+          "Nơi đây không chỉ là không gian hành lễ, thực hiện các nghi thức tế ca trang trọng trong các kỳ lễ hội, mà còn là một kho tàng lịch sử thu nhỏ lưu giữ các bức hoành phi, câu đối sơn son thếp vàng, bộ bát bửu, chấp kích chạm khắc tinh vi, thể hiện đỉnh cao của nghệ thuật điêu khắc gỗ cổ truyền và tấm lòng tri ân sâu sắc của các thế hệ hậu sinh đối với công lao của bậc tiền nhân.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "scene-9",
+    order: "09",
+    title: "Chính điện Đình làng",
+    location: "Đình Làng Định Công Thượng",
+    image: panoramaPath("9 Chính điện Đình làng.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 38, y: 28 },
+    hotspots: [{ targetId: "scene-8", label: "Tiền sảnh Đình làng", yaw: 180, pitch: -30, rotation: -30 }],
+    infoMarkers: [
+      {
+        id: "chinh-dien-dinh-info",
+        title: "Chính Điện Đình Làng",
+        eyebrow: "Nhà Thờ Tổ Kim Hoàn",
+        yaw: -85,
+        pitch: -20,
+        rotation: 0,
+        iconType: "landmark",
+        content: [
+          "Nhà thờ Tổ nghề nằm trong quần thể di tích là hạng mục lịch sử mang đặc trưng độc nhất vu nhị, nơi thờ phụng ba anh em là Trần Đình Điền, Trần Đình Điện và Thiên Thanh tổ Trần Đình Hòa sống vào thời Lý Nam Đế (thế kỷ VI), những người đã có công khai sáng, truyền dạy kỹ nghệ chế tác các loại nữ trang nhỏ nhắn, tinh xảo như hoa tai, xuyến, hột vòng cho dân cư bản địa, đặt nền móng đầu tiên cho làng nghề phát đạt. Đền cấu trúc theo kiểu chuôi vồ, Đại Đền 5 gian hậu cung 3 gian. Mái làm kiểu hai tầng mái ở 3 gian giữa ĐẠI ĐỀN, nên tạo thành 4 bức tường hồi, với kiểu dáng giống nhau. Tại cung cấm, sự lộng lẫy được thể hiện qua hệ thống cửa võng sơn son thếp vàng, các món đồ thờ tự cổ và 3 bộ bài vị thờ Tam vị Tổ nghề đặt dưới bức hoành phi \"Vạn Đại Ân Sư - Muôn đời nhờ thầy\", trở thành biểu tượng kiêu hãnh của đạo lý \"Uống nước nhớ nguồn\" nhằm tôn vinh bàn tay tài hoa của các bậc tiền nhân. ",
+        ],
+      },
+    ],
+  },
+  {
+    id: "scene-10",
+    order: "10",
+    title: "Sân hậu",
     location: "Đình Làng Định Công Thượng",
     image: panoramaPath("10 Sân hậu.jpg"),
     initialYaw: 0,
@@ -383,32 +538,32 @@ const scenes: TourScene[] = [
     ],
   },
   {
-  id: "scene-13",
-  order: "13",
-  title: "Nhà Thờ Kim Hoàn",
-  location: "Chính điện Đình làng",
-  image: panoramaPath("13 Chính điện Đền thờ Tổ nghề.jpg"),
-  initialYaw: 0,
-  mapPosition: { x: 80, y: 10 },
-  hotspots: [
-    { targetId: "scene-12", label: "Quay lại", yaw: -68, pitch: -14 },
-  ],
-  infoMarkers: [
-    {
-      id: "chinh-dien-den-to-info",
-      title: "Chính Điện Đền Thờ Tổ",
-      eyebrow: "Đền thờ Tổ nghề Kim hoàn",
-      yaw: 145,
-      pitch: 15,
-      rotation: 0,
-      
-      content: [
-        "Chính Điện Đền Thờ Tổ là nơi thờ phụng ba vị Tổ nghề kim hoàn: Trần Hòa, Trần Điện, Trần Điền — những người đã khai sinh nghề vàng bạc truyền thống Việt Nam vào thế kỷ XVII.",
-        "Hàng năm vào ngày 12 tháng 2 âm lịch, các nghệ nhân kim hoàn khắp nơi tề tựu về đây dâng hương tưởng nhớ công đức tổ nghề, gìn giữ mạch nguồn văn hóa làng nghề kim hoàn Định Công Thượng.",
-      ],
-    },
-  ],
-},
+    id: "scene-13",
+    order: "13",
+    title: "Nhà Thờ Kim Hoàn",
+    location: "Chính điện Đình làng",
+    image: panoramaPath("13 Chính điện Đền thờ Tổ nghề.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 80, y: 10 },
+    hotspots: [
+      { targetId: "scene-12", label: "Quay lại", yaw: -68, pitch: -14 },
+    ],
+    infoMarkers: [
+      {
+        id: "chinh-dien-den-to-info",
+        title: "Chính Điện Đền Thờ Tổ",
+        eyebrow: "Đền thờ Tổ nghề Kim hoàn",
+        yaw: 145,
+        pitch: 15,
+        rotation: 0,
+
+        content: [
+          "Chính Điện Đền Thờ Tổ là nơi thờ phụng ba vị Tổ nghề kim hoàn: Trần Hòa, Trần Điện, Trần Điền — những người đã khai sinh nghề vàng bạc truyền thống Việt Nam vào thế kỷ XVII.",
+          "Hàng năm vào ngày 12 tháng 2 âm lịch, các nghệ nhân kim hoàn khắp nơi tề tựu về đây dâng hương tưởng nhớ công đức tổ nghề, gìn giữ mạch nguồn văn hóa làng nghề kim hoàn Định Công Thượng.",
+        ],
+      },
+    ],
+  },
 ];
 
 const sceneNarration = new Map<SceneId, string[]>([
@@ -433,15 +588,18 @@ const continuousNarrationGroups: SceneId[][] = [
   ["scene-11", "scene-12", "scene-13"],
 ];
 
-const isContinuousNarrationTransition = (from: SceneId | null, to: SceneId) => {
+const isContinuousNarrationTransition = (
+  groups: SceneId[][],
+  from: SceneId | null,
+  to: SceneId,
+) => {
   if (!from) {
     return false;
   }
 
-  return continuousNarrationGroups.some((group) => group.includes(from) && group.includes(to));
+  return groups.some((group) => group.includes(from) && group.includes(to));
 };
 
-const sceneById = new Map(scenes.map((scene) => [scene.id, scene]));
 const mapRoutes: MapRoute[] = [
   { from: "scene-1", to: "scene-2" },
   { from: "scene-2", to: "scene-3" },
@@ -458,17 +616,391 @@ const mapRoutes: MapRoute[] = [
   { from: "scene-11", to: "scene-12" },
   { from: "scene-12", to: "scene-13" },
 ];
-const locationGroups = Array.from(
-  scenes
-    .reduce((groups, scene) => {
-      if (!groups.has(scene.location)) {
-        groups.set(scene.location, scene);
-      }
 
-      return groups;
-    }, new Map<string, TourScene>())
-    .values(),
+const chuaScenes: TourScene[] = [
+  {
+    id: "scene-1",
+    order: "01",
+    title: "Sơn Môn",
+    location: "Sơn Môn",
+    image: chuaPanoramaPath("1 Trước Cổng.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 50, y: 90 },
+    hotspots: [
+      { targetId: "scene-2", label: "Tiền Đường", yaw: 115, pitch: -20, rotation: 0 },
+    ],
+    infoMarkers: [
+      {
+      id: "cong-tam-quan-chua-info",
+      title: "Sơn Môn - Cổng Tam Quan",
+      eyebrow: "Lối vào Chùa Liên Hoa",
+      yaw: 177,
+      pitch: 8,
+      rotation: 0,
+      iconType: "landmark",
+      content: [
+      "Đài Quan Âm là khuôn viên lộ thiên trang nghiêm, nơi tôn trí tôn tượng Bồ Tát Quán Thế Âm trong dáng đứng từ bi, tay cầm bình cam lộ và nhành dương liễu để rưới tình thương, cứu khổ cứu nạn cho chúng sinh. Đây là không gian thanh bình, nơi du khách thường dừng chân tĩnh tâm và cầu nguyện bình an cho gia đình.",
+
+        "Cổng Tam Quan là lối vào chính của Chùa Liên Hoa, biểu tượng cho ba cách nhìn của Phật giáo: Không quán, Giả quán và Trung quán. Cổng được xây dựng theo lối kiến trúc cổ, mái đao cong vút lợp ngói mũi hài, phía trên đắp nổi tên chùa. Đây là ranh giới thiêng liêng, chuyển tiếp từ không gian đời thường ồn ào vào chốn thiền môn thanh tịnh.",
+
+        "The Tam Quan Gate is the main entrance of Lien Hoa Pagoda, symbolizing the three perspectives of Buddhism: Emptiness (Kong), Illusion (Jia), and the Middle Way (Zhong). Built in a traditional architectural style with curved, boot-shaped tiled roofs, the gate features the pagoda's name embossed at the top. It serves as a sacred boundary, transitioning visitors from the bustling secular world into the serene realm of Zen."
+      ],
+      },
+      ],
+
+  },
+ {
+id: "scene-2",
+order: "02",
+title: "Tiền Đường",
+location: "Tiền Đường",
+image: chuaPanoramaPath("2 Sảnh Chính.jpg"),
+initialYaw: 0,
+mapPosition: { x: 50, y: 72 },
+hotspots: [
+{ targetId: "scene-1", label: "Sơn Môn", yaw: -45, pitch: -16, rotation: 0 },
+{ targetId: "scene-3", label: "Điện Tam Bảo", yaw: 120, pitch: -16, rotation: 0 },
+{ targetId: "scene-7", label: "Đài Quan Âm", yaw: 172, pitch: -15, rotation: 20 },
+{ targetId: "scene-4", label: "Sân Tả Vu", yaw: 64, pitch: -15, rotation: -20 },
+],
+
+infoMarkers: [
+{
+id: "tien-duong-info",
+title: "Tiền Đường",
+eyebrow: "Nhà Bái Đường",
+yaw: 125,
+pitch: 8,
+rotation: 0,
+iconType: "landmark",
+content: [
+"Nhà Bái Đường (hay Tiền Đường) là không gian rộng lớn nằm ngay sau cổng Tam Quan, nơi chuẩn bị các nghi thức hành lễ và tiếp đón Phật tử, du khách thập phương. Không gian nơi đây mang không khí trang nghiêm với hệ thống cột gỗ vững chãi và các bức hoành phi, câu đối ca ngợi công đức của Phật pháp.",
+    "The Front Hall (also known as Tien Duong) is a spacious area located right behind the Tam Quan Gate. It is where ceremonial rituals are prepared and Buddhists and tourists are welcomed. This space possesses a solemn atmosphere with sturdy wooden pillars, horizontal lacquered boards, and parallel sentences praising the merits of Buddhist teachings."
+  ],
+},
+],
+},
+
+ {
+id: "scene-3",
+order: "03",
+title: "Điện Tam Bảo",
+location: "Điện Tam Bảo",
+image: chuaPanoramaPath("3 Ban Tam Bảo.jpg"),
+initialYaw: 0,
+mapPosition: { x: 50, y: 54 },
+hotspots: [
+{ targetId: "scene-2", label: "Tiền Đường", yaw: 320, pitch: -22, rotation: 0, nextYaw: 0 },
+{ targetId: "scene-4", label: "Sân Tả Vu", yaw: 68, pitch: -39, rotation: -24 },
+{ targetId: "scene-7", label: "Đài Quan Âm", yaw: 192, pitch: -39, rotation: 24 },
+{ targetId: "scene-8", label: "Chính Điện Tam Bảo", yaw: 110, pitch: -39, rotation: 0 },
+],
+
+infoMarkers: [
+{
+id: "dien-tam-bao-info",
+title: "Điện Tam Bảo",
+eyebrow: "Không gian thờ tự chính",
+yaw: 143,
+pitch: -20,
+rotation: 0,
+iconType: "landmark",
+content: [
+"Thượng Điện Tam Bảo nằm tại chính giữa nhà Bái Đường, là lối dẫn thẳng vào Hậu Cung và khu vực thờ tự trung tâm của chùa. Đây là trục tâm linh cốt lõi của ngôi chùa, dẫn dắt tâm thức của người hành lễ đi sâu vào thế giới nội tâm thanh tịnh, nơi ngự tọa của các vị Phật và Bồ Tát tối cao.",
+    "Upper Hall Tam Bao: Located at the center of the Front Hall is the path leading directly to the Back Sanctuary and the Upper Hall (Tam Bao). This is the core spiritual axis of the pagoda, guiding the minds of practitioners into a serene inner world where the supreme Buddhas and Bodhisattvas reside.",
+    "Ban thờ Đức Ông (Trưởng giả Cấp Cô Độc) được đặt trang trọng ở góc bên trái nhà Bái Đường. Ngài là bậc đại phú trưởng giả thời Đức Phật tại thế, người đã có công mua lại ngự uyển của thái tử Kỳ Đà để xây dựng tịnh xá dâng cúng cho giáo đoàn. Trong các ngôi chùa Bắc Bộ, Ngài được thờ phụng như vị thần bảo hộ, giám sát việc quản lý đất đai và tài sản của chùa.",
+    "The Altar of Duc Ong (Anathapindika / Sudatta) is solemnly located in the left corner of the Front Hall. He was a wealthy merchant during the Buddha's lifetime who generously purchased Prince Jeta's grove to build a monastery for the Sangha. In Northern Vietnamese pagodas, he is revered as a guardian deity protecting the pagoda's land and properties.",
+    "Ban thờ Đức Thánh Hiền (Tôn giả A Nan) tọa lạc tại góc bên phải nhà Bái Đường. Ngài là một trong mười đại đệ tử của Đức Phật, nổi tiếng với trí nhớ siêu phàm và lòng từ bi quảng đại. Việc thờ phụng Đức Thánh Hiền nhằm tôn vinh tinh thần hiếu học, gìn giữ và truyền bá chánh pháp Phật giáo cho thế hệ mai sau.",
+    "The Altar of Duc Thanh Hien (Venerable Ananda) is situated in the right corner of the Front Hall. He was one of the ten chief disciples of the Buddha, renowned for his extraordinary memory and boundless compassion. Worshiping Duc Thanh Hien honors the spirit of diligent learning, preserving, and propagating Buddhist teachings to future generations."
+  ],
+},
+],
+},
+
+  {
+    id: "scene-4",
+    order: "04",
+    title: "Sân Tả Vu",
+    location: "Sân Tả Vu",
+    image: chuaPanoramaPath("4a Bên Trái.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 29, y: 62 },
+    hotspots: [
+      { targetId: "scene-2", label: "Tiền Đường", yaw: 242, pitch: -26, rotation: 0, nextYaw: 0 },
+      { targetId: "scene-3", label: "Điện Tam Bảo", yaw: 168, pitch: -30, rotation: 0 },
+      { targetId: "scene-5", label: "Hành Lang Tả", yaw: 99, pitch: -25, rotation: 0 },
+    ],
+  },
+  {
+    id: "scene-5",
+    order: "04B",
+    title: "Hành Lang Tả",
+    location: "Hành Lang Tả",
+    image: chuaPanoramaPath("4b Chi tiết bên trái.jpg"),
+    initialYaw: 0,
+    mapPosition: { x: 20, y: 49 },
+    hotspots: [
+      { targetId: "scene-4", label: "Sân Tả Vu", yaw: -39, pitch: -25, rotation: 0 },
+      { targetId: "scene-8", label: "Chính Điện Tam Bảo", yaw: -180, pitch: -25, rotation: -8 },
+    ],
+  },
+ {
+  id: "scene-8",
+  order: "05",
+  title: "Chính Điện Tam Bảo",
+  location: "Chính Điện Tam Bảo",
+  image: chuaPanoramaPath("5 Sảnh trung tâm.jpg"),
+  initialYaw: 0,
+  mapPosition: { x: 42, y: 42 },
+  hotspots: [
+    { targetId: "scene-3", label: "Điện Tam Bảo", yaw: -66, pitch: -25, rotation: 0 },
+    { targetId: "scene-6", label: "Vườn Tháp Tổ", yaw: 205, pitch: -15, rotation: 0 },
+    { targetId: "scene-5", label: "Hành Lang Tả", yaw: 5, pitch: -15, rotation: -28 },
+  ],
+
+  infoMarkers: [
+    {
+      id: "sanh-trung-tam-info",
+      title: "Tam Bảo",
+      eyebrow: "Sảnh Trung Tâm",
+      yaw: 130,
+      pitch: 20,
+      rotation: 0,
+      iconType: "landmark",
+      content: [
+        "Tam Bảo nghĩa là ba ngôi báu trong Phật giáo: Phật (Đấng giác ngộ), Pháp (Lời dạy của Phật) và Tăng (Người tu hành). Điện Tam Bảo là tòa chính điện của chùa, nơi đặt các pho tượng Phật, Bồ Tát để tăng ni, phật tử chiêm bái. Tại Chùa Liên Hoa, hệ thống tượng được bài trí nhiều tầng lớp theo giáo lý Đại thừa (quá khứ, hiện tại, vị lai), tạo nên không gian tâm linh tối thượng và giải thoát.",
+        
+        "Tam Bao means the Three Jewels of Buddhism: the Buddha (the Enlightened One), the Dharma (the Buddha's teachings), and the Sangha (the monastic community). The Tam Bao Hall is the main sanctuary of the pagoda, where statues of Buddhas and Bodhisattvas are enshrined for monastics and Buddhists to worship. At Lien Hoa Pagoda, the multi-tiered statues follow Mahayana doctrines (past, present, and future), creating a supreme spiritual space of liberation."
+      ],
+    },
+    {
+      id: "nha-to-info",
+      title: "Nhà Tổ",
+      eyebrow: "Nơi thờ các bậc Sư Tổ",
+      yaw: -325,
+      pitch: 15,
+      rotation: 0,
+      iconType: "landmark",
+      content: [
+        "Nhà Tổ là nơi thờ phụng các vị Sư tổ, các bậc cao tăng thạc đức đã có công khai sơn phá thạch, trụ trì và hoằng dương Phật pháp tại Chùa Liên Hoa qua các thời kỳ lịch sử. Điện thờ thể hiện truyền thống đạo lý \"Uống nước nhớ nguồn\", tri ân công đức lao lao của những người đi trước trong việc gìn giữ ngôi già lam.",
+        
+        "The Patriarch Hall is dedicated to the ancestral monks and eminent masters who contributed to the founding, abbacy, and propagation of Buddhism at Lien Hoa Pagoda throughout history. This altar embodies the traditional Vietnamese moral values of gratitude, honoring the immense merits of predecessors in preserving the sacred pagoda."
+      ],
+    },
+    {
+      id: "bia-cong-duc-info",
+      title: "Bia Công Đức",
+      eyebrow: "Tấm bia ghi nhận công đức",
+      yaw: 328,          
+      pitch: 0,
+      rotation: 0,
+      iconType: "landmark",
+      content: [
+        "Bia Công Đức là nơi ghi nhận và lưu danh tấm lòng thành kính, sự đóng góp to lớn của các bậc thiện nam tín nữ, Phật tử gần xa trong các đợt trùng tu, xây dựng và tôn tạo chùa. Tấm bia không chỉ là lời tri ân sâu sắc mà còn là chứng tích lịch sử lưu dấu sự đồng lòng của cộng đồng trong việc gìn giữ di sản văn hóa tâm linh.",
+        
+        "The Merit Stele records and honors the devotion and generous contributions of Buddhist devotees and donors from near and far during the restoration and embellishment of the pagoda. This stele is not only a profound token of gratitude but also a historical testament to the community's solidarity in preserving this cultural and spiritual heritage."
+      ],
+    }
+  ],
+},
+ {
+  id: "scene-6",
+  order: "06",
+  title: "Vườn Tháp Tổ",
+  location: "Vườn Tháp Tổ",
+  image: chuaPanoramaPath("6 Tháp.jpg"),
+  initialYaw: 0,
+  mapPosition: { x: 70, y: 34 },
+  hotspots: [
+    { targetId: "scene-7", label: "Đài Quan Âm", yaw: -80, pitch: -12, rotation: -28 },
+    { targetId: "scene-8", label: "Chính Điện Tam Bảo", yaw: -59, pitch: -12, rotation: 38 },
+  ],
+
+  infoMarkers: [
+    {
+      id: "ho-sen-info",
+      title: "Hồ Sen / Hồ Phóng Sinh",
+      eyebrow: "Không gian sinh thái thanh tịnh",
+      yaw: 297,          
+      pitch: -15,
+      rotation: 0,
+      iconType: "landmark",
+      content: [
+        "Hồ sen / Hồ phóng sinh tạo nên một điểm nhấn cảnh quan sinh thái thanh tịnh và mát mẻ cho Chùa Liên Hoa. Hoa sen - biểu tượng của sự thuần khiết, \"gần bùn mà chẳng hôi tanh mùi bùn\" - cùng với tập tục phóng sinh tại hồ nhắc nhở con người về lòng từ bi, trân trọng mạng sống của muôn loài và nuôi dưỡng tâm hồn lương thiện.",
+        
+        "The Lotus Pond / Release Pond creates a serene and refreshing ecological highlight for the landscape of Lien Hoa Pagoda. The lotus flower - a symbol of purity, rising above the mud untainted - along with the ritual of releasing captive animals, reminds people of compassion, respect for all living beings, and nurturing a kind heart."
+      ],
+    },
+    {
+      id: "vuon-thap-to-info",
+      title: "Vườn Tháp Tổ",
+      eyebrow: "Nơi an nghỉ các bậc Sư Tổ",
+      yaw: -249,        
+      pitch: -2,
+      rotation: 0,
+      iconType: "landmark",
+      content: [
+        "Vườn Tháp Tổ thường nằm phía sau hoặc bên cạnh chùa, nơi mỗi ngọn tháp chính là một ngôi mộ cổ kính. Khi các vị thiền sư, tăng ni tu hành tại chùa viên tịch và được hỏa táng, phần tro cốt sẽ được an táng trang trọng bên trong lòng tháp. Đây là công trình kiến trúc thiêng liêng, biểu tượng cho quả vị tu hành và sự trường tồn của tinh thần Phật giáo tại Chùa Liên Hoa.",
+        
+        "The Ancestral Stupa Garden is usually located behind or beside the pagoda, where each stupa serves as an ancient tomb. When the Zen masters, monks, or nuns practicing at the pagoda pass away and are cremated, their ashes are solemnly enshrined inside these stupas. This is a sacred architectural structure, symbolizing their spiritual achievements and the permanence of the Buddhist spirit at Lien Hoa Pagoda."
+      ],
+    }
+  ],
+},
+  {
+id: "scene-7",
+order: "07",
+title: "Đài Quan Âm",
+location: "Đài Quan Âm",
+image: chuaPanoramaPath("7 Tượng bồ tát.jpg"),
+initialYaw: 0,
+mapPosition: { x: 75, y: 58 },
+hotspots: [
+{ targetId: "scene-2", label: "Tiền Đường", yaw: -72, pitch: -15, rotation: -5, nextYaw: 0 },
+{ targetId: "scene-3", label: "Điện Tam Bảo", yaw: -60, pitch: -15, rotation: 29 },
+{ targetId: "scene-6", label: "Vườn Tháp Tổ", yaw: 8, pitch: -25, rotation: 22 },
+],
+
+infoMarkers: [
+{
+id: "dai-quan-am-info",
+title: "Đài Quan Âm",
+eyebrow: "Không gian tâm linh ngoài trời",
+yaw: 140,
+pitch: 5,
+rotation: 0,
+iconType: "landmark",
+content: [
+"Đài Quan Âm là khuôn viên lộ thiên trang nghiêm, nơi tôn trí tôn tượng Bồ Tát Quán Thế Âm trong dáng đứng từ bi, tay cầm bình cam lộ và nhành dương liễu để rưới tình thương, cứu khổ cứu nạn cho chúng sinh. Đây là không gian thanh bình, nơi du khách thường dừng chân tĩnh tâm và cầu nguyện bình an cho gia đình.",
+    "The Guanyin Shrine is a solemn open-air area featuring the statue of Avalokitesvara Bodhisattva (Guanyin) in a compassionate standing posture. Holding a vase of pure water and a willow branch, she sprinkles mercy to alleviate the sufferings of sentient beings. This peaceful space invites visitors to pause, meditate, and pray for peace and well-being."
+  ],
+},
+],
+},
+
+];
+
+const chuaSceneNarration = new Map<SceneId, string[]>([
+  ["scene-1", [chuaNarrationPath("Điểm 0- Lời chào mở đầu.mp3"), chuaNarrationPath("Điểm 1- Cổng tam quan .mp3")]],
+  ["scene-2", [chuaNarrationPath("Điểm 2- Nhà bái đường.mp3")]],
+  ["scene-3", [chuaNarrationPath("Điểm 4- Điện tam bảo.mp3")]],
+  ["scene-4", []],
+  ["scene-5", []],
+  ["scene-8", [chuaNarrationPath("Điểm 5- Nhà tổ.mp3"), chuaNarrationPath("Điểm 6- Bia Công Đức.mp3")]],
+  ["scene-6", [chuaNarrationPath("Điểm 8- Vườn tháp tổ.mp3"), chuaNarrationPath("Điểm 7- Hồ sen.mp3")]],
+  ["scene-7", [chuaNarrationPath("Điểm 3- Đài quan âm.mp3"), chuaNarrationPath("Điểm 9- Lời chào tạm biệt.mp3")]],
+]);
+
+const chuaContinuousNarrationGroups: SceneId[][] = [
+  ["scene-5", "scene-8"],
+  ["scene-6", "scene-7"],
+];
+
+const chuaMapRoutes: MapRoute[] = [
+  { from: "scene-1", to: "scene-2" },
+  { from: "scene-2", to: "scene-3" },
+  { from: "scene-2", to: "scene-4" },
+  { from: "scene-2", to: "scene-7" },
+  { from: "scene-3", to: "scene-4" },
+  { from: "scene-3", to: "scene-7" },
+  { from: "scene-4", to: "scene-5" },
+  { from: "scene-5", to: "scene-8" },
+  { from: "scene-8", to: "scene-6" },
+  { from: "scene-6", to: "scene-7" },
+];
+
+function createTourConfig(config: Omit<TourConfig, "sceneById" | "locationGroups">): TourConfig {
+  const sceneById = new Map(config.scenes.map((scene) => [scene.id, scene]));
+  const locationGroups = Array.from(
+    config.scenes
+      .reduce((groups, scene) => {
+        if (!groups.has(scene.location)) {
+          groups.set(scene.location, scene);
+        }
+
+        return groups;
+      }, new Map<string, TourScene>())
+      .values(),
+  );
+
+  return {
+    ...config,
+    sceneById,
+    locationGroups,
+  };
+}
+
+const dinhTourConfig = createTourConfig({
+  id: "dinh-lang-dinh-cong",
+  title: "Đình Làng Định Công Thượng",
+  subtitle: "Đền thờ Tổ nghề Kim hoàn",
+  welcomeTitle: "Số hóa di tích",
+  welcomeAccent: "lịch sử văn hóa",
+  welcomeSubtitle: "Đình Làng Định Công Thượng · Đền thờ Tổ nghề Kim hoàn",
+  welcomeBackgroundImage,
+  welcomeCards: [
+    {
+      image: dinhCardImage,
+      label: "Đình Làng Định Công Thượng",
+      rotate: "-rotate-6",
+      sceneId: "scene-8",
+    },
+    {
+      image: shrineCardImage,
+      label: "Đền thờ Tổ nghề Kim hoàn",
+      rotate: "rotate-5",
+      sceneId: "scene-13",
+    },
+  ],
+  backgroundAudio,
+  practicalInfo: dinhPracticalInfo,
+  scenes,
+  sceneNarration,
+  continuousNarrationGroups,
+  mapRoutes,
+});
+
+const chuaTourConfig = createTourConfig({
+  id: "chua-lien-hoa",
+  title: "Chùa Liên Hoa",
+  subtitle: "Tuyến VR360 di tích Phường Định Công",
+  welcomeTitle: "Chùa Liên Hoa",
+  welcomeAccent: "không gian VR360",
+  welcomeSubtitle: "Cổng Tam Quan · Tiền Đường · Điện Tam Bảo · Đài Quan Âm",
+  welcomeBackgroundImage: chuaPanoramaPath("2 Sảnh Chính.jpg"),
+  welcomeCards: [
+    {
+      image: chuaPanoramaPath("1 Trước Cổng.jpg"),
+      label: "Sơn Môn",
+      rotate: "-rotate-6",
+      sceneId: "scene-1",
+    },
+    {
+      image: chuaPanoramaPath("7 Tượng bồ tát.jpg"),
+      label: "Đài Quan Âm",
+      rotate: "rotate-5",
+      sceneId: "scene-7",
+    },
+  ],
+  backgroundAudio,
+  practicalInfo: chuaPracticalInfo,
+  scenes: chuaScenes,
+  sceneNarration: chuaSceneNarration,
+  continuousNarrationGroups: chuaContinuousNarrationGroups,
+  mapRoutes: chuaMapRoutes,
+});
+
+const toursById = {
+  "dinh-lang-dinh-cong": dinhTourConfig,
+  "chua-lien-hoa": chuaTourConfig,
+} satisfies Record<TourConfig["id"], TourConfig>;
+
+const defaultTourConfig = dinhTourConfig;
+
+const getTourConfig = (tourId?: TourConfig["id"]) => (
+  tourId ? toursById[tourId] : defaultTourConfig
 );
+
 const panoramaTextureCache = new Map<string, THREE.Texture>();
 const panoramaTexturePromises = new Map<string, Promise<THREE.Texture>>();
 const panoramaTextureProgress = new Map<string, number>();
@@ -542,7 +1074,7 @@ function loadPanoramaTexture(image: string, onProgress?: (progress: number) => v
   return texturePromise.finally(unsubscribe);
 }
 
-function preloadSceneAndHotspots(scene: TourScene) {
+function preloadSceneAndHotspots(scene: TourScene, sceneById: Map<SceneId, TourScene>) {
   loadPanoramaTexture(scene.image).catch(() => undefined);
 
   scene.hotspots.forEach((hotspot) => {
@@ -570,7 +1102,12 @@ function directionFromYawPitch(yaw: number, pitch: number) {
   );
 }
 
-export default function VirtualTour() {
+export default function VirtualTour({
+  tourId = "dinh-lang-dinh-cong",
+}: {
+  tourId?: TourConfig["id"];
+}) {
+  const tourConfig = getTourConfig(tourId);
   const [hasEntered, setHasEntered] = useState(false);
   const [isEntering, setIsEntering] = useState(false);
   const [initialSceneId, setInitialSceneId] = useState<SceneId>("scene-1");
@@ -730,11 +1267,12 @@ export default function VirtualTour() {
 
   return (
     <>
-      <audio ref={audioRef} src={backgroundAudio} preload="auto" loop playsInline />
+      <audio ref={audioRef} src={tourConfig.backgroundAudio} preload="auto" loop playsInline />
       {!hasEntered ? (
-        <WelcomeScreen isEntering={isEntering} onEnter={handleEnter} />
+        <WelcomeScreen tourConfig={tourConfig} isEntering={isEntering} onEnter={handleEnter} />
       ) : (
         <TourExperience
+          tourConfig={tourConfig}
           initialSceneId={initialSceneId}
           soundEnabled={soundEnabled}
           onToggleSound={toggleSound}
@@ -789,9 +1327,11 @@ function useDeviceOrientation() {
 }
 
 function WelcomeScreen({
+  tourConfig,
   isEntering,
   onEnter,
 }: {
+  tourConfig: TourConfig;
   isEntering: boolean;
   onEnter: (sceneId?: SceneId) => void;
 }) {
@@ -831,9 +1371,9 @@ function WelcomeScreen({
     scene.add(sphere);
 
     let isDisposed = false;
-    const firstScene = sceneById.get("scene-1")!;
-    
-    preloadSceneAndHotspots(firstScene);
+    const firstScene = tourConfig.sceneById.get("scene-1") ?? tourConfig.scenes[0];
+
+    preloadSceneAndHotspots(firstScene, tourConfig.sceneById);
 
     loadPanoramaTexture(firstScene.image)
       .then(() => {
@@ -847,7 +1387,7 @@ function WelcomeScreen({
         }
       });
 
-    loadPanoramaTexture(welcomeBackgroundImage)
+    loadPanoramaTexture(tourConfig.welcomeBackgroundImage)
       .then((texture) => {
         if (isDisposed) {
           return;
@@ -889,19 +1429,17 @@ function WelcomeScreen({
       material.dispose();
       renderer.dispose();
     };
-  }, []);
+  }, [tourConfig]);
 
   return (
     <main
-      className={`fixed inset-0 min-h-[100dvh] overflow-hidden bg-[var(--background)] text-[var(--foreground)] transition-[opacity,transform,filter] duration-[720ms] ease-[cubic-bezier(.2,.8,.2,1)] ${
-        isEntering ? "pointer-events-none scale-[1.02] opacity-0 blur-[2px]" : "opacity-100"
-      }`}
+      className={`tour-welcome fixed inset-0 min-h-[100dvh] overflow-hidden bg-[var(--background)] text-[var(--foreground)] transition-[opacity,transform,filter,scale] duration-500 ease-[cubic-bezier(.2,.8,.2,1)] ${isEntering ? "pointer-events-none scale-[1.02] opacity-0 blur-[2px]" : "opacity-100"
+        }`}
     >
       <canvas
         ref={canvasRef}
-        className={`absolute inset-0 h-full w-full sepia-[0.24] contrast-[1.24] saturate-[0.92] brightness-[0.68] transition-opacity duration-500 ${
-          isPanoramaReady ? "opacity-100" : "opacity-0"
-        }`}
+        className={`absolute inset-0 h-full w-full sepia-[0.24] contrast-[1.24] saturate-[0.92] brightness-[0.68] transition-opacity duration-500 ${isPanoramaReady ? "opacity-100" : "opacity-0"
+          }`}
       />
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(16,25,19,0.42),rgba(36,28,19,0.08)_48%,rgba(12,18,14,0.48))]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,232,180,0.08)_0%,rgba(65,48,31,0.08)_45%,rgba(5,8,6,0.38)_100%)]" />
@@ -909,9 +1447,8 @@ function WelcomeScreen({
       <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(0deg,rgba(255,252,245,0.12)_1px,transparent_1px)] [background-size:100%_4px]" />
 
       <div
-        className={`absolute inset-0 z-20 grid place-items-center bg-[var(--background)] text-[var(--tour-ink)] transition-opacity duration-500 ${
-          canEnterTour ? "pointer-events-none opacity-0" : "opacity-100"
-        }`}
+        className={`absolute inset-0 z-20 grid place-items-center bg-[var(--background)] text-[var(--tour-ink)] transition-opacity duration-500 ${canEnterTour ? "pointer-events-none opacity-0" : "opacity-100"
+          }`}
       >
         <div className="rounded-full border border-[rgb(166_124_82_/_0.22)] bg-[rgb(255_252_245_/_0.72)] px-5 py-2 text-[0.82rem] font-black uppercase tracking-[0.18em] shadow-[0_18px_52px_rgb(74_63_53_/_0.16)]">
           Đang tải không gian 360°...
@@ -919,9 +1456,8 @@ function WelcomeScreen({
       </div>
 
       <section
-        className={`relative z-10 grid min-h-[100dvh] place-items-center px-4 py-8 transition-[opacity,transform] duration-500 ${
-          canEnterTour ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
-        }`}
+        className={`relative z-10 grid min-h-[100dvh] place-items-center px-4 py-8 transition-[opacity,transform] duration-500 ${canEnterTour ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+          }`}
       >
         <div className="flex w-full max-w-5xl flex-col items-center text-center">
           <div className="relative w-[min(88vw,780px)] px-4  pt-9 sm:px-9 sm:pb-7 sm:pt-9 lg:w-[min(90vw,840px)]">
@@ -929,17 +1465,17 @@ function WelcomeScreen({
               src={welcomeTitleBackground}
               alt=""
               fill
-              priority
+              loading="eager"
               sizes="1000px"
               className="pointer-events-none scale-x-[1.32] scale-y-[1.72] select-none object-contain sm:scale-x-[1.05] sm:scale-y-[1.35] lg:scale-x-[1.16] lg:scale-y-[1.26]"
               draggable={false}
             />
             <h1 className="font-display-vn relative text-balance text-[1.85rem] font-bold uppercase leading-[1.18] text-[var(--tour-ink)] drop-shadow-[0_2px_0_rgba(255,252,245,0.92),0_3px_8px_rgba(45,38,33,0.28)] sm:text-[3rem] sm:leading-[1.12] lg:text-[3.72rem]">
-              Số hóa di tích
-              <span className="mt-1.5 block text-[var(--primary)] sm:mt-1">lịch sử văn hóa</span>
+              {tourConfig.welcomeTitle}
+              <span className="mt-1.5 block text-[var(--primary)] sm:mt-1">{tourConfig.welcomeAccent}</span>
             </h1>
-            <p className="relative mt-3.5 text-[0.76rem] font-bold text-[rgb(58_50_44_/_0.88)] drop-shadow-[0_1px_0_rgba(255,252,245,0.76)] sm:mt-4 sm:text-[0.95rem]">
-              Đình Làng Định Công Thượng · Đền thờ Tổ nghề Kim hoàn
+            <p className="relative mx-auto mt-3.5 max-w-[58ch] text-balance text-[0.78rem] font-bold leading-5 text-[rgb(58_50_44_/_0.9)] drop-shadow-[0_1px_0_rgba(255,252,245,0.76)] sm:mt-4 sm:text-[0.95rem] sm:leading-6">
+              {tourConfig.welcomeSubtitle}
             </p>
           </div>
 
@@ -957,20 +1493,16 @@ function WelcomeScreen({
           </button>
 
           <div className="relative mt-6 grid w-full max-w-[480px] grid-cols-2 gap-4 px-4 sm:mt-7 sm:gap-6">
-            <WelcomeCard
-              image={dinhCardImage}
-              label="Đình Làng  Định Công Thượng"
-              rotate="-rotate-6"
-              disabled={isEntering || !canEnterTour}
-              onClick={() => onEnter("scene-8")}
-            />
-            <WelcomeCard
-              image={shrineCardImage}
-              label="Đền thờ Tổ nghề Kim hoàn"
-              rotate="rotate-5"
-              disabled={isEntering || !canEnterTour}
-              onClick={() => onEnter("scene-13")}
-            />
+            {tourConfig.welcomeCards.map((card) => (
+              <WelcomeCard
+                key={card.sceneId}
+                image={card.image}
+                label={card.label}
+                rotate={card.rotate}
+                disabled={isEntering || !canEnterTour}
+                onClick={() => onEnter(card.sceneId)}
+              />
+            ))}
           </div>
         </div>
       </section>
@@ -991,7 +1523,17 @@ function WelcomeScreen({
 
         .welcome-title-plaque {
           isolation: isolate;
+          border: 2px solid rgba(185, 139, 86, 0.62);
           border-radius: 56px 56px 48px 48px / 42px 42px 36px 36px;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(255, 252, 245, 0.94), transparent 24%),
+            linear-gradient(180deg, rgba(255, 252, 245, 0.96), rgba(246, 234, 210, 0.96));
+          box-shadow:
+            0 28px 74px rgba(8, 10, 7, 0.38),
+            0 0 0 5px rgba(255, 252, 245, 0.62),
+            0 0 0 7px rgba(166, 124, 82, 0.34),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9),
+            inset 0 -14px 28px rgba(166, 124, 82, 0.12);
         }
 
         .welcome-title-plaque::before,
@@ -1145,17 +1687,17 @@ function WelcomeCard({
       title={label}
       aria-label={label}
     >
-      <div className="absolute inset-0 rounded-[18px] bg-[conic-gradient(from_140deg,#f6ead4,#c8a27a,#315f50,#c8a27a,#f6ead4)] opacity-55 blur-[14px]" />
-      <div className="relative rounded-[18px] bg-[linear-gradient(150deg,rgba(255,252,245,0.9),rgba(255,252,245,0.55)_46%,rgba(255,252,245,0.2))] p-[2px] shadow-[0_26px_70px_rgb(74_63_53_/_0.26)]">
-        <div className="rounded-[16px] border border-[rgb(166_124_82_/_0.18)] bg-[linear-gradient(160deg,rgba(255,252,245,0.85),rgba(236,229,216,0.6))] p-2">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-[14px]">
+      <div className="absolute inset-0 rounded-[8px] bg-[conic-gradient(from_140deg,#f6ead4,#c8a27a,#315f50,#c8a27a,#f6ead4)] opacity-55 blur-[14px]" />
+      <div className="relative rounded-[8px] bg-[linear-gradient(150deg,rgba(255,252,245,0.9),rgba(255,252,245,0.55)_46%,rgba(255,252,245,0.2))] p-[2px] shadow-[0_26px_70px_rgb(74_63_53_/_0.26)]">
+        <div className="rounded-[8px] border border-[rgb(166_124_82_/_0.18)] bg-[linear-gradient(160deg,rgba(255,252,245,0.85),rgba(236,229,216,0.6))] p-2">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[7px]">
             <Image
               src={image}
               alt={label}
               fill
               sizes="260px"
               className="object-cover transition duration-500 group-hover:scale-[1.05]"
-              priority
+              loading="eager"
             />
             <span className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.3),transparent_40%,rgba(0,0,0,0.2))]" />
             <span className="absolute inset-0 ring-1 ring-white/40" />
@@ -1164,9 +1706,6 @@ function WelcomeCard({
             <p className="font-display-vn max-w-[10.6rem] truncate text-[0.8rem] font-bold text-[var(--foreground)] sm:max-w-[11.8rem] sm:text-[0.9rem]" title={label}>
               {label}
             </p>
-            <span className="text-[0.58rem] font-black uppercase tracking-[0.22em] text-[var(--tour-gold)]">
-              Di sản
-            </span>
           </div>
         </div>
       </div>
@@ -1175,11 +1714,13 @@ function WelcomeCard({
 }
 
 function TourExperience({
+  tourConfig,
   initialSceneId,
   soundEnabled,
   onToggleSound,
   onNarrationStateChange,
 }: {
+  tourConfig: TourConfig;
   initialSceneId: SceneId;
   soundEnabled: boolean;
   onToggleSound: () => void;
@@ -1210,7 +1751,7 @@ function TourExperience({
   const transitionMaterialRef = useRef<THREE.MeshBasicMaterial | null>(null);
   const warmedTextureUrlsRef = useRef<Set<string>>(new Set());
   const hotspotRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
-  const currentSceneRef = useRef<TourScene>(sceneById.get("scene-1")!);
+  const currentSceneRef = useRef<TourScene>(tourConfig.sceneById.get(initialSceneId) ?? tourConfig.scenes[0]);
   const lastOrientationRef = useRef<{ alpha: number; beta: number; gamma: number } | null>(null);
   const stopOrientationRef = useRef<(() => void) | null>(null);
   const vrModeRef = useRef(false);
@@ -1322,7 +1863,7 @@ function TourExperience({
       return;
     }
 
-    const narrationSources = sceneNarration.get(currentSceneId);
+    const narrationSources = tourConfig.sceneNarration.get(currentSceneId);
 
     if (!narrationSources || narrationSources.length === 0) {
       stopNarration();
@@ -1332,6 +1873,7 @@ function TourExperience({
 
     const audio = narrationRef.current;
     const shouldKeepPlaying = isContinuousNarrationTransition(
+      tourConfig.continuousNarrationGroups,
       lastNarrationSceneRef.current,
       currentSceneId,
     );
@@ -1348,11 +1890,11 @@ function TourExperience({
 
     void playNarrationSequence(narrationSources);
     lastNarrationSceneRef.current = currentSceneId;
-  }, [currentSceneId, playNarrationSequence, soundEnabled, stopNarration]);
+  }, [currentSceneId, playNarrationSequence, soundEnabled, stopNarration, tourConfig]);
 
   const activeScene = useMemo(
-    () => sceneById.get(currentSceneId) ?? sceneById.get("scene-1")!,
-    [currentSceneId],
+    () => tourConfig.sceneById.get(currentSceneId) ?? tourConfig.scenes[0],
+    [currentSceneId, tourConfig],
   );
 
   const closeInfoMarker = useCallback(() => {
@@ -1542,14 +2084,14 @@ function TourExperience({
 
       preloadImage(scene.image);
       scene.hotspots.forEach((hotspot) => {
-        const targetScene = sceneById.get(hotspot.targetId);
+        const targetScene = tourConfig.sceneById.get(hotspot.targetId);
 
         if (targetScene) {
           preloadImage(targetScene.image);
         }
       });
     },
-    [warmPanoramaTexture],
+    [tourConfig, warmPanoramaTexture],
   );
 
   useEffect(() => {
@@ -1730,13 +2272,13 @@ function TourExperience({
       if (!vrModeRef.current) {
         controls.update();
       }
-      
+
       // Update camera yaw for mini-map rotation
       const direction = new THREE.Vector3();
       camera.getWorldDirection(direction);
       const yaw = yawFromDirection(direction);
       setCameraYaw(yaw);
-      
+
       updateHotspots();
 
       renderer.render(threeScene, camera);
@@ -1956,10 +2498,10 @@ function TourExperience({
       const loadTexture = initialCachedTexture
         ? Promise.resolve(initialCachedTexture)
         : loadPanoramaTexture(scene.image, (progress) => {
-            if (transitionTokenRef.current === token) {
-              setLoadProgress(progress);
-            }
-          });
+          if (transitionTokenRef.current === token) {
+            setLoadProgress(progress);
+          }
+        });
 
       setIsLoading(!initialCachedTexture);
       setLoadProgress(initialCachedTexture ? 100 : 0);
@@ -2135,7 +2677,7 @@ function TourExperience({
       setActivePanel(null);
     }
 
-    const targetScene = sceneById.get(sceneId);
+    const targetScene = tourConfig.sceneById.get(sceneId);
     if (targetScene) {
       runSceneTransition(targetScene, arrivalYaw ?? targetScene.initialYaw);
     }
@@ -2152,9 +2694,8 @@ function TourExperience({
       </div>
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(45,38,33,0.1)_0%,rgba(45,38,33,0.02)_42%,rgba(45,38,33,0.68)_100%)]" />
       <div
-        className={`fixed left-3 top-3 z-20 hidden transition-[width,opacity,transform] duration-300 sm:left-4 sm:top-4 sm:block ${
-          isMiniMapExpanded ? "w-[min(52vw,220px)] sm:w-[240px]" : "w-[min(72vw,260px)] sm:w-auto"
-        }`}
+        className={`fixed left-3 top-3 z-20 hidden transition-[width,opacity,transform] duration-300 sm:left-4 sm:top-4 sm:block ${isMiniMapExpanded ? "w-[min(52vw,220px)] sm:w-[240px]" : "w-[min(72vw,260px)] sm:w-auto"
+          }`}
       >
         {isMiniMapExpanded ? (
           <div className="relative">
@@ -2179,6 +2720,7 @@ function TourExperience({
               </button>
             </div>
             <MiniMap
+              tourConfig={tourConfig}
               activeScene={activeScene}
               onSceneSelect={(sceneId) => goToScene(sceneId, true)}
               compact
@@ -2215,7 +2757,7 @@ function TourExperience({
             onClick={() => setIsMiniMapOverviewOpen(false)}
             aria-label="Đóng bản đồ phóng to"
           />
-          <section className="relative max-h-[88dvh] w-[min(92vw,760px)] overflow-y-auto rounded-[14px] border border-[rgb(232_207_170_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.13),rgb(255_252_245_/_0.045)_40%,transparent_72%),rgb(45_38_33_/_0.78)] p-3 text-white shadow-[0_38px_120px_rgb(0_0_0_/_0.48),inset_0_1px_0_rgb(255_255_255_/_0.16)] backdrop-blur-2xl [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin] sm:p-4">
+          <section className="relative max-h-[88dvh] w-[min(92vw,760px)] overflow-y-auto rounded-[8px] border border-[rgb(232_207_170_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.13),rgb(255_252_245_/_0.045)_40%,transparent_72%),rgb(45_38_33_/_0.78)] p-3 text-white shadow-[0_38px_120px_rgb(0_0_0_/_0.48),inset_0_1px_0_rgb(255_255_255_/_0.16)] backdrop-blur-2xl [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin] sm:p-4">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-[0.7rem] font-black uppercase tracking-[0.16em] text-[var(--tour-gold-light)]">
@@ -2236,6 +2778,7 @@ function TourExperience({
               </button>
             </div>
             <MiniMap
+              tourConfig={tourConfig}
               activeScene={activeScene}
               onSceneSelect={(sceneId) => {
                 goToScene(sceneId, true);
@@ -2243,6 +2786,7 @@ function TourExperience({
               }}
               cameraYaw={cameraYaw}
               mode="overview"
+              mapClassName="aspect-[16/10]"
               showLegend
               compact
             />
@@ -2268,9 +2812,8 @@ function TourExperience({
       ) : null}
 
       <div
-        className={`pointer-events-none absolute inset-0 z-10 transition-opacity duration-200 ${
-          isTransitioning ? "opacity-0" : "opacity-100"
-        }`}
+        className={`pointer-events-none absolute inset-0 z-10 transition-opacity duration-200 ${isTransitioning ? "opacity-0" : "opacity-100"
+          }`}
       >
         {activeScene.hotspots.map((hotspot) => (
           <button
@@ -2285,7 +2828,7 @@ function TourExperience({
               }
             }}
             type="button"
-            className="group absolute left-1/2 top-1/2 grid h-[3.2rem] w-[3.2rem] -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_10px_18px_rgba(0,0,0,0.46)] transition-[opacity,transform,filter] duration-200 hover:scale-105 hover:drop-shadow-[0_14px_24px_rgba(0,0,0,0.58)] active:scale-96 sm:h-16 sm:w-16"
+            className="group absolute left-1/2 top-1/2 grid h-[3.2rem] w-[3.2rem] -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_10px_18px_rgba(0,0,0,0.46)] transition-[opacity,transform,filter,scale] duration-500 hover:scale-105 hover:drop-shadow-[0_14px_24px_rgba(0,0,0,0.58)] active:scale-96 sm:h-16 sm:w-16"
             style={
               {
                 "--hotspot-angle": `${hotspot.rotation ?? 0}deg`,
@@ -2315,6 +2858,7 @@ function TourExperience({
           const isRead = readMarkers.has(markerKey);
           const isOpening = openingInfoMarkerId === marker.id;
           const isHovered = hoveredMarkerId === markerKey;
+          const isIntroMarker = marker.id === "gioi-thieu-cum-di-tich";
 
           return (
             <button
@@ -2327,7 +2871,8 @@ function TourExperience({
                 }
               }}
               type="button"
-              className="group absolute left-1/2 top-1/2 grid h-[7.35rem] w-[10rem] -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_16px_30px_rgba(0,0,0,0.4)] transition-[opacity,transform,filter] duration-300 ease-[cubic-bezier(.2,.9,.2,1)] hover:scale-[1.045] hover:drop-shadow-[0_20px_38px_rgba(0,0,0,0.48)] active:scale-[0.97] sm:h-[8.15rem] sm:w-[11rem]"
+              className={`group absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2 place-items-center opacity-0 drop-shadow-[0_16px_30px_rgba(0,0,0,0.4)] transition-[opacity,transform,filter,scale] duration-500 ease-[cubic-bezier(.2,.9,.2,1)] hover:scale-[1.045] hover:drop-shadow-[0_20px_38px_rgba(0,0,0,0.48)] active:scale-[0.97] ${isIntroMarker ? "h-[5.25rem] w-[6.25rem] sm:h-[5.75rem] sm:w-[6.75rem]" : "h-[7.35rem] w-[10rem] sm:h-[8.15rem] sm:w-[11rem]"
+                }`}
               data-opening={isOpening ? "true" : undefined}
               data-read={isRead ? "true" : undefined}
               style={
@@ -2362,73 +2907,72 @@ function TourExperience({
               aria-label={`Mở thông tin ${marker.title}`}
               title={marker.title}
             >
-             {/* TÌM ĐOẠN NÀY VÀ THAY TOÀN BỘ */}
-{marker.iconType === "envelope" ? (
-  <>
-    {!isRead && (
-      <>
-        <span className="tour-envelope-glow absolute inset-[-1.5rem] rounded-[42%]" />
-        <span className="tour-envelope-aura absolute bottom-5 left-1/2 h-7 w-[72%] -translate-x-1/2 rounded-full" />
-      </>
-    )}
-    <EnvelopeLottie
-      isOpening={isOpening}
-      isRead={isRead}
-      isHovered={isHovered}
-      rotation={marker.rotation ?? 0}
-    />
-  </>
-) : (
-  <div
-  className={`
+              {/* TÌM ĐOẠN NÀY VÀ THAY TOÀN BỘ */}
+              {marker.iconType === "envelope" ? (
+                <>
+                  {!isRead && (
+                    <>
+                      <span className="tour-envelope-glow absolute inset-[-1.5rem] rounded-[42%]" />
+                      <span className="tour-envelope-aura absolute bottom-5 left-1/2 h-7 w-[72%] -translate-x-1/2 rounded-full" />
+                    </>
+                  )}
+                  <EnvelopeLottie
+                    isOpening={isOpening}
+                    isRead={isRead}
+                    isHovered={isHovered}
+                    rotation={marker.rotation ?? 0}
+                  />
+                </>
+              ) : (
+                <div
+                  className={`
     relative grid place-items-center overflow-visible rounded-full border
     backdrop-blur-md
     transition-all duration-300
     ${marker.iconType === "info"
-      ? "h-16 w-16 border-[rgba(232,207,170,0.9)] bg-[radial-gradient(circle_at_50%_34%,rgba(255,246,206,0.34),rgba(184,45,34,0.86)_58%,rgba(82,28,22,0.94))] shadow-[0_0_0_4px_rgba(232,207,170,0.18),0_0_30px_rgba(232,207,170,0.48),0_12px_30px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,248,220,0.55)]"
-      : "h-14 w-14 border-[rgba(255,255,255,0.3)] bg-[rgba(255,255,255,0.08)] shadow-[0_0_16px_rgba(255,255,255,0.15),0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.4)]"}
+                      ? "h-12 w-12 border-[rgba(232,207,170,0.86)] bg-[radial-gradient(circle_at_50%_34%,rgba(255,246,206,0.3),rgba(143,57,45,0.88)_62%,rgba(72,31,25,0.94))] shadow-[0_0_0_3px_rgba(232,207,170,0.14),0_0_22px_rgba(232,207,170,0.34),0_10px_24px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,248,220,0.5)] sm:h-14 sm:w-14"
+                      : "h-14 w-14 border-[rgba(255,255,255,0.3)] bg-[rgba(255,255,255,0.08)] shadow-[0_0_16px_rgba(255,255,255,0.15),0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.4)]"}
     ${isHovered
-      ? marker.iconType === "info"
-        ? "scale-125 border-[rgba(255,234,176,1)] shadow-[0_0_0_7px_rgba(232,207,170,0.22),0_0_44px_rgba(255,210,115,0.72),0_16px_36px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,250,230,0.7)]"
-        : "scale-125 bg-[rgba(255,255,255,0.18)] border-[rgba(255,255,255,0.6)] shadow-[0_0_28px_rgba(255,255,255,0.35),inset_0_1px_0_rgba(255,255,255,0.6)]"
-      : "scale-100"}
+                      ? marker.iconType === "info"
+                        ? "scale-110 border-[rgba(255,234,176,1)] shadow-[0_0_0_5px_rgba(232,207,170,0.18),0_0_30px_rgba(255,210,115,0.52),0_14px_30px_rgba(0,0,0,0.38),inset_0_1px_0_rgba(255,250,230,0.66)]"
+                        : "scale-125 bg-[rgba(255,255,255,0.18)] border-[rgba(255,255,255,0.6)] shadow-[0_0_28px_rgba(255,255,255,0.35),inset_0_1px_0_rgba(255,255,255,0.6)]"
+                      : "scale-100"}
     ${isRead ? "opacity-50" : "opacity-100"}
   `}
->
-  {marker.iconType === "info" ? (
-    <>
-      {!isRead ? (
-        <span className="tour-temple-icon-pulse absolute inset-[-0.7rem] -z-10 rounded-full" />
-      ) : null}
-      <span className="absolute inset-[0.38rem] rounded-full border border-[rgba(255,238,184,0.34)]" />
-      <Info
-        className={`relative h-8 w-8 transition-colors duration-300 ${isHovered ? "text-white" : "text-[rgb(255,238,184)]"}`}
-        strokeWidth={2.1}
-      />
-    </>
-  ) : (
-    <Landmark
-      className={`h-7 w-7 transition-colors duration-300 ${isHovered ? "text-white" : "text-[rgba(255,255,255,0.82)]"}`}
-      strokeWidth={1.6}
-    />
-  )}
-</div>
-)}
-<span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.42rem)] max-w-[11rem] -translate-x-1/2 whitespace-nowrap rounded-[7px] border border-[rgb(232_207_170_/_0.24)] bg-[rgb(45_38_33_/_0.72)] px-3 py-1.5 text-[0.72rem] font-bold text-white opacity-0 shadow-[0_12px_28px_rgba(0,0,0,0.34)] backdrop-blur-xl transition group-hover:opacity-100 group-focus-visible:opacity-100">
-  {marker.title}
-</span>
-</button>
+                >
+                  {marker.iconType === "info" ? (
+                    <>
+                      {!isRead ? (
+                        <span className="tour-temple-icon-pulse absolute inset-[-0.45rem] -z-10 rounded-full" />
+                      ) : null}
+                      <span className="absolute inset-[0.32rem] rounded-full border border-[rgba(255,238,184,0.3)]" />
+                      <BookOpenText
+                        className={`relative h-6 w-6 transition-colors duration-300 sm:h-7 sm:w-7 ${isHovered ? "text-white" : "text-[rgb(255,238,184)]"}`}
+                        strokeWidth={1.95}
+                      />
+                    </>
+                  ) : (
+                    <Landmark
+                      className={`h-7 w-7 transition-colors duration-300 ${isHovered ? "text-white" : "text-[rgba(255,255,255,0.82)]"}`}
+                      strokeWidth={1.6}
+                    />
+                  )}
+                </div>
+              )}
+              <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.42rem)] max-w-[11rem] -translate-x-1/2 whitespace-nowrap rounded-[7px] border border-[rgb(232_207_170_/_0.24)] bg-[rgb(45_38_33_/_0.72)] px-3 py-1.5 text-[0.72rem] font-bold text-white opacity-0 shadow-[0_12px_28px_rgba(0,0,0,0.34)] backdrop-blur-xl transition group-hover:opacity-100 group-focus-visible:opacity-100">
+                {marker.title}
+              </span>
+            </button>
           );
         })}
       </div>
 
       {activeInfoMarker ? (
         <div
-          className={`fixed inset-0 z-40 grid place-items-center bg-[rgb(22_18_15_/_0.44)] px-3 py-4 backdrop-blur-[3px] sm:px-5 sm:py-6 ${
-            isInfoMarkerClosing
+          className={`fixed inset-0 z-40 grid place-items-center bg-[rgb(22_18_15_/_0.44)] px-3 py-4 backdrop-blur-[3px] sm:px-5 sm:py-6 ${isInfoMarkerClosing
               ? "animate-[tourModalBackdropOut_240ms_ease-in_both]"
               : "animate-[tourModalBackdrop_320ms_ease-out_both]"
-          }`}
+            }`}
         >
           <button
             type="button"
@@ -2437,9 +2981,8 @@ function TourExperience({
             aria-label="Đóng thư"
           />
           <article
-            className={`tour-letter-shell relative h-[min(90dvh,820px)] w-[min(90vw,560px)] overflow-hidden rounded-[13px] text-[var(--foreground)] shadow-[0_38px_120px_rgb(0_0_0_/_0.46)] sm:w-[min(82vw,590px)] ${
-              isInfoMarkerClosing ? "tour-letter-shell--closing" : ""
-            }`}
+            className={`tour-letter-shell relative h-[min(90dvh,820px)] w-[min(90vw,560px)] overflow-hidden rounded-[13px] text-[var(--foreground)] shadow-[0_38px_120px_rgb(0_0_0_/_0.46)] sm:w-[min(82vw,590px)] ${isInfoMarkerClosing ? "tour-letter-shell--closing" : ""
+              }`}
           >
             <Image
               src={infoModalBackground}
@@ -2465,7 +3008,7 @@ function TourExperience({
                   <p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-[var(--tour-gold)] sm:text-[0.66rem]">
                     {activeInfoMarker.eyebrow}
                   </p>
-                  <h2 className="font-display-vn mt-0.5 text-[1.85rem] font-bold leading-tight text-[var(--tour-ink)] sm:text-[2.55rem]">
+                 <h2 className="font-display-vn mt-0.5 text-[1.85rem] font-bold leading-tight text-[var(--tour-gold)] sm:text-[2.55rem]">
                     {activeInfoMarker.title}
                   </h2>
                 </div>
@@ -2498,7 +3041,7 @@ function TourExperience({
             onClick={() => setActivePanel(null)}
             aria-label="Đóng vị trí"
           />
-          <section className="relative grid max-h-[calc(100dvh-8.5rem)] w-[calc(100vw-1.5rem)] max-w-[980px] grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-[14px] border border-[rgb(232_207_170_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.13),rgb(255_252_245_/_0.045)_40%,transparent_72%),rgb(58_50_44_/_0.82)] text-white shadow-[0_38px_120px_rgb(0_0_0_/_0.46),inset_0_1px_0_rgb(255_255_255_/_0.16)] backdrop-blur-2xl sm:w-[calc(100vw-2.5rem)] sm:max-h-[calc(100dvh-9.5rem)] lg:max-w-[1080px]">
+          <section className="relative grid max-h-[calc(100dvh-8.5rem)] w-[calc(100vw-1.5rem)] max-w-[980px] grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-[8px] border border-[rgb(232_207_170_/_0.2)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.13),rgb(255_252_245_/_0.045)_40%,transparent_72%),rgb(58_50_44_/_0.82)] text-white shadow-[0_38px_120px_rgb(0_0_0_/_0.46),inset_0_1px_0_rgb(255_255_255_/_0.16)] backdrop-blur-2xl sm:w-[calc(100vw-2.5rem)] sm:max-h-[calc(100dvh-9.5rem)] lg:max-w-[1080px]">
             <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-5 sm:py-4">
               <h2 className="text-xl font-black tracking-[-0.02em] sm:text-2xl">Vị trí</h2>
               <button
@@ -2514,6 +3057,7 @@ function TourExperience({
 
             <div className="flex min-h-0 flex-col gap-3 overflow-y-auto p-3 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin] sm:p-4 lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(260px,3fr)] lg:overflow-hidden">
               <MiniMap
+                tourConfig={tourConfig}
                 activeScene={activeScene}
                 onSceneSelect={(sceneId) => goToScene(sceneId, true)}
                 cameraYaw={cameraYaw}
@@ -2533,7 +3077,7 @@ function TourExperience({
                 </div>
 
                 <div className="mt-4 grid min-h-0 gap-2 overflow-y-auto pr-1 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin]">
-                  {locationGroups.map((scene) => {
+                  {tourConfig.locationGroups.map((scene) => {
                     const isActiveLocation = scene.location === activeScene.location;
 
                     return (
@@ -2542,11 +3086,10 @@ function TourExperience({
                         type="button"
                         onClick={() => goToScene(scene.id, true)}
                         aria-current={isActiveLocation ? "true" : undefined}
-                        className={`group relative h-[5.8rem] overflow-hidden rounded-[7px] border text-left transition-[border-color,box-shadow,filter] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tour-gold-light)] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(45_38_33_/_0.62)] active:scale-[0.99] ${
-                          isActiveLocation
+                        className={`group relative h-[5.8rem] overflow-hidden rounded-[7px] border text-left transition-[border-color,box-shadow,filter] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tour-gold-light)] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(45_38_33_/_0.62)] active:scale-[0.99] ${isActiveLocation
                             ? "border-[var(--tour-gold-light)] bg-[rgb(192_160_128_/_0.16)] shadow-[0_0_0_2px_rgb(232_207_170_/_0.22),0_16px_40px_rgb(0_0_0_/_0.24)]"
                             : "border-white/12 bg-white/[0.04] shadow-[0_12px_30px_rgb(0_0_0_/_0.16)] hover:border-[rgb(232_207_170_/_0.42)]"
-                        }`}
+                          }`}
                       >
                         <Image
                           src={scene.image}
@@ -2577,9 +3120,8 @@ function TourExperience({
       ) : null}
 
       <div
-        className={`absolute left-1/2 z-30 -translate-x-1/2 transition-[bottom,width,max-width,transform] duration-300 ease-out ${
-          activePanel === "scenes" ? "w-[calc(100vw-32px)] max-w-[1180px]" : "w-[min(92vw,448px)]"
-        } ${activePanel === "scenes" ? "bottom-1 sm:bottom-2" : "bottom-2 sm:bottom-5"}`}
+        className={`absolute left-1/2 z-30 -translate-x-1/2 transition-[bottom,width,max-width,transform] duration-300 ease-out ${activePanel === "scenes" ? "w-[calc(100vw-32px)] max-w-[1180px]" : "w-[min(92vw,448px)]"
+          } ${activePanel === "scenes" ? "bottom-1 sm:bottom-2" : "bottom-2 sm:bottom-5"}`}
       >
         {activePanel && activePanel !== "map" ? (
           <section className="mb-1.5 max-h-[46dvh] animate-[tourPanelIn_260ms_cubic-bezier(.2,.9,.2,1)_both] overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.18)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.12),rgb(255_252_245_/_0.04)_38%,transparent_70%),rgb(45_38_33_/_0.48)] shadow-[0_24px_86px_rgb(0_0_0_/_0.28),inset_0_1px_0_rgb(255_255_255_/_0.18),inset_0_-1px_0_rgb(0_0_0_/_0.16)] backdrop-blur-xl backdrop-saturate-150 sm:mb-2.5">
@@ -2599,17 +3141,16 @@ function TourExperience({
 
             {activePanel === "scenes" ? (
               <div className="flex w-full gap-2.5 overflow-x-auto overflow-y-hidden px-2.5 py-2.5 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin]">
-                {scenes.map((scene) => (
+                {tourConfig.scenes.map((scene) => (
                   <button
                     key={scene.id}
                     type="button"
                     onClick={() => goToScene(scene.id, false)}
                     aria-current={scene.id === activeScene.id ? "true" : undefined}
-                    className={`group relative h-20 w-[60vw] shrink-0 overflow-hidden rounded-[6px] border text-left transition-[border-color,box-shadow,filter] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tour-gold-light)] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(45_38_33_/_0.62)] active:scale-[0.99] sm:h-24 sm:w-48 lg:w-56 ${
-                      scene.id === activeScene.id
+                    className={`group relative h-20 w-[60vw] shrink-0 overflow-hidden rounded-[6px] border text-left transition-[border-color,box-shadow,filter] duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tour-gold-light)] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(45_38_33_/_0.62)] active:scale-[0.99] sm:h-24 sm:w-48 lg:w-56 ${scene.id === activeScene.id
                         ? "border-[var(--tour-gold-light)] bg-[rgb(192_160_128_/_0.16)] shadow-[0_0_0_2px_rgb(232_207_170_/_0.28),0_16px_40px_rgb(0_0_0_/_0.28)]"
                         : "border-white/14 bg-white/[0.04] shadow-[0_12px_30px_rgb(0_0_0_/_0.18)] hover:border-[rgb(232_207_170_/_0.46)] hover:shadow-[0_16px_38px_rgb(0_0_0_/_0.24)]"
-                    }`}
+                      }`}
                   >
                     <Image src={scene.image} alt={scene.title} fill sizes="220px" className="object-cover transition duration-500 group-hover:saturate-[1.06]" />
                     <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.03)_22%,rgba(0,0,0,0.68)_100%)] opacity-90" />
@@ -2637,15 +3178,36 @@ function TourExperience({
             ) : null}
 
             {activePanel === "info" ? (
-              <div className="space-y-2.5 p-3 text-[0.82rem] leading-5 text-white/76">
-                <p>
-                  Di chuyển bằng chuột hoặc vuốt trên màn hình để xoay 360 độ. Dùng con
-                  lăn chuột hoặc chụm hai ngón để phóng to, thu nhỏ trong không gian.
-                </p>
-                <p>
-                  Cảnh hiện tại:{" "}
-                  <span className="font-semibold text-white">{activeScene.title}</span>.
-                </p>
+              <div className="max-h-[calc(46dvh-44px)] space-y-3 overflow-y-auto p-3 pr-2 text-[0.82rem] leading-5 text-white/76 [scrollbar-color:var(--tour-gold)_transparent] [scrollbar-width:thin]">
+                <p className="text-white/82">{tourConfig.practicalInfo.intro}</p>
+
+                <div className="grid gap-2">
+                  {tourConfig.practicalInfo.items.map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-[6px] border border-[rgb(255_252_245_/_0.1)] bg-[rgb(255_252_245_/_0.055)] px-3 py-2.5"
+                    >
+                      <p className="text-[0.66rem] font-black uppercase tracking-[0.1em] text-[var(--tour-gold-light)]">
+                        {item.label}
+                      </p>
+                      <p className="mt-1 text-white/82">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-[6px] border border-[rgb(232_207_170_/_0.16)] bg-[rgb(49_95_80_/_0.18)] px-3 py-2.5">
+                  <p className="font-semibold text-white">
+                    Đang tham quan: {activeScene.title}
+                  </p>
+                  <ul className="mt-1.5 space-y-1.5">
+                    {tourConfig.practicalInfo.notes.map((note) => (
+                      <li key={note} className="flex gap-2">
+                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[var(--tour-gold-light)]" />
+                        <span>{note}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             ) : null}
 
@@ -2714,11 +3276,10 @@ function TourExperience({
         type="button"
         onClick={() => void toggleVrMode()}
         disabled={!isSupported}
-        className={`fixed right-3 top-1/2 z-20 inline-flex h-12 min-w-14 -translate-y-1/2 items-center justify-center gap-1.5 rounded-full border px-3 shadow-[0_18px_54px_rgba(0,0,0,0.34)] backdrop-blur-xl transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-45 sm:right-4 sm:h-14 sm:min-w-16 ${
-          vrMode
+        className={`fixed right-3 top-1/2 z-20 inline-flex h-12 min-w-14 -translate-y-1/2 items-center justify-center gap-1.5 rounded-full border px-3 shadow-[0_18px_54px_rgba(0,0,0,0.34)] backdrop-blur-xl transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-45 sm:right-4 sm:h-14 sm:min-w-16 ${vrMode
             ? "border-[var(--tour-gold-light)] bg-[rgb(232_207_170_/_0.24)] text-white"
             : "border-white/20 bg-[rgb(45_38_33_/_0.58)] text-white/88 hover:bg-[rgb(45_38_33_/_0.72)]"
-        }`}
+          }`}
         aria-label={isSupported ? (vrMode ? "Tắt VR" : "Bật VR") : "Thiết bị không hỗ trợ VR"}
         title={isSupported ? (vrMode ? "Tắt VR" : "Bật VR") : "Thiết bị không hỗ trợ VR"}
       >
@@ -2731,11 +3292,10 @@ function TourExperience({
       <button
         type="button"
         onClick={toggleFullscreen}
-        className={`fixed right-4 top-4 z-20 hidden rounded-full border p-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-all active:scale-95 sm:p-3 lg:inline-flex lg:items-center lg:justify-center ${
-          isFullscreen
+        className={`fixed right-4 top-4 z-20 hidden rounded-full border p-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-all active:scale-95 sm:p-3 lg:inline-flex lg:items-center lg:justify-center ${isFullscreen
             ? "border-[var(--tour-gold-light)] bg-[rgb(192_160_128_/_0.24)] text-white"
             : "border-white/20 bg-[rgb(45_38_33_/_0.48)] text-white/80 hover:bg-[rgb(45_38_33_/_0.62)]"
-        }`}
+          }`}
         aria-label={isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
         title={isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
       >
@@ -2773,7 +3333,7 @@ function TourExperience({
           to {
             transform: translateX(180%) skewX(-18deg);
           }
-        }
+         }
 
         .welcome-cta-sheen {
           background: linear-gradient(90deg, transparent, rgba(255, 252, 245, 0.28), transparent);
@@ -3156,6 +3716,7 @@ function panelTitle(panel: Exclude<Panel, null>) {
 }
 
 function MiniMap({
+  tourConfig,
   activeScene,
   className = "",
   compact = false,
@@ -3166,6 +3727,7 @@ function MiniMap({
   showLegend = false,
   showNames = false,
 }: {
+  tourConfig: TourConfig;
   activeScene: TourScene;
   className?: string;
   compact?: boolean;
@@ -3176,17 +3738,19 @@ function MiniMap({
   showLegend?: boolean;
   showNames?: boolean;
 }) {
+  const { mapRoutes, sceneById, scenes } = tourConfig;
   const isOverview = mode === "overview";
   const nodeSize = compact ? 5.2 : 5.2;
   const edgeInset = nodeSize / 2;
   const clampMapPoint = (value: number) => THREE.MathUtils.clamp(value, edgeInset, 100 - edgeInset);
+  const compressOverviewY = (value: number) => 50 + (value - 50) * 0.86;
   const getMapPosition = (scene: TourScene) => {
     if (!scene.mapPosition || (!isOverview && !activeScene.mapPosition)) return null;
 
     if (isOverview) {
       return {
         x: clampMapPoint(scene.mapPosition.x),
-        y: clampMapPoint(scene.mapPosition.y),
+        y: clampMapPoint(compressOverviewY(scene.mapPosition.y)),
       };
     }
 
@@ -3206,9 +3770,8 @@ function MiniMap({
   };
   return (
     <section
-      className={`relative overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.18)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.07),rgb(255_252_245_/_0.018)_45%,transparent),rgb(45_38_33_/_0.18)] shadow-[0_18px_70px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.12)] backdrop-blur-xl backdrop-saturate-150 ${
-        compact ? "p-2.5" : "min-h-[260px] p-3"
-      } ${className}`}
+      className={`relative overflow-hidden rounded-[6px] border border-[rgb(255_252_245_/_0.18)] bg-[linear-gradient(135deg,rgb(255_252_245_/_0.07),rgb(255_252_245_/_0.018)_45%,transparent),rgb(45_38_33_/_0.18)] shadow-[0_18px_70px_rgba(0,0,0,0.32),inset_0_1px_0_rgb(255_255_255_/_0.12)] backdrop-blur-xl backdrop-saturate-150 ${compact ? "p-2.5" : "min-h-[260px] p-3"
+        } ${className}`}
       aria-label="Mini-map vị trí tham quan"
     >
       <div className={`mb-2 flex items-center justify-between gap-2 ${compact ? "pr-24" : ""}`}>
@@ -3223,9 +3786,8 @@ function MiniMap({
       </div>
 
       <div
-        className={`relative overflow-hidden rounded-[5px] border border-white/[0.07] bg-[radial-gradient(circle_at_50%_76%,rgb(232_207_170_/_0.055),transparent_24%),linear-gradient(180deg,rgb(255_252_245_/_0.026),rgb(0_0_0_/_0.025))] ${
-          compact ? "aspect-[4/3]" : "aspect-[4/3] min-h-[240px] sm:aspect-[16/10]"
-        } ${mapClassName}`}
+        className={`relative overflow-hidden rounded-[5px] border border-white/[0.07] bg-[radial-gradient(circle_at_50%_76%,rgb(232_207_170_/_0.055),transparent_24%),linear-gradient(180deg,rgb(255_252_245_/_0.026),rgb(0_0_0_/_0.025))] ${compact ? "aspect-[4/3]" : "aspect-[4/3] min-h-[240px] sm:aspect-[16/10]"
+          } ${mapClassName}`}
       >
         <svg
           className="absolute inset-0 h-full w-full transition-opacity duration-200 ease-out"
@@ -3413,9 +3975,8 @@ function BottomButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-[6px] px-1.5 py-2 text-center transition active:scale-95 ${
-        active ? "bg-[rgb(255_252_245_/_0.2)] text-white shadow-[inset_0_1px_0_rgb(255_255_255_/_0.18)]" : "text-white/92 hover:bg-white/12"
-      }`}
+      className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-[6px] px-1.5 py-2 text-center transition active:scale-95 ${active ? "bg-[rgb(255_252_245_/_0.2)] text-white shadow-[inset_0_1px_0_rgb(255_255_255_/_0.18)]" : "text-white/92 hover:bg-white/12"
+        }`}
       aria-label={label}
       title={label}
     >
@@ -3447,11 +4008,10 @@ function ToggleButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`flex items-center justify-between rounded-[6px] border px-2.5 py-2.5 text-[0.82rem] font-semibold transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 ${
-        active
+      className={`flex items-center justify-between rounded-[6px] border px-2.5 py-2.5 text-[0.82rem] font-semibold transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 ${active
           ? "border-[rgb(232_207_170_/_0.56)] bg-[rgb(192_160_128_/_0.16)] text-white"
           : "border-white/10 bg-white/[0.04] text-white/78 hover:border-white/24"
-      }`}
+        }`}
     >
       <span className="flex items-center gap-2">
         <Icon className="h-3.5 w-3.5 text-[var(--tour-gold-light)]" strokeWidth={1.9} />
