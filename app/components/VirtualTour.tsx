@@ -309,6 +309,17 @@ const scenes: TourScene[] = [
         "Nơi đây không chỉ là không gian hành lễ, thực hiện các nghi thức tế ca trang trọng trong các kỳ lễ hội, mà còn là một kho tàng lịch sử thu nhỏ lưu giữ các bức hoành phi, câu đối sơn son thếp vàng, bộ bát bửu, chấp kích chạm khắc tinh vi, thể hiện đỉnh cao của nghệ thuật điêu khắc gỗ cổ truyền và tấm lòng tri ân sâu sắc của các thế hệ hậu sinh đối với công lao của bậc tiền nhân.",
       ],
     },
+    {
+      id: "mieu-tho-mau-info",
+      title: "Miếu Thờ Mẫu",
+      eyebrow: "Tiền Sảnh Đình Làng",
+      yaw: 230,
+      pitch: 5,
+      rotation: 0,
+      content: [
+        "Nằm ngay sát cạnh ngôi Đình chính, Miếu thờ Mẫu là hạng mục tâm linh được xây dựng nhằm đáp ứng nhu cầu tín ngưỡng thờ Mẫu Tam phủ lâu đời của người dân địa phương. Ngôi miếu thờ phụng Thánh Mẫu cùng các vị Cô, Cậu, thể hiện sự dung hợp hài hòa với tín ngưỡng thờ Thành hoàng làng tại chính điện. Với quy mô nhỏ nhắn và kiến trúc cổ kính đồng nhất, nơi đây là khoảng không gian thanh tịnh để bách gia trăm họ gửi gắm những ước vọng bình dị về sức khỏe, bình an và sự may mắn trong cuộc sống hằng ngày.",
+      ],
+    },
   ],
 },
   {
