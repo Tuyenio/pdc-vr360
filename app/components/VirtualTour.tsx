@@ -921,9 +921,13 @@ const chuaMapRoutes: MapRoute[] = [
 ];
 
 function createTourConfig(config: Omit<TourConfig, "sceneById" | "locationGroups">): TourConfig {
-  const sceneById = new Map(config.scenes.map((scene) => [scene.id, scene]));
+  const sceneById = config.scenes.reduce(
+    (uniqueScenes, scene) => uniqueScenes.set(scene.id, scene),
+    new Map<SceneId, TourScene>(),
+  );
+  const scenes = Array.from(sceneById.values());
   const locationGroups = Array.from(
-    config.scenes
+    scenes
       .reduce((groups, scene) => {
         if (!groups.has(scene.location)) {
           groups.set(scene.location, scene);
@@ -936,6 +940,7 @@ function createTourConfig(config: Omit<TourConfig, "sceneById" | "locationGroups
 
   return {
     ...config,
+    scenes,
     sceneById,
     locationGroups,
   };
